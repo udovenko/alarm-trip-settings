@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <property name="hibernate.connection.driver_class">org.sqlite.JDBC</property>
+    <property name="hibernate.connection.url">jdbc:sqlite:C:\AlarmAndTrip.sqlite</property>
+    <property name="hibernate.dialect">ru.sakhalinenergy.alarmtripsettings.models.storage.SQLiteDialect</property>
+    <property name="hibernate.show_sql">true</property>
+    <property name="hibernate.query.factory_class">org.hibernate.hql.ast.ASTQueryTranslatorFactory</property>
+    <property name="hibernate.cache.use_second_level_cache">true</property>
+    <property name="hibernate.cache.use_query_cache">true</property>
+    <property name="hibernate.cache.region.factory_class">net.sf.ehcache.hibernate.EhCacheRegionFactory</property>
+    <property name="hibernate.c3p0.min_size">1</property>
+    <property name="hibernate.c3p0.max_size">20</property>
+    <property name="hibernate.c3p0.timeout">300</property>
+    <property name="hibernate.c3p0.max_statements">0</property>
+    <property name="hibernate.c3p0.idle_test_period">3000</property>
+    <mapping class="ru.sakhalinenergy.alarmtripsettings.models.entity.Tag"/>
+    <mapping class="ru.sakhalinenergy.alarmtripsettings.models.entity.TagSetting"/>
+    <mapping class="ru.sakhalinenergy.alarmtripsettings.models.entity.TagSettingProperty"/>
+    <mapping class="ru.sakhalinenergy.alarmtripsettings.models.entity.Loop"/>
+    <mapping class="ru.sakhalinenergy.alarmtripsettings.models.entity.Source"/>
+    <mapping class="ru.sakhalinenergy.alarmtripsettings.models.entity.SourceProperty"/>
+    <mapping class="ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask"/>
+    <mapping class="ru.sakhalinenergy.alarmtripsettings.models.entity.Plant"/>
+  </session-factory>
+</hibernate-configuration>
