@@ -1,8 +1,11 @@
 package ru.sakhalinenergy.alarmtripsettings.models.logic.classes.plantstree;
 
+
 /**
- * @author   Denis.Udovenko
- * @version  1.0.0
+ * Implements plant unit class for plants tree node.
+ * 
+ * @author Denis Udovenko
+ * @version 1.0.1
  */
 public class TreeUnit
 {
@@ -12,58 +15,62 @@ public class TreeUnit
     
     
     /**
-     * Конструктор класса. 
+     * Public constructor.
+     * 
+     * @param plantId Plant identifier
+     * @param area Area identifier
+     * @param name Unit name
      */
     public TreeUnit(String plantId, String area, String name)
     {
         this.plantId = plantId;
         this.area = area;
         this.name = name;
-    }//Unit
+    }// TreeUnit
     
     
     /**
-     * Метод перегружает родительский. Возвращает струку, которая будет 
-     * выводится в названиях узлов дерева ассетов.
+     * Overrides parent "toString()" method. Returns unit caption and name
+     * string instead.
      * 
-     * @return  String
+     * @return Unit caption and name string
      */
     @Override
     public String toString()
     {
-        return "Unit " + this.name;
-    }//toString
+        return "Unit " + name;
+    }// toString
     
     
     /**
-     * Метод возвращает код текущего юнита.
+     * Returns unit name (code).
      * 
-     * @return  String
+     * @return Unit name
      */
     public String getName()
     {
-        return this.name;
-    }//getName
+        return name;
+    }// getName
     
     
     /**
-     * Метод возвращает код ассета, к которому принадлежит юнит.
+     * Returns unit's parent plant identifier.
      * 
-     * @return  String
+     * @return Unit's parent plant identifier
      */
     public String getPlant()
     {
-        return this.plantId;
-    }//getPlant
+        return plantId;
+    }// getPlant
     
     
     /**
-     * Метод возвращает код зоны, к которой отнесен юнит.
+     * Returns unit's parent area identifier.
      *
-     * @return  String
+     * @return Unit's parent area identifier
      */
     public String getArea()
     {
-        return this.area;
-    }//getArea()
-}//Unit
+        return area;
+    }// getArea
+}// TreeUnit

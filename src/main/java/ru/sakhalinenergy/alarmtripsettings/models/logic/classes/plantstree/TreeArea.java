@@ -5,80 +5,84 @@ import java.util.ArrayList;
 
 
 /**
- * @author   Denis.Udovenko
- * @version  1.0.0
+ * Implements plant area class for plants tree node.
+ * 
+ * @author Denis Udovenko
+ * @version 1.0.1
  */
 public class TreeArea 
 {   
     private final String plantId;
     private final String name;
-    private List<TreeUnit> units = new ArrayList();
+    private final List<TreeUnit> units = new ArrayList();
     
     
     /**
-     * Конструктор класса. 
+     * Public constructor.
+     * 
+     * @param plantId Plant identifier
+     * @param name Area name
      */
     public TreeArea(String plantId, String name)
     {
         this.plantId = plantId;
         this.name = name;
-    }//Area
+    }// TreeArea
     
     
     /**
-     * Метод перегружает родительский. Возвращает струку, которая будет 
-     * выводится в названиях узлов дерева ассетов.
+     * Overrides parent "toString()" method. Returns area caption and name 
+     * string instead.
      * 
-     * @return  String
+     * @return Area caption and name string
      */
     @Override
     public String toString()
     {
-        return "Area " + this.name;
-    }//toString
+        return "Area " + name;
+    }// toString
     
     
     /**
-     * Метод добавляет юнит в список зоны.
+     * Add a unit to ara units list.
      * 
-     * @param   unit  Экземпляр добавляемого юнита.
-     * @return  void
+     * @param unit Unit to be added
      */
     public void addUnit(TreeUnit unit)
     {
-        this.units.add(unit);
-    }//addUnit
+        units.add(unit);
+    }// addUnit
     
     
     /**
-     * Метод возвращает название зоны. 
+     * Returns area name.
      * 
-     * @return  String
+     * @return Area name
      */
     public String getName()
     {
-        return this.name;
-    }//getName
+        return name;
+    }// getName
     
     
     /**
-     * Метод возвращает id ассета, к которому притнадлежит зона.
+     * Returns area's parent plant.
      * 
-     * @return  String
+     * @return Area's parent plant
      */
     public String getPlant()
     {
-        return this.plantId;
-    }//getPlant
+        return plantId;
+    }// getPlant
     
     
     /**
-     * Метод возвращает список юнитов зоны. 
+     * Returns area's units list.
      * 
-     * @return  List<Unit>
+     * @return Area's units list
      */
     public List<TreeUnit> getUnits()
     {
         return this.units;
-    }//getUnits
-}//Area
+    }// getUnits
+}// TreeArea

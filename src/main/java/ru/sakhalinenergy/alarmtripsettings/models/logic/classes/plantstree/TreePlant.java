@@ -5,66 +5,70 @@ import java.util.ArrayList;
 
 
 /**
- * @author   Denis.Udovenko
- * @version  1.0.0
+ * Implements plant class for plants tree node.
+ * 
+ * @author Denis Udovenko
+ * @version 1.0.1
  */
 public class TreePlant
 {
     private final String id;
-    private List<TreeArea> areas = new ArrayList();
+    private final List<TreeArea> areas = new ArrayList();
     
     
     /**
-     * Конструктор класса.
+     * Public constructor.
+     * 
+     * @param id Plant identifier
      */
     public TreePlant(String id)
     {
         this.id = id;
-    }//Plant
+    }// TreePlant
     
     
     /**
-     * Метод перегружает родительский. Возвращает струку, которая будет 
-     * выводится в названиях узлов дерева ассетов.
+     * Overrides parent "toString()" method. Returns plant identifier string 
+     * instead.
      * 
-     * @return  String
+     * @return Plant identifier string
      */
     @Override
     public String toString()
     {
-        return this.id;
-    }//toString
+        return id;
+    }// toString
     
     
     /**
-     * Метод добавляет зону ассета.
+     * Adds area to current plant.
      * 
-     * @return  void
+     * @param area Area to be added
      */
     public void addArea(TreeArea area)
     {
-        this.areas.add(area);
-    }//addArea
+        areas.add(area);
+    }// addArea
     
     
     /**
-     * Метод возвращает код ассета. 
+     * Returns plant identifier.
      * 
-     * @return  String
+     * @return Plant identifier
      */
     public String getId()
     {
-        return this.id;
-    }//getId
+        return id;
+    }// getId
     
     
     /**
-     * Метод возвращает список зон ассета.
+     * Returns plant areas list.
      * 
-     * @return  List<Area>
+     * @return Plant areas list
      */
     public List<TreeArea> getAreas()
     {
         return this.areas;
-    }//getAreas
-}//Plant
+    }// getAreas
+}// TreePlant
