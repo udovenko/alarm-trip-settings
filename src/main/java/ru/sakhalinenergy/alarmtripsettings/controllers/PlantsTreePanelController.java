@@ -3,7 +3,7 @@ package ru.sakhalinenergy.alarmtripsettings.controllers;
 import ru.sakhalinenergy.alarmtripsettings.Main;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsTreeControllable;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsTree;
 import ru.sakhalinenergy.alarmtripsettings.models.config.ConfigEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.config.PlantsTreePanelSettings;
 import ru.sakhalinenergy.alarmtripsettings.models.config.LoopsTablePanelSettings;
@@ -32,7 +32,7 @@ import ru.sakhalinenergy.alarmtripsettings.views.IntoolsComplianceSummaryPanel;
 public class PlantsTreePanelController
 {
     private final PlantsTreePanel view;
-    private final PlantsTreeControllable model;
+    private final PlantsTree model;
     
     
     /**
@@ -41,7 +41,7 @@ public class PlantsTreePanelController
      * @param model Plants tree model instance
      * @param view Plants tree panel view instance
      */
-    public PlantsTreePanelController(PlantsTreeControllable model, PlantsTreePanel view)
+    public PlantsTreePanelController(PlantsTree model, PlantsTreePanel view)
     {
         this.model = model;
         this.view = view;

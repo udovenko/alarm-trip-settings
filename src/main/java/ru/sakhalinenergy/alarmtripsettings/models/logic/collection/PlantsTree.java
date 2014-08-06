@@ -3,51 +3,52 @@ package ru.sakhalinenergy.alarmtripsettings.models.logic.collection;
 import java.util.Set;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.HashMap;
-import ru.sakhalinenergy.alarmtripsettings.models.WorkerThread;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.classes.plantstree.TreeArea;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.classes.plantstree.TreeUnit;
 import java.util.ArrayList;
-import ru.sakhalinenergy.alarmtripsettings.models.Model;
-import ru.sakhalinenergy.alarmtripsettings.models.entity.Loop;
-import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
-import ru.sakhalinenergy.alarmtripsettings.models.storage.HibernateUtil;
+import java.util.HashMap;
 import org.hibernate.Session;
 import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.transform.Transformers;
+import ru.sakhalinenergy.alarmtripsettings.models.WorkerThread;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.classes.plantstree.TreeArea;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.classes.plantstree.TreeUnit;
+import ru.sakhalinenergy.alarmtripsettings.models.Model;
+import ru.sakhalinenergy.alarmtripsettings.models.entity.Loop;
+import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
+import ru.sakhalinenergy.alarmtripsettings.models.storage.HibernateUtil;
 
 
 /**
- * Модель дерева ассетов.
+ * Implements plants (assets) tree logic.
  * 
  * @author Denis Udovenko
  * @version 1.0.2
  */
-public class PlantsTree extends Model implements PlantsTreeObservable, PlantsTreeControllable
+public class PlantsTree extends Model implements PlantsTreeObservable
 {
     private final Set<Plant> plants = new LinkedHashSet();
     
     
     /**
-     * Возвращает коллекцию ассетов модели.
+     * Returns tree plants list.
      * 
-     * @return Коллекцию ассетов модели
+     * @return Tree plants list
      */
     @Override
     public Set<Plant> getPlants()
     {
         return plants;
-    }//getPlants
+    }// getPlants
     
     
     /**
-     * Создает нить для получения контуров с уникальными наборами элементов
-     * структуры Plant - Area - Unit и построения на их базе дерва ассетов.
+     * Creates a thread for fetching loops with unique Plant/Area/Unit 
+     * combinations and creating plants tree. Subscribes models events listeners
+     * on thread events and executes it.
      */
     public void fetch()
     {
-        //Создаем анонимную нить для создания коллекции тагов из текущего листа книги MS Excel:
+        // Create a thread:
         WorkerThread treeReader = new WorkerThread()
         {
             @Override
@@ -76,7 +77,7 @@ public class PlantsTree extends Model implements PlantsTreeObservable, PlantsTre
                         .setResultTransformer(Transformers.aliasToBean(Loop.class))
                         .list();
                     
-                    //Если запрос не вернул результатов - завершаем работу нити:
+                    // If request is empty - return an empty hash:
                     if (loopsWithUniquePAU.isEmpty()) return new HashMap(); 
                 
                     String currentPlantCode, previousPlantCode = null, 
@@ -86,44 +87,44 @@ public class PlantsTree extends Model implements PlantsTreeObservable, PlantsTre
                     TreeArea currentArea = null;
                     TreeUnit tempUnit;
                 
-                    //Обходим полученные контуры и строим дерево производственных объектов:
+                    // Loop through received loops and build plants tree:
                     for (Loop tempLoop : loopsWithUniquePAU) 
                     {
                         currentPlantCode = tempLoop.getPlant();
                         currentAreaCode = tempLoop.getArea();
                    
-                        //Если код ассета предыдущего контура не совпадает с текущим:
+                        // If previous loop's plant code does not much current one:
                         if (previousPlantCode == null || !previousPlantCode.equals(currentPlantCode))
                         {
                             previousPlantCode = currentPlantCode;
                             previousAreaCode = null;
                             currentPlant = (Plant)session.get(Plant.class, currentPlantCode);
                             
-                            //Если ассет есть в базе, добаволяем его в коллекцию:
+                            // If plant name is in database, add it to collection:
                             if (currentPlant != null) plants.add(currentPlant);
                             else {
                                 
-                                //Если ассета нет в базе, добавляем в коллекцию пустой:
+                                // If plant has no matched name in database, add new plant with "(unknown)" name:
                                 Plant newEmptyPlant = new Plant();
                                 newEmptyPlant.setId(currentPlantCode);
                                 newEmptyPlant.setName("(unknown)");
                                 plants.add(newEmptyPlant);
                                 currentPlant = newEmptyPlant;
-                            }//else    
-                        }//if
+                            }// else    
+                        }// if
      
-                        //Если код зоны предыдущего контура не сопадает с текущим:
+                        // If previous loop's area code does not mutch current one:
                         if (previousAreaCode == null || !previousAreaCode.equals(currentAreaCode))
                         {
                             previousAreaCode = currentAreaCode;
                             currentArea = new TreeArea(currentPlantCode, currentAreaCode);
                             currentPlant.addArea(currentArea);
-                        }//if
+                        }// if
                     
-                        //Добавляем юнит к текущей зоне:
+                        // Add unit to current area:
                         tempUnit = new TreeUnit(currentPlantCode, currentAreaCode, tempLoop.getUnit());
                         currentArea.addUnit(tempUnit);
-                    }//for
+                    }// for
                     
                 } catch (Exception exception) {
             
@@ -131,18 +132,17 @@ public class PlantsTree extends Model implements PlantsTreeObservable, PlantsTre
                 } finally {
             
                     if (session != null && session.isOpen()) session.close();
-                }//finally
+                }// finally
                 
                 return new HashMap();
-            }//doInBackground
-        };//WorkerThread
+            }// doInBackground
+        };// WorkerThread
         
-        //Подписываем подписчиков модели на события нити:
-        if (events.get(CollectionEvent.THREAD_ERROR) != null) treeReader.events.on(WorkerThread.Event.ERROR, events.get(CollectionEvent.THREAD_ERROR));
-        if (events.get(CollectionEvent.THREAD_WARNING) != null) treeReader.events.on(WorkerThread.Event.WARNING, events.get(CollectionEvent.THREAD_WARNING));
-        if (events.get(CollectionEvent.THREAD_PROGRESS) != null) treeReader.events.on(WorkerThread.Event.PROGRESS, events.get(CollectionEvent.THREAD_PROGRESS));
-        if (events.get(CollectionEvent.TREE_READ) != null) treeReader.events.on(WorkerThread.Event.WORK_DONE, events.get(CollectionEvent.TREE_READ));
+        // Resubscribe model's events listeners on thread events:
+        _subscribeOnThreadEvents(treeReader, CollectionEvent.THREAD_PROGRESS, 
+            CollectionEvent.THREAD_WARNING, CollectionEvent.THREAD_ERROR, CollectionEvent.TREE_READ);
         
+        // Execute thread:
         treeReader.execute();
-    }//fetch
-}//AssetsTree
+    }// fetch
+}// PlantsTree

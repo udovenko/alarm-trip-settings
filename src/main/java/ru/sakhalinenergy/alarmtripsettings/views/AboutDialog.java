@@ -1,14 +1,11 @@
 package ru.sakhalinenergy.alarmtripsettings.views;
 
 import ru.sakhalinenergy.alarmtripsettings.Main;
-import java.awt.Toolkit;
-import java.awt.Image;
-import javax.swing.ImageIcon;
 
 
 /**
- * @author   Denis.Udovenko
- * @version  1.0.1
+ * @author Denis Udovenko
+ * @version 1.0.1
  */
 public class AboutDialog extends javax.swing.JDialog
 {
@@ -21,12 +18,10 @@ public class AboutDialog extends javax.swing.JDialog
         this.setModal(true);
         initComponents();
         
-        //Устанавливаем иконку диалога:
-        ImageIcon img = Main.aboutIcon;
-        this.setIconImage(img.getImage());
-        Image imga = Toolkit.getDefaultToolkit().createImage("images/logo.png");
-        sakhalinenergyLabelImagePanel.setImage(imga);
-    }//AboutDialog
+        // Set dialog icon and company logo:
+        this.setIconImage(Main.aboutIcon.getImage());
+        sakhalinenergyLabelImagePanel.setImage(Main.sakhalinEnergyLogoImage);
+    }// AboutDialog
     
     
     /**

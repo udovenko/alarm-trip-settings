@@ -10,34 +10,34 @@ import org.hibernate.Session;
 
 
 /**
- * Реализует логику для работы с коллекцией производственных объектов.
+ * Implements logic to work with plants collection.
  *
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.2
  */
-public class PlantsLogic extends Model implements PlantsLogicObservable, PlantsLogicControllable
+public class PlantsLogic extends Model implements PlantsLogicObservable
 {
     private List<Plant> plants;
     
     
     /**
-     * Возвращает коллекцию производственных объектов.
+     * Returns current plants list.
      * 
-     * @return Коллекцию производственных объектов
+     * @return Plants list
      */
     public List<Plant> getPlants()
     {
         return plants;
-    }//getPlants
+    }// getPlants
     
     
     /**
-     * Создает и запускает нить для получения коллекции производственных объектов.
+     * Creates a thread for fetching plants collection. Subscribes models events
+     * listeners on thread events and executes it.
      */
-    @Override
     public void fetch()
     {
-        //Создаем анонимную нить для создания коллекции тагов из текущего листа книги MS Excel:
+        // Create a thread:
         WorkerThread plantsReader = new WorkerThread()
         {
             @Override
@@ -47,6 +47,7 @@ public class PlantsLogic extends Model implements PlantsLogicObservable, PlantsL
                 
                 try 
                 {
+                    // Fetch plants collection:
                     session = HibernateUtil.getSessionFactory().openSession();
                     plants = session.createCriteria(Plant.class).list();
                 
@@ -56,18 +57,17 @@ public class PlantsLogic extends Model implements PlantsLogicObservable, PlantsL
                 } finally {
             
                     if (session != null && session.isOpen()) session.close();
-                }//finally
+                }// finally
                 
                 return new HashMap();
-            }//doInBackground
-        };//plantsReader
+            }// doInBackground
+        };// plantsReader
         
-        // Подписываем подписчиков модели на события нити:
-        if (events.get(CollectionEvent.THREAD_ERROR) != null) plantsReader.events.on(WorkerThread.Event.ERROR, events.get(CollectionEvent.THREAD_ERROR));
-        if (events.get(CollectionEvent.THREAD_WARNING) != null) plantsReader.events.on(WorkerThread.Event.WARNING, events.get(CollectionEvent.THREAD_WARNING));
-        if (events.get(CollectionEvent.THREAD_PROGRESS) != null) plantsReader.events.on(WorkerThread.Event.PROGRESS, events.get(CollectionEvent.THREAD_PROGRESS));
-        if (events.get(CollectionEvent.PLANTS_READ) != null) plantsReader.events.on(WorkerThread.Event.WORK_DONE, events.get(CollectionEvent.PLANTS_READ));
+        // Resubscribe model's events listeners on thread events:
+        _subscribeOnThreadEvents(plantsReader, CollectionEvent.THREAD_PROGRESS, 
+            CollectionEvent.THREAD_WARNING, CollectionEvent.THREAD_ERROR, CollectionEvent.PLANTS_READ);
         
+        // Execute thread:
         plantsReader.execute();
-    }//fetch
-}//PlantsLogic
+    }// fetch
+}// PlantsLogic

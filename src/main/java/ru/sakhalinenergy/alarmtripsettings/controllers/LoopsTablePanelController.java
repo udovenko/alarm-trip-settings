@@ -7,7 +7,7 @@ import ru.sakhalinenergy.alarmtripsettings.factories.DialogsFactory;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelector;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Loop;
 import ru.sakhalinenergy.alarmtripsettings.models.config.LoopsTablePanelSettings;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.LoopsTableControllable;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.LoopsTable;
 import ru.sakhalinenergy.alarmtripsettings.views.LoopsTablePanel.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.LoopsTablePanel.LoopsTablePanel;
 import ru.sakhalinenergy.alarmtripsettings.views.TagsTreePanel.TagsTreePanel;
@@ -22,7 +22,7 @@ import ru.sakhalinenergy.alarmtripsettings.views.TagsTreePanel.TagsTreePanel;
 public class LoopsTablePanelController 
 {
     private final LoopsTablePanel view;
-    private final LoopsTableControllable model;
+    private final LoopsTable model;
     
     
     /**
@@ -31,7 +31,7 @@ public class LoopsTablePanelController
      * @param model Loops table model instance
      * @param view Loops table panel view instance
      */
-    public LoopsTablePanelController(LoopsTableControllable model, LoopsTablePanel view)
+    public LoopsTablePanelController(LoopsTable model, LoopsTablePanel view)
     {
         this.view = view;
         this.model = model;

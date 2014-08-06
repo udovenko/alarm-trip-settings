@@ -5,11 +5,9 @@ import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
 import ru.sakhalinenergy.alarmtripsettings.events.SummaryCallback;
 import ru.sakhalinenergy.alarmtripsettings.Main;
-import ru.sakhalinenergy.alarmtripsettings.models.config.ConfigEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Loop;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.CollectionEvent;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.LoopsTableControllable;
 import ru.sakhalinenergy.alarmtripsettings.models.config.Config;
+import ru.sakhalinenergy.alarmtripsettings.models.config.ConfigEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.config.IntoolsExportDataSourceDialogSettings;
 import ru.sakhalinenergy.alarmtripsettings.models.config.DocumentDataSourceDialogSettings;
 import ru.sakhalinenergy.alarmtripsettings.models.config.DcsVariableTableDataSourceDialogSettings;
@@ -20,6 +18,8 @@ import ru.sakhalinenergy.alarmtripsettings.models.config.StorageConnectionDialog
 import ru.sakhalinenergy.alarmtripsettings.models.config.CreateDcsVariableTableFromYokogawaBackupDialogSettings;
 import ru.sakhalinenergy.alarmtripsettings.models.config.CreateDcsVariableTableFromHoneywellDcsExportDialogSettings;
 import ru.sakhalinenergy.alarmtripsettings.models.config.CreateDcsVariableTableFromHoneywellScadaDatabaseDialogSettings;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.CollectionEvent;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.LoopsTable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.ExcelBook;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.YokogawaDcsBackup;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.HoneywellDcsExport;
@@ -385,7 +385,7 @@ public class DialogsFactory
       * @param loop Loop instance to be split
       * @param loopsTable Loops table model instance, which loop belongs to
       */
-     public static void produceSplitSelectedLoopDialog(final Loop loop, LoopsTableControllable loopsTable)
+     public static void produceSplitSelectedLoopDialog(final Loop loop, LoopsTable loopsTable)
      {
         LoopSplittingDialog loopSplittingDialog = new LoopSplittingDialog(loop);
         loopSplittingDialog.setLocationRelativeTo(Main.mainForm);

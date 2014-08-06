@@ -1,42 +1,24 @@
 package ru.sakhalinenergy.alarmtripsettings.models.logic.collection;
 
-import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
-import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
 import java.util.Set;
+import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
+import ru.sakhalinenergy.alarmtripsettings.events.EventsObservable;
 
 
 /**
- * Интерфейс модели дерева ассетов для использования модели представлениями. 
- * Допускает только использование геттерорв.
+ * Interface of plants tree model for using by views. Allows only getters.
  *
  * @author Denis Udovenko
  * @version 1.0.1
  */
-public interface PlantsTreeObservable 
+public interface PlantsTreeObservable extends EventsObservable
 {
    
     /**
-     * Метод добавляет подписчика на заданное событие модели.
+     * Returns tree plants list.
      * 
-     * @param eventType Идентификатор типа события
-     * @param listener Экземпляр подписчика
-     */
-    public void on(Enum eventType, CustomEventListener listener);
-       
-    
-    /**
-     * Метод удаляет всех подписчиков на заданное событие модели.
-     * 
-     * @param eventType Идентификатор типа события
-     */
-    public void off(Enum eventType);
-    
-    
-    /**
-     * Возвращает коллекцию ассетов модели.
-     * 
-     * @return Коллекцию ассетов модели
+     * @return Tree plants list
      */
     public Set<Plant> getPlants();
     
-}//AssetsTreeObservable
+}// AssetsTreeObservable

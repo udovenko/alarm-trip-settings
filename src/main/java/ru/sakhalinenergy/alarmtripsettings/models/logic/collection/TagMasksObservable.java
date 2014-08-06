@@ -6,20 +6,19 @@ import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
 
 
 /**
- * Интерфейс модели коллекеции масок имен тагов для использования представлениями. 
- * Допускает только использование геттерорв.
+ * Interface of tag masks model for using by views. Allows only getters.
  *
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.3
  */
 public interface TagMasksObservable extends EventsObservable
 {
 
     /**
-     * Возвращает коллекцию масок имен тагов текущего экземпляра модели.
+     * Returns current tag masks list.
      * 
-     * @return Коллекцию масок
+     * @return Tag masks list
      */
     public List<TagMask> getMasks();
     
-}//TagMasksObservable
+}// TagMasksObservable

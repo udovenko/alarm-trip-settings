@@ -1,43 +1,25 @@
 package ru.sakhalinenergy.alarmtripsettings.models.logic.collection;
 
-import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelector;
 import java.util.List;
+import ru.sakhalinenergy.alarmtripsettings.events.EventsObservable;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelector;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Loop;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Source;
 
 
 /**
- * Интерфейс модели таблицы контуров для использования представлениями. 
- * Допускает только использование геттерорв.
+ * Interface of loops table model for using by views. Allows only getters.
  *
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.4
  */
-public interface LoopsTableObservable 
+public interface LoopsTableObservable extends EventsObservable
 {
 
     /**
-     * Метод добавляет подписчика на заданное событие модели.
+     * Returns current loops list.
      * 
-     * @param eventType Идентификатор типа события
-     * @param listener Экземпляр подписчика
-     */
-    public void on(Enum eventType, CustomEventListener listener);
-       
-    
-    /**
-     * Метод удаляет всех подписчиков на заданное событие модели.
-     * 
-     * @param eventType Идентификатор типа события
-     */
-    public void off(Enum eventType);
-    
-    
-    /**
-     * Возвращает текущую коллекцию контуров модели.
-     * 
-     * @return Текущую коллекцию контуров модели
+     * @return Loops list
      */
     public List<Loop> getLoops();
     
@@ -62,10 +44,11 @@ public interface LoopsTableObservable
     
     
     /**
-     * Возвращает набор источников данных тагов текущей коллекции контуров.
+     * Returns a list of data sources which contain tags form current loops 
+     * collection.
      * 
-     * @return Набор источников данных
+     * @return Data sources list
      */
     public List<Source> getSources();
     
-}//LoopsTableObservable
+}// LoopsTableObservable

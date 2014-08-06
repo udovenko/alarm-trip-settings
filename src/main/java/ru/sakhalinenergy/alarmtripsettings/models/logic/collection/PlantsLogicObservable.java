@@ -6,20 +6,19 @@ import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
 
 
 /**
- * Интерфейс модели коллекции производственных объектов для использования модели
- * представлениями. Допускает только использование геттерорв.
+ * Interface of plants logic model for using by views. Allows only getters.
  * 
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.3
  */
 public interface PlantsLogicObservable extends EventsObservable
 {
    
     /**
-     * Возвращает коллекцию производственных объектов.
+     * Returns current plants list.
      * 
-     * @return Коллекцию производственных объектов
+     * @return Plants list
      */
     public List<Plant> getPlants();
     
-}//PlantsLogicObservable
+}// PlantsLogicObservable

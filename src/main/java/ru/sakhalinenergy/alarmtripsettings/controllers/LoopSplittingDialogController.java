@@ -5,7 +5,7 @@ import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Tag;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.CollectionEvent;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.LoopsTableControllable;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.LoopsTable;
 import ru.sakhalinenergy.alarmtripsettings.views.LoopSplittingDialog.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.LoopSplittingDialog.LoopSplittingDialog;
 
@@ -20,7 +20,7 @@ import ru.sakhalinenergy.alarmtripsettings.views.LoopSplittingDialog.LoopSplitti
  */
 public class LoopSplittingDialogController extends Controller
 {
-    private final LoopsTableControllable model;
+    private final LoopsTable model;
     private final LoopSplittingDialog view;
     
     
@@ -30,7 +30,7 @@ public class LoopSplittingDialogController extends Controller
      * @param model LoopsTable to which view own model belongs
      * @param view Loop splitting dialog instance
      */
-    public LoopSplittingDialogController(LoopsTableControllable model, LoopSplittingDialog view)
+    public LoopSplittingDialogController(LoopsTable model, LoopSplittingDialog view)
     {
         this.model = model;
         this.view = view;

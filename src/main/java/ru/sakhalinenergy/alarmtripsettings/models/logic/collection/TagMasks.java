@@ -12,10 +12,9 @@ import ru.sakhalinenergy.alarmtripsettings.models.storage.HibernateUtil;
 
 
 /**
- * Реализует модель для работы с коллекцией масок (регулярных выраженийц) для
- * парсинга имен тагов.
+ * Implements logic to work with tag formats (parsing masks) collection.
  *
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.2
  */
 public class TagMasks extends Model implements TagMasksObservable
@@ -24,23 +23,24 @@ public class TagMasks extends Model implements TagMasksObservable
     
     
     /**
-     * Возвращает коллекцию масок имен тагов текущего экземпляра модели.
+     * Returns current tag masks list.
      * 
-     * @return Коллекцию масок
+     * @return Tag masks list
      */
     @Override
     public List<TagMask> getMasks()
     {
         return masks;
-    }//getMasks
+    }// getMasks
     
         
     /**
-     * Создает нить для получения коллекции масок из базы данных.
+     * Creates a thread for fetching tag masks collection. Subscribes models 
+     * events listeners on thread events and executes it.
      */
     public void fetch()
     {
-        //Создаем анонимную нить для создания коллекции тагов из текущего листа книги MS Excel:
+        // Create thread:
         WorkerThread tagMasksReader = new WorkerThread()
         {
             @Override
@@ -64,18 +64,17 @@ public class TagMasks extends Model implements TagMasksObservable
                 } finally {
 
                     if (session != null && session.isOpen()) session.close();
-                }//finally
+                }// finally
                 
                 return new HashMap();
-            }//doInBackground
-        };//WorkerThread
+            }// doInBackground
+        };// WorkerThread
         
-        //Подписываем подписчиков модели на события нити:
-        if (events.get(CollectionEvent.THREAD_ERROR) != null) tagMasksReader.events.on(WorkerThread.Event.ERROR, events.get(CollectionEvent.THREAD_ERROR));
-        if (events.get(CollectionEvent.THREAD_WARNING) != null) tagMasksReader.events.on(WorkerThread.Event.WARNING, events.get(CollectionEvent.THREAD_WARNING));
-        if (events.get(CollectionEvent.THREAD_PROGRESS) != null) tagMasksReader.events.on(WorkerThread.Event.PROGRESS, events.get(CollectionEvent.THREAD_PROGRESS));
-        if (events.get(CollectionEvent.MASKS_READ) != null) tagMasksReader.events.on(WorkerThread.Event.WORK_DONE, events.get(CollectionEvent.MASKS_READ));
+        // Resubscribe model's events listeners on thread events:
+        _subscribeOnThreadEvents(tagMasksReader, CollectionEvent.THREAD_PROGRESS, 
+            CollectionEvent.THREAD_WARNING, CollectionEvent.THREAD_ERROR, CollectionEvent.MASKS_READ);
         
+        // Execute thread:
         tagMasksReader.execute();
-    }//fetch
-}//TagMasks
+    }// fetch
+}// TagMasks

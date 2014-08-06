@@ -1,5 +1,7 @@
 package ru.sakhalinenergy.alarmtripsettings;
 
+import java.awt.Image;
+import java.awt.Toolkit;
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
@@ -18,21 +20,21 @@ import ru.sakhalinenergy.alarmtripsettings.controllers.MainFormController;
  * Главный класс приложения. Содержит все глобальные переменные и объекты, а 
  * также метод - точку входа приложения.
  * 
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.9
  */
 public class Main 
 {
     //Информация о версии приложения:
-    public static final String VERSION = "2.0.9.5";
-    public static final String LAST_CHANGES_DATE = "05.08.2014";
-    public static final String LAST_CHANGES_TIME = "15:14";
+    public static final String VERSION = "2.0.9.7";
+    public static final String LAST_CHANGES_DATE = "06.08.2014";
+    public static final String LAST_CHANGES_TIME = "16:13";
     public static final String AUTHOR = "Denis Udovenko";
     
     // Images source directory:
     public static final String IMAGES_SOURCE_DIR = "/images";
     
-    //Создаем типовые иконки приложения:
+    // Create application icons:
     public static final ImageIcon 
         intoolsIcon           = new ImageIcon(Main.class.getResource(IMAGES_SOURCE_DIR + "/intools.png")),
         documentsIcon         = new ImageIcon(Main.class.getResource(IMAGES_SOURCE_DIR + "/documents.png")),
@@ -66,6 +68,10 @@ public class Main
         plantIcon             = new ImageIcon(Main.class.getResource(IMAGES_SOURCE_DIR + "/plant.jpg")),
         areaIcon              = new ImageIcon(Main.class.getResource(IMAGES_SOURCE_DIR + "/area.jpg")),
         unitIcon              = new ImageIcon(Main.class.getResource(IMAGES_SOURCE_DIR + "/unit.jpg"));
+    
+    // Create application images:
+    public static final Image 
+        sakhalinEnergyLogoImage = Toolkit.getDefaultToolkit().createImage(Main.class.getResource(IMAGES_SOURCE_DIR + "/logo.png"));
     
     
     //Объявляем глобальные переменные вью:

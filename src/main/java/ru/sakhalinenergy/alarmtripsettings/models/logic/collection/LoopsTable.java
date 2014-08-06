@@ -21,28 +21,28 @@ import ru.sakhalinenergy.alarmtripsettings.models.storage.HibernateUtil;
 
 
 /**
- * Реализует логику для работы с коллекцией контуров для выбранного объекта 
- * иерархии дерева ассетов.
+ * Implements logic to work with loops collection of selected plants tree 
+ * object.
  * 
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.5
  */
-public class LoopsTable extends Model implements LoopsTableObservable, LoopsTableControllable
+public class LoopsTable extends Model implements LoopsTableObservable
 {
     private List<Loop> loops;
     private List<SettingsSelector> wrappedLoops;
     
     
     /**
-     * Возвращает текущую коллекцию контуров модели.
+     * Returns current loops list.
      * 
-     * @return Текущую коллекцию контуров модели
+     * @return Loops list
      */
     @Override
     public List<Loop> getLoops()
     {
         return loops;
-    }//getLoops
+    }// getLoops
     
     
     /**
@@ -63,17 +63,18 @@ public class LoopsTable extends Model implements LoopsTableObservable, LoopsTabl
             {
                 tempWrapper = new СoincidenceSettingsSelectior(tempLoop);
                 wrappedLoops.add(tempWrapper);
-            }//for
+            }// for
         }// if
         
         return wrappedLoops;
-    }//getWrappedLoops
+    }// getWrappedLoops
     
     
     /**
-     * Возвращает набор источников данных тагов текущей коллекции контуров.
+     * Returns a list of data sources which contain tags form current loops 
+     * collection.
      * 
-     * @return Набор источников данных
+     * @return Data sources list
      */
     @Override
     public List<Source> getSources()
@@ -87,15 +88,18 @@ public class LoopsTable extends Model implements LoopsTableObservable, LoopsTabl
             {
                 tempSource = tempTag.getSource();
                 if (!sources.contains(tempSource)) sources.add(tempSource);
-            }//for
-        }//for
+            }// for
+        }// for
         
         return sources;
-    }//getSources
+    }// getSources
     
     
     /**
+     * Returns tags which belongs to data source with given identifier.
      * 
+     * @param sourceId Parent data source identifier
+     * @return Tags which belongs to data source
      */
     public Set<Tag> getTagsBySourceId(int sourceId)
     {
@@ -106,8 +110,8 @@ public class LoopsTable extends Model implements LoopsTableObservable, LoopsTabl
             for (Tag tempTag : tempLoop.getTags())
             {
                 if (tempTag.getSource().getId() == sourceId) sourceTags.add(tempTag);
-            }//for
-        }//for
+            }// for
+        }// for
         
         return sourceTags;
     }// getTagsBySourceId
@@ -133,11 +137,15 @@ public class LoopsTable extends Model implements LoopsTableObservable, LoopsTabl
     
     
     /**
-     * Создает нить для получения контуров для выбранного объекта дерва ассетов.
+     * Creates a thread for fetching loops collection of selected plants tree 
+     * object. Subscribes models events listeners on thread events and executes
+     * it.
+     * 
+     * @param filters Loops collection fetching criteria filters array 
      */
     public void fetch(final String[] filters)
     {
-        //Создаем анонимную нить для создания коллекции тагов из текущего листа книги MS Excel:
+        // Create a thread:
         WorkerThread loopsReader = new WorkerThread()
         {
             @Override
@@ -165,18 +173,18 @@ public class LoopsTable extends Model implements LoopsTableObservable, LoopsTabl
                     progress.put(ProgressInfoKey.CYCLE_CAPTION, "loading tag sets for loops");
                     publish(progress);
                     
-                    //Вызываем ленивую инициализацию коллекций тагов каждого контура:
+                    // Force lazy initialozation of tags collections for each loop:
                     int loopsProcessed = 0, loopsTotal = loops.size();
                     for (Loop tempLoop : loops)
                     {
                         Hibernate.initialize(tempLoop.getTags());
 
-                        //Публикуем текущий прогресс:
+                        // Publish progress:
                         progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, (int)((double)loopsProcessed / (double)loopsTotal * 100));
                         publish(progress);
                         
                         loopsProcessed++;
-                    }//for
+                    }// for
                                    
                 } catch (HibernateException exception) {
             
@@ -185,20 +193,19 @@ public class LoopsTable extends Model implements LoopsTableObservable, LoopsTabl
                 } finally {
             
                     if (session != null && session.isOpen()) session.close();
-                }//finally
+                }// finally
                                 
                 return new HashMap();
-            }//doInBackground
-        };//WorkerThread
+            }// doInBackground
+        };// WorkerThread
+
+        // Resubscribe model's events listeners on thread events:
+        _subscribeOnThreadEvents(loopsReader, CollectionEvent.THREAD_PROGRESS, 
+            CollectionEvent.THREAD_WARNING, CollectionEvent.THREAD_ERROR, CollectionEvent.LOOPS_READ);
         
-        //Подписываем подписчиков модели на события нити:
-        if (events.get(CollectionEvent.THREAD_ERROR) != null) loopsReader.events.on(WorkerThread.Event.ERROR, events.get(CollectionEvent.THREAD_ERROR));
-        if (events.get(CollectionEvent.THREAD_WARNING) != null) loopsReader.events.on(WorkerThread.Event.WARNING, events.get(CollectionEvent.THREAD_WARNING));
-        if (events.get(CollectionEvent.THREAD_PROGRESS) != null) loopsReader.events.on(WorkerThread.Event.PROGRESS, events.get(CollectionEvent.THREAD_PROGRESS));
-        if (events.get(CollectionEvent.LOOPS_READ) != null) loopsReader.events.on(WorkerThread.Event.WORK_DONE, events.get(CollectionEvent.LOOPS_READ));
-        
+        // Execute thread:
         loopsReader.execute();
-    }//fetch
+    }// fetch
     
     
     /**
@@ -289,12 +296,11 @@ public class LoopsTable extends Model implements LoopsTableObservable, LoopsTabl
             }// doInBackground
         };// WorkerThread
         
-        //Подписываем подписчиков модели на события нити:
-        if (events.get(CollectionEvent.THREAD_ERROR) != null) loopSplitter.events.on(WorkerThread.Event.ERROR, events.get(CollectionEvent.THREAD_ERROR));
-        if (events.get(CollectionEvent.THREAD_WARNING) != null) loopSplitter.events.on(WorkerThread.Event.WARNING, events.get(CollectionEvent.THREAD_WARNING));
-        if (events.get(CollectionEvent.THREAD_PROGRESS) != null) loopSplitter.events.on(WorkerThread.Event.PROGRESS, events.get(CollectionEvent.THREAD_PROGRESS));
-        if (events.get(CollectionEvent.LOOP_SPLIT) != null) loopSplitter.events.on(WorkerThread.Event.WORK_DONE, events.get(CollectionEvent.LOOP_SPLIT));
-        
+        // Resubscribe model's events listeners on thread events:
+        _subscribeOnThreadEvents(loopSplitter, CollectionEvent.THREAD_PROGRESS, 
+            CollectionEvent.THREAD_WARNING, CollectionEvent.THREAD_ERROR, CollectionEvent.LOOP_SPLIT);
+
+        // Execute thread:
         loopSplitter.execute();
     }// splitLoop
 }// LoopsTable
