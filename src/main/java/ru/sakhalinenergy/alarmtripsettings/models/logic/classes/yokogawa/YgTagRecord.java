@@ -4,11 +4,10 @@ import ru.sakhalinenergy.alarmtripsettings.util.DataTypesUtils;
 
 
 /**
- * Класс описывает структуру записи тага в файле функционального блока бэкапа 
- * DCS Yokogawa.
+ * Implements tag record entity structure in Yokogawa DCS backup.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.3
+ * @author Denis Udovenko
+ * @version 1.0.3
  */
 public class YgTagRecord 
 {
@@ -47,8 +46,11 @@ public class YgTagRecord
     
     
     /**
-     * 128 байт
+     * Public constructor. Parses given bytes array to segments and translates 
+     * them to instance fields according to backup tag record structure.
      * 
+     * @throws RuntimeException
+     * @param record Tag record data bytes array
      */
     public YgTagRecord(byte[] record)
     {
@@ -58,137 +60,143 @@ public class YgTagRecord
         byte[] temp4BytesArray = new byte[4];
         byte[] temp16BytesArray = new byte[16];
                 
-        //Получаем имя тага:
+        // Read tag name:
         System.arraycopy(record, 0, temp16BytesArray, 0, 16);
-        this.tagName = new String(temp16BytesArray);
+        tagName = new String(temp16BytesArray);
         
-        //Получаем комментарий к тагу:
+        // Read tag's comment:
         byte[] tagCmntBytes = new byte[24];
         System.arraycopy(record, 16, tagCmntBytes, 0, 24);
-        this.tagComent = new String(tagCmntBytes);
+        tagComent = new String(tagCmntBytes);
         
-        //Получаем значение поля upperPanel:
+        // Read "upperPanel" parameter value:
         System.arraycopy(record, 40, temp16BytesArray, 0, 16);
-        this.upperPanel = new String(temp16BytesArray);        
+        upperPanel = new String(temp16BytesArray);        
         
-        //Получаем значение байтовых полей:
-        this.alarmType = record[56];
-        this.accessLevel = record[57];
-        this.elemTypeOne = record[58];
-        this.elemTypeTwo = record[59];
+        // Read bytes fields:
+        alarmType = record[56];
+        accessLevel = record[57];
+        elemTypeOne = record[58];
+        elemTypeTwo = record[59];
         
-        //Получаем значение поля elemNo:
+        // Read "elemNo" parameter:
         System.arraycopy(record, 60, temp2BytesArray, 0, 2);
-        this.elemNo = DataTypesUtils.readBytesAsUnsignedShort(temp2BytesArray);
+        elemNo = DataTypesUtils.readBytesAsUnsignedShort(temp2BytesArray);
         
-        //Получаем значение helpNo:
+        // Read "helpNo" parameter:
         System.arraycopy(record, 62, temp2BytesArray, 0, 2);
-        this.helpNo = DataTypesUtils.readBytesAsUnsignedShort(temp2BytesArray);
+        helpNo = DataTypesUtils.readBytesAsUnsignedShort(temp2BytesArray);
         
-        //Получаем значение instNo:
+        // Read "instNo" parameter:
         System.arraycopy(record, 64, temp2BytesArray, 0, 2);
-        this.instNo = DataTypesUtils.readBytesAsUnsignedShort(temp2BytesArray);
+        instNo = DataTypesUtils.readBytesAsUnsignedShort(temp2BytesArray);
         
-        //Получаем значение plantNo:
+        // Read "plantNo" parameter:
         System.arraycopy(record, 66, temp2BytesArray, 0, 2);
-        this.plantNo = DataTypesUtils.readBytesAsUnsignedShort(temp2BytesArray);
+        plantNo = DataTypesUtils.readBytesAsUnsignedShort(temp2BytesArray);
                
-        //Получаем значение поля auxPointer:
+        // Read "auxPointer" parameter:
         System.arraycopy(record, 68, temp4BytesArray, 0, 4);
-        this.auxPointer = DataTypesUtils.readAsUnsignedLong(temp4BytesArray);
+        auxPointer = DataTypesUtils.readAsUnsignedLong(temp4BytesArray);
         
-        //Получаем значение байтовых полей:
-        this.instType      = record[72];
-        this.auxCodeOne    = record[73];
-        this.dataDisp      = record[74];      
-        this.auxCodeTwo    = record[75];
-        this.instMark      = record[76];
-        this.tagMark       = record[77];
-        this.dp            = record[78];
-        this.tp            = record[79];
-        this.rp            = record[80];
-        this.mvdp          = record[81];
-        this.ocMark        = record[82];
-        this.divideNo      = record[83];
-        this.labelCode     = record[84];
-        this.userCodeOne   = record[85];
-        this.userCodeTwo   = record[86];
-        this.userCodeThree = record[87];
+        // Read byte fields values:
+        instType      = record[72];
+        auxCodeOne    = record[73];
+        dataDisp      = record[74];      
+        auxCodeTwo    = record[75];
+        instMark      = record[76];
+        tagMark       = record[77];
+        dp            = record[78];
+        tp            = record[79];
+        rp            = record[80];
+        mvdp          = record[81];
+        ocMark        = record[82];
+        divideNo      = record[83];
+        labelCode     = record[84];
+        userCodeOne   = record[85];
+        userCodeTwo   = record[86];
+        userCodeThree = record[87];
         
-        //Получаем значение поля mvUnit:
+        // Read "mvUnit" parameter:
         System.arraycopy(record, 88, temp2BytesArray, 0, 2);
-        this.mvUnitsIndex = DataTypesUtils.readBytesAsUnsignedShort(temp2BytesArray);
+        mvUnitsIndex = DataTypesUtils.readBytesAsUnsignedShort(temp2BytesArray);
         
-        //Получаем индекс единиц измерения:
+        // Read units of measure index parameter:
         System.arraycopy(record, 90, temp2BytesArray, 0, 2);
-        this.engUnitsIndex = DataTypesUtils.readBytesAsUnsignedShort(temp2BytesArray);
+        engUnitsIndex = DataTypesUtils.readBytesAsUnsignedShort(temp2BytesArray);
         
-        //Получаем ваерхнюю границу измеряемого диапазона:
+        // Read range max parameter:
         System.arraycopy(record, 92, temp4BytesArray, 0, 4);
-        this.sh = DataTypesUtils.readAsUnsignedLong(temp4BytesArray);  
+        sh = DataTypesUtils.readAsUnsignedLong(temp4BytesArray);  
         
-        //Получаем ваерхнюю границу измеряемого диапазона:
+        // Read range min parameter:
         System.arraycopy(record, 96, temp4BytesArray, 0, 4);
-        this.sl = DataTypesUtils.readAsUnsignedLong(temp4BytesArray);  
-    }//YgTagRecord
+        sl = DataTypesUtils.readAsUnsignedLong(temp4BytesArray);  
+    }// YgTagRecord
     
     
     /**
+     * Returns tag name parameter value.
      * 
-     * 
+     * @return Tag name parameter value
      */
     public String getTagName()
     {
-        return this.tagName;
-    }//getTagName
+        return tagName;
+    }// getTagName
     
     
     /**
+     * Returns "dp" parameter value.
      * 
-     * 
+     * @return "dp" parameter value
      */
     public byte getDp()
     {
-        return this.dp;
-    }//getDp
+        return dp;
+    }// getDp
     
     
     /**
+     * Returns "mvUnits" parameter value.
      * 
-     * 
+     * @return "mvUnits" parameter value
      */
     public int getMvUnits()
     {
-        return this.mvUnitsIndex;
-    }//getMvUnits
+        return mvUnitsIndex;
+    }// getMvUnits
     
     
     /**
+     * Returns engineering units index parameter value.
      * 
-     * 
+     * @return Engineering units
      */
     public int getEngUnitsIndex()
     {
-        return this.engUnitsIndex;
-    }//getEngUnitsIndex
+        return engUnitsIndex;
+    }// getEngUnitsIndex
     
     
     /**
+     * Returns range max parameter value.
      * 
-     * 
+     * @return Range max parameter value
      */
     public long getSh()
     {
-        return this.sh;
-    }//getSh
+        return sh;
+    }// getSh
     
     
     /**
+     * Returns range min parameter value.
      * 
-     * 
+     * @return Range min parameter value
      */
     public long getSl()
     {
-        return this.sl;
-    }//getSl
-}//YgTag
+        return sl;
+    }// getSl
+}// YgTagRecord

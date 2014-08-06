@@ -4,10 +4,10 @@ import ru.sakhalinenergy.alarmtripsettings.util.DataTypesUtils;
 
 
 /**
- * Класс описывает функциональный блок в бэкапке DCS Yokogawa.
+ * Implements functional block entity in DCS Yokogawa backup.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.1
+ * @author Denis Udovenko
+ * @version 1.0.1
  */
 public class YgBlockRecord
 {
@@ -21,11 +21,11 @@ public class YgBlockRecord
     
     
     /**
-     * Конструктор класса. Разбирает полученный массив байт на сегменты и 
-     * преобразует их в поля экземпляра согласно структуре файла.
-     * 
-     * @throws  RuntimeException
-     * @param   blockBytes        Массив байт описания функционального блока
+     * Public constructor. Parses given bytes array to segments and translates 
+     * them to instance fields according to backup file structure.
+     *
+     * @throws RuntimeException
+     * @param blockBytes Functional block data bytes array
      */
     public YgBlockRecord(byte[] blockBytes)
     {
@@ -37,62 +37,63 @@ public class YgBlockRecord
         byte[] temp8BytesArray = new byte[8];
         byte[] temp16BytesArray = new byte[16];
         
-        //Читаем имя тага:
+        // Read tag name:
         System.arraycopy(blockBytes, 0, temp16BytesArray, 0, 16);
-        this.tagName = new String(temp16BytesArray);
+        tagName = new String(temp16BytesArray);
         bytesRead += temp16BytesArray.length;
         
-        //Читаем параметры Control Flag и Block No:
+        // Read "Control Flag" and "Block No" parameters:
         System.arraycopy(blockBytes, 16, temp2BytesArray, 0, 2);
-        this.controlFlag = DataTypesUtils.readBytesAsUnsignedShort(temp2BytesArray);
+        controlFlag = DataTypesUtils.readBytesAsUnsignedShort(temp2BytesArray);
         bytesRead += temp2BytesArray.length;
         
         System.arraycopy(blockBytes, 18, temp2BytesArray, 0, 2);
-        this.blockNo = DataTypesUtils.readBytesAsUnsignedShort(temp2BytesArray);
+        blockNo = DataTypesUtils.readBytesAsUnsignedShort(temp2BytesArray);
         bytesRead += temp2BytesArray.length;
         
-        //Читаем имя инстанса:
+        // Read block instance name:
         System.arraycopy(blockBytes, 20, temp8BytesArray, 0, 8);
-        this.instanceName = new String(temp8BytesArray);
+        instanceName = new String(temp8BytesArray);
         bytesRead += temp8BytesArray.length;
         
-        //Читаем параметр Option Id:
+        // Read "option id" parameter:
         System.arraycopy(blockBytes, 28, temp4BytesArray, 0, 4);
-        this.optionId = temp4BytesArray;
+        optionId = temp4BytesArray;
         bytesRead += temp4BytesArray.length;
         
-        //Читаем параметр usInsName:
+        // Read "usInsName" parameter:
         System.arraycopy(blockBytes, 32, temp8BytesArray, 0, 8);
         this.usInsName = temp8BytesArray;
         bytesRead += temp8BytesArray.length;
         
-        //Читаем параметр auxThree:
+        // Read "auxThree" parameter:
         System.arraycopy(blockBytes, 40, temp8BytesArray, 0, 8);
         this.auxThree = temp8BytesArray;
         bytesRead += temp8BytesArray.length;
         
-        //Проверяем, что прочитан весь массив:
+        // Check that array was fully read:
         if (blockBytes.length != bytesRead) throw new RuntimeException("YgBlockRecord constructor error: Wrong number of bytes read!"); 
-    }//YgBlockRecord
+    }// YgBlockRecord
         
     
     /**
-     * Метод возвращает значение поля с именем тага.
+     * Returns tag name parameter value.
      * 
-     * @return  Значение поля с именем тага
+     * @return Tag name parameter value
      */
     public String getTagName()
     {
         return this.tagName;
-    }//getTagName
+    }// getTagName
     
     
     /**
+     * Returns functional block instance name parameter value.
      * 
-     * 
+     * @return Instance name parameter value
      */
     public String getInstanceName()
     {
         return this.instanceName;              
-    }//getInstanceName
-}//Block
+    }// getInstanceName
+}// YgBlockRecord

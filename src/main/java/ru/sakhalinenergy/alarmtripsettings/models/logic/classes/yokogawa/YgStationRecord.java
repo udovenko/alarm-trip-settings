@@ -2,10 +2,10 @@ package ru.sakhalinenergy.alarmtripsettings.models.logic.classes.yokogawa;
 
 
 /**
- * Класс описывает запись с информацией о станции в бэкапе DCS Yokogawa.
+ * Implements station record entity in DCS Yokogawa backup.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.4
+ * @author Denis Udovenko
+ * @version 1.0.4
  */
 public class YgStationRecord 
 {
@@ -14,11 +14,11 @@ public class YgStationRecord
     
     
     /**
-     * Конструктор класса. Разбирает полученный массив байт на сегменты и 
-     * преобразует их в поля экземпляра согласно структуре файла.
+     * Public constructor. Parses given bytes array to segments and translates 
+     * them to instance fields according to backup station record structure.
      * 
-     * @throws  RuntimeException
-     * @param   headerBytes       Массив байт элемента описания станции
+     * @throws RuntimeException
+     * @param stationBytes Station record data bytes array
      */
     public YgStationRecord(byte[] stationBytes)
     {
@@ -28,41 +28,40 @@ public class YgStationRecord
        byte[] temp8ByteArray = new byte[8];
        byte[] temp248ByteArray = new byte[248];
        
-       //Читаем имя станции:
+       // Read station name:
        System.arraycopy(stationBytes, 0, temp8ByteArray, 0, 8);
-       this.stationName = new String(temp8ByteArray);
-       //System.out.println(this.stationName);
+       stationName = new String(temp8ByteArray);
        bytesRead += temp8ByteArray.length;
        
-       //Читаем массив оставшихся байтов:
+       // Read remainig bytes array:
        System.arraycopy(stationBytes, 8, temp248ByteArray, 0, 248);
-       this.rest = temp248ByteArray;
+       rest = temp248ByteArray;
        bytesRead += temp248ByteArray.length;
        
-       //Проверяем, что прочитан весь массив:
+       // Check that array was fully read:
         if (stationBytes.length != bytesRead) throw new RuntimeException("YgStationRecord constructor error: Wrong number of bytes read!"); 
-    }//YgStationRecord
+    }// YgStationRecord
     
     
     /**
-     * Метод возвращает поле с именем станции.
+     * Returns station name parameter value.
      * 
-     * @return  Имя станции
+     * @return Station name
      */
     public String getStationName()
     {
-        return this.stationName;
-    }//getStationName
+        return stationName;
+    }// getStationName
     
     
     /**
-     * Метод перегружает родительский метод преобразования объекта в строку.
+     * Overrides parent "toString()" method. Returns station name string instead.
      * 
-     * @return  Имя станции
+     * @return Station name string
      */
     @Override
     public String toString()
     {
-        return this.stationName.trim();
-    }//toString
-}//YgStationRecord
+        return stationName.trim();
+    }// toString
+}// YgStationRecord

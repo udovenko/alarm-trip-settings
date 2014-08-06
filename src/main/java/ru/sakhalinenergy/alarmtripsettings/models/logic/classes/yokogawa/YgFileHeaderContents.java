@@ -4,11 +4,10 @@ import ru.sakhalinenergy.alarmtripsettings.util.DataTypesUtils;
 
 
 /**
- * Клоасс описывает элемент оглавления заголовка файла диаграммы функциональных 
- * блоков.
+ * Implements contents element of Yokogawa DCS backup file header.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.1
+ * @author Denis Udovenko
+ * @version 1.0.1
  */
 public class YgFileHeaderContents 
 {
@@ -19,28 +18,29 @@ public class YgFileHeaderContents
     
     
     /**
-     * Конструктор класса. Разбирает полученный массив байт на сегменты и 
-     * преобразует их в поля экземпляра согласно структуре файла.
+     * Public constructor. Parses given bytes array to segments and translates 
+     * them to instance fields according to backup file header contents element
+     * structure.
      * 
-     * @throws  RuntimeException
-     * @param   headerBytes       Массив байт элемента оглавления файла
+     * @throws RuntimeException
+     * @param contentsBytes File header contents element data bytes array
      */
     public YgFileHeaderContents(byte[] contentsBytes)
     {
-        //Проверяем корректность длины параметра:
+        // Check given bytes array length:
         if (contentsBytes.length != 16) throw new RuntimeException("YgFileHeaderContents constructor error: Wrong parameter length!"); 
         
         byte bytesRead = 0;
         byte[] temp4ByteArray = new byte[4];
         
-        //Читаем значение поля Item:
+        // Read "Item" parameter:
         System.arraycopy(contentsBytes, 0, temp4ByteArray, 0, 4);
-        this.item = new String(temp4ByteArray);
+        item = new String(temp4ByteArray);
         bytesRead += temp4ByteArray.length;
         
-        //Читаем целочисленные значения:
+        // Read integer values:
         System.arraycopy(contentsBytes, 4, temp4ByteArray, 0, 4);
-        this.offset = DataTypesUtils.readAsUnsignedLong(temp4ByteArray);
+        offset = DataTypesUtils.readAsUnsignedLong(temp4ByteArray);
         bytesRead += temp4ByteArray.length;
         
         System.arraycopy(contentsBytes, 8, temp4ByteArray, 0, 4);
@@ -51,41 +51,40 @@ public class YgFileHeaderContents
         this.pitch = DataTypesUtils.readAsUnsignedLong(temp4ByteArray);
         bytesRead += temp4ByteArray.length;
         
-        //Проверяем, что прочитан весь массив:
+        // Check that array was fully read:
         if (contentsBytes.length != bytesRead) throw new RuntimeException("YgFileHeaderContents constructor error: Wrong number of bytes read!"); 
-    }//YgFileHeaderContents
+    }// YgFileHeaderContents
         
     
     /**
-     * Метод возвращает значение имени пункта оглавления.
+     * Returns "item" parameter value.
      * 
-     * @return  Имя пункта оглавления
+     * @return "item" parameter value
      */
     public String getItem()
     {
-        return this.item;
-    }//getItem
+        return item;
+    }// getItem
     
     
     /**
-     * Метод возвращает отступ, начиная с которого нужно читать информацию о
-     * блоках.
+     * Returns an offset, starting from which block info can be read.
      * 
-     * @return  Отступ, начиная с которого нужно читать информацию о блоках.
+     * @return "offset" parameter value
      */
     public long getOffset()
     {
-        return this.offset;
-    }//getOffset
+        return offset;
+    }// getOffset
     
     
     /**
-     * Метод возвращзает значение параметра number.
+     * Returns "number" parameter value.
      * 
-     * @return  Значение параметра number
+     * @return "number" parameter value
      */
     public long getNumber()
     {
-        return this.number;
-    }//getNumber
-}//OdtContents
+        return number;
+    }// getNumber
+}// YgFileHeaderContents

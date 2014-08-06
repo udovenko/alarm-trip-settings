@@ -4,11 +4,10 @@ import ru.sakhalinenergy.alarmtripsettings.util.DataTypesUtils;
 
 
 /**
- * Класс описывает структуру полей файла диаграммы функциональных блоков в 
- * бэкапе проекта Yokogawa DCS.
+ * Implements Yokogawa DCS backup file header structure.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.2
+ * @author Denis Udovenko
+ * @version 1.0.2
  */
 public class YgFileHeader 
 {
@@ -34,11 +33,11 @@ public class YgFileHeader
     
     
     /**
-     * Конструктор класса. Разбирает полученный массив байт на сегменты и 
-     * преобразует их в поля экземпляра согласно структуре файла.
+     * Public constructor. Parses given bytes array to segments and translates 
+     * them to instance fields according to backup file header structure.
      * 
-     * @throws  RuntimeException
-     * @param   headerBytes       Массив байт звголовка файла
+     * @throws RuntimeException
+     * @param headerBytes File header data bytes array
      */
     public YgFileHeader(byte[] headerBytes)
     {
@@ -52,112 +51,112 @@ public class YgFileHeader
         byte[] temp12ByteArray = new byte[12];
         byte[] temp16ByteArray = new byte[16];
         
-        //Читаем имя файла из заголовка:
+        // Read file name from header:
         System.arraycopy(headerBytes, 0, temp12ByteArray, 0, 12);
-        this.fName = new String(temp12ByteArray);
+        fName = new String(temp12ByteArray);
         bytesRead += temp12ByteArray.length;
         
-        //Читаем Editor Id:
+        // Read "Editor Id" param:
         System.arraycopy(headerBytes, 12, temp4ByteArray, 0, 4);
-        this.editorId = DataTypesUtils.readAsUnsignedLong(temp4ByteArray);
+        editorId = DataTypesUtils.readAsUnsignedLong(temp4ByteArray);
         bytesRead += temp4ByteArray.length;
         
-        //Читаем имя проекта:
+        // Read project name:
         System.arraycopy(headerBytes, 16, temp8ByteArray, 0, 8);
-        this.projectName = new String(temp8ByteArray);
+        projectName = new String(temp8ByteArray);
         bytesRead += temp8ByteArray.length;
         
-        //Читаем имя хоста:
+        // Read host name:
         System.arraycopy(headerBytes, 24, temp8ByteArray, 0, 8);
-        this.hostName = temp8ByteArray;
+        hostName = temp8ByteArray;
         bytesRead += temp8ByteArray.length;
         
-        //Читаем байтовые данные:
-        this.createSubRevision  = headerBytes[32];
-        this.createRevision     = headerBytes[33];
-        this.createVersion      = headerBytes[34];
-        this.reservedOne        = headerBytes[35];
-        this.modifySubRevision  = headerBytes[36]; 
-        this.modifyRevision     = headerBytes[37];  
-        this.modifyVersion      = headerBytes[38];
-        this.reservedTwo        = headerBytes[39];
-        this.fileFormatRevision = headerBytes[40];
+        // Read byte data:
+        createSubRevision  = headerBytes[32];
+        createRevision     = headerBytes[33];
+        createVersion      = headerBytes[34];
+        reservedOne        = headerBytes[35];
+        modifySubRevision  = headerBytes[36]; 
+        modifyRevision     = headerBytes[37];  
+        modifyVersion      = headerBytes[38];
+        reservedTwo        = headerBytes[39];
+        fileFormatRevision = headerBytes[40];
         bytesRead += 9;
         
-        //Читаем третий зарезервированный участок:
+        // Read third reserved sector:
         System.arraycopy(headerBytes, 41, temp3ByteArray, 0, 3);
-        this.reservedThree = temp3ByteArray;
+        reservedThree = temp3ByteArray;
         bytesRead += temp3ByteArray.length;
         
-        //Читаем целочисленные данные:
+        // Read integer data:
         System.arraycopy(headerBytes, 44, temp4ByteArray, 0, 4);
-        this.itemNumber = DataTypesUtils.readAsUnsignedLong(temp4ByteArray);
+        itemNumber = DataTypesUtils.readAsUnsignedLong(temp4ByteArray);
         bytesRead += temp4ByteArray.length;
         
         System.arraycopy(headerBytes, 48, temp4ByteArray, 0, 4);
-        this.createTime = DataTypesUtils.readAsUnsignedLong(temp4ByteArray);
+        createTime = DataTypesUtils.readAsUnsignedLong(temp4ByteArray);
         bytesRead += temp4ByteArray.length;
         
         System.arraycopy(headerBytes, 52, temp4ByteArray, 0, 4);
-        this.modifyTime = DataTypesUtils.readAsUnsignedLong(temp4ByteArray);
+        modifyTime = DataTypesUtils.readAsUnsignedLong(temp4ByteArray);
         bytesRead += temp4ByteArray.length;
         
-        //Читаем тип файла:
+        // Read file type:
         System.arraycopy(headerBytes, 56, temp8ByteArray, 0, 8);
-        this.fileType = temp8ByteArray;
+        fileType = temp8ByteArray;
         bytesRead += temp8ByteArray.length;
         
-        //Читаем оглавление файла:
+        // Read file contents:
         YgFileHeaderContents tempContents;
         
         for (int i = 0; i < 28; i++)
         {
             System.arraycopy(headerBytes, 64 + i*16, temp16ByteArray, 0, 16);
             tempContents = new YgFileHeaderContents(temp16ByteArray);
-            this.contents[i] = tempContents;
+            contents[i] = tempContents;
             bytesRead += temp16ByteArray.length;
         }//for
         
-        //Проверяем, что прочитан весь массив:
+        // Check that array was fully read:
         if (headerBytes.length != bytesRead) throw new RuntimeException("YgFileHeader constructor error: Wrong number of bytes read!"); 
-    }//YgFileHeader
+    }// YgFileHeader
        
     
     /**
-     * Метод возвращает значение поля fName.
+     * Returns "fName" parameter value.
      * 
-     * @return  Значение поля fName
+     * @return "fName" parameter value
      */
     public String getFName()
     {
-        return this.fName;
-    }//getFName
+        return fName;
+    }// getFName
     
     
     /**
-     * Метод возвращает значение поля editorId.
+     * Returns "editorId" parameter value.
      * 
-     * @return  Значение поля editorId
+     * @return "editorId" parameter value
      */
     public long getEditorId()
     {
-        return this.editorId;
-    }//getEditorId
+        return editorId;
+    }// getEditorId
     
     
     /**
-     * Метод находит элемент оглавления заоголовка по его имени.
+     * Finds header contents element by name.
      * 
-     * @param   item  Имя элемента оглавления
-     * @return  Экземпляр элемента оглавления, если он был найден, или null
+     * @param item Contents element name
+     * @return Contents element instance or null if nothing was found
      */
     public YgFileHeaderContents getContentItem(String item)
     {
         for (YgFileHeaderContents tempContents : this.contents)
         {
             if (tempContents.getItem().equals(item)) return tempContents;
-        }//for
+        }// for
         
         return null;
-    }//getContentItem
-}//FunctionalBlockDiagram
+    }// getContentItem
+}// YgFileHeader
