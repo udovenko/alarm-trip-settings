@@ -1,31 +1,32 @@
 package ru.sakhalinenergy.alarmtripsettings.models.logic.settings;
 
-import ru.sakhalinenergy.alarmtripsettings.implemented.SettingsTypes;
-import ru.sakhalinenergy.alarmtripsettings.implemented.SourcesTypes;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import ru.sakhalinenergy.alarmtripsettings.implemented.SettingsTypes;
+import ru.sakhalinenergy.alarmtripsettings.implemented.SourcesTypes;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Loop;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Tag;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagSetting;
 
 
 /**
+ * Implements settings selection logic based on setting values coincidence.
  *
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.4
  */
 public class СoincidenceSettingsSelectior extends SettingsSelector
 {
     
-    //Массивы уставок, выбранных из всех уставок тагов прибора с учетом приоритетов:
-    private Set<TagSetting> intoolsSettings = new HashSet(), documentsSettings = new HashSet(), 
+    // Arrays of settings filtered from loop tags settings collection according to priority:
+    private final Set<TagSetting> intoolsSettings = new HashSet(), documentsSettings = new HashSet(), 
         dcsSettings = new HashSet(), esdSettings = new HashSet(), fgsSettings = new HashSet();
     
     
     /**
-     * Public constructor. 
+     * Public constructor. Executes settings selection.
      * 
      * @param loop Loop instance to be wrapped by current logic
      */
@@ -33,7 +34,7 @@ public class СoincidenceSettingsSelectior extends SettingsSelector
     {
         super(loop);
         
-        //Собираем все настройки контура из его тагов в группы по типу источника:
+        // Group all loop tags settings by data source type:
         for (Tag tempTag : loop.getTags())
         {
             if (tempTag.getSource().getTypeId() == SourcesTypes.INTOOLS_EXPORT_DOCUMENT.ID) intoolsSettings.addAll(tempTag.getSettings());
@@ -41,9 +42,9 @@ public class СoincidenceSettingsSelectior extends SettingsSelector
             if (tempTag.getSource().getTypeId() == SourcesTypes.DCS_VARIABLE_TABLE.ID) dcsSettings.addAll(tempTag.getSettings());
             if (tempTag.getSource().getTypeId() == SourcesTypes.ESD_VARIABLE_TABLE.ID) esdSettings.addAll(tempTag.getSettings());
             if (tempTag.getSource().getTypeId() == SourcesTypes.FGS_VARIABLE_TABLE.ID) fgsSettings.addAll(tempTag.getSettings());
-        }//for
+        }// for
         
-        //Filtering setpoints according to priority:
+        // Filtering setpoints according to priority:
         _filterSetpointsAccordingToPriority(intoolsSettings);
         _filterSetpointsAccordingToPriority(documentsSettings);
         _filterSetpointsAccordingToPriority(dcsSettings);
@@ -61,12 +62,12 @@ public class СoincidenceSettingsSelectior extends SettingsSelector
         _choosePlcSettings(fgsSettings);
         _chooseDcsSettings();
         
-        //Calculating conformity of chosen settings:
+        // Calculating conformity of chosen settings:
         _calculateAlarmsLLConformity();
         _calculateAlarmsLConformity();
         _calculateAlarmsHConformity();
         _calculateAlarmsHHConformity();
-    }//СoincidenceSettingsSelectior
+    }// СoincidenceSettingsSelectior
 
     
     /**
@@ -77,7 +78,7 @@ public class СoincidenceSettingsSelectior extends SettingsSelector
      */
     private void _filterSetpointsAccordingToPriority(Set<TagSetting> settings)
     {
-        //Находим настройки, уступающие по приоритету настройкам такого же типа:
+        // Find settings inferior to other ones of same type:
         List<TagSetting> settingsToRemove = new ArrayList();
         for (TagSetting settingStrong : settings)
         {
@@ -88,13 +89,13 @@ public class СoincidenceSettingsSelectior extends SettingsSelector
                 {
                     settingsToRemove.add(settingWeak);
                     
-                    //Если более актуальная настройка имеет зарезервированное значение "удалена", удалаяем ее вместе с низкоприоритетной:
+                    // If setting with higher priority has value with reserved word for deleted settings, remove it too:
                     if (settingStrong.getValue().equals(DELETED_SETTING_RESERVED_WORD)) settingsToRemove.add(settingStrong);
-                }//if
-            }//for
-        }//for
+                }// if
+            }// for
+        }// for
         
-        //Удаляем настройки, уступающие по приоритету:
+        // Remove settings inferior by priority:
         settings.removeAll(settingsToRemove);
     }// _filterIntoolsSetpointsAccordingToPriority
     
@@ -136,7 +137,7 @@ public class СoincidenceSettingsSelectior extends SettingsSelector
             if (settingType == SettingsTypes.ALARM_H_SETTING.ID) chosenDocumentsAlarmH = setting;
             if (settingType == SettingsTypes.ALARM_HH_SETTING.ID) chosenDocumentsAlarmHH = setting;
         }// for
-    }// _chooseIntoolsSettings
+    }// _chooseDocumentsSettings
       
     
     /**
@@ -161,8 +162,8 @@ public class СoincidenceSettingsSelectior extends SettingsSelector
                 && chosenSystemsAlarmH == null) chosenSystemsAlarmH = setting;
             if (settingType == SettingsTypes.ALARM_HH_SETTING.ID 
                 && chosenSystemsAlarmHH == null) chosenSystemsAlarmHH = setting;
-        }//for
-    }// _chooseEsdSettings
+        }// for
+    }// _choosePlcSettings
     
         
     /**
@@ -194,7 +195,7 @@ public class СoincidenceSettingsSelectior extends SettingsSelector
      * type. If setting can be chosen, returns it, else return null.
      * 
      * @param setting Setting to be checked
-     * @param chosenIntoolsSetting Current chosen Intools setting of according type
+     * @param chosenIntoolsSetting Current chosen SPI setting of according type
      * @param chosenDocumentSetting Current chosen Documents setting of according type
      * @return Checked setting or null
      */
@@ -207,21 +208,21 @@ public class СoincidenceSettingsSelectior extends SettingsSelector
         // If only Documents setting chosen:
         if (chosenDocumentsAlarmValue != null)
         {
-            Byte comparsionResult = _compare(chosenDocumentsAlarmValue, setting.getValue());
+            Enum comparsionResult = _compare(chosenDocumentsAlarmValue, setting.getValue());
             
-            if (comparsionResult == COMPARED_AS_DOUBLE_EQUALS 
-                || comparsionResult == COMPARED_AS_STRING_EQUALS) return setting;
+            if (comparsionResult == Compared.AS_DOUBLE_EQUALS 
+                || comparsionResult == Compared.AS_STRING_EQUALS) return setting;
         }// if
         
         // If only SPI setting chosen:
         if (chosenIntoolsAlarmValue != null)
         {
-            Byte comparsionResult = _compare(chosenIntoolsAlarmValue, setting.getValue());
-            if (comparsionResult == COMPARED_AS_DOUBLE_EQUALS 
-                || comparsionResult == COMPARED_AS_STRING_EQUALS) return setting;
+            Enum comparsionResult = _compare(chosenIntoolsAlarmValue, setting.getValue());
+            if (comparsionResult == Compared.AS_DOUBLE_EQUALS 
+                || comparsionResult == Compared.AS_STRING_EQUALS) return setting;
         }// if
               
         // If method didn't return control before, seems that setting can't be chosen:
         return null;
-    }// _chooseDcsAlarmLL
-}//СoincidenceSettingsSelectior
+    }// _permitDcsSetting
+}// СoincidenceSettingsSelectior

@@ -2,52 +2,55 @@ package ru.sakhalinenergy.alarmtripsettings.models.logic.settings;
 
 
 /**
- * Класс реализует базового потомка для всех классов логики операций с устваками
- * притборов, таких как выбор уставок из множества тагов, реализация отчетов
- * и т.д.
+ * Implements an abstract parent for classes with tag settings comparison logic.
  * 
- * @author Denis.Udovenko
- * @version 1.0.2
+ * @author Denis Udovenko
+ * @version 1.0.3
  */
 public abstract class Comparator 
 {
-    protected static final byte COMPARED_AS_DOUBLE_EQUALS     = 1;
-    protected static final byte COMPARED_AS_DOUBLE_LESS       = 2;
-    protected static final byte COMPARED_AS_DOUBLE_MORE       = 3;
-    protected static final byte COMPARED_AS_STRING_EQUALS     = 4;
-    protected static final byte COMPARED_AS_STRING_NOT_EQUALS = 5;
+    
+    // Comparison result types enumeration:
+    protected static enum Compared
+    { 
+        AS_DOUBLE_EQUALS,
+        AS_DOUBLE_LESS,
+        AS_DOUBLE_MORE,
+        AS_STRING_EQUALS,
+        AS_STRING_NOT_EQUALS
+    }// Compared
     
     protected final String POSSIBILITY_FLAG_POSITIVE_VALUE = "YES";
     protected final Double eps = 0.001;
     
     
     /**
-     * Метод проверяет совпадение уставок с точночтью eps, если их возможно 
-     * преобразовать в числа с плавающей точкой, либо сравнивает как строки, 
-     * если преобразование невозможно.
-     * 
-     * @param setpointOne Строка, содержащаяя первую сравниваемую уставку
-     * @param setpointTwo Строка, содержащаяя вторую сравниваемую уставку
-     * @return Boolean
+     * Tries to compare given values as double with fixed epsilon. If it's
+     * possible, returns one of Compared.AS_DOUBLE... constants, else compares
+     * values as strings.
+     *  
+     * @param setpointOne First value to compare
+     * @param setpointTwo Second value to compare
+     * @return Comparison result type constant
      */
-    protected byte _compare(String setpointOne, String setpointTwo)
+    protected Enum _compare(String setpointOne, String setpointTwo)
     {
-        try //Пытаемся сравенить уставки как Double с точночтью eps:
+        try // Try to compare values as double with epsilon precision:
         {
-            //Если первая уставка больше (второй + eps):
+            // If first value is more than (second one + eps):
             if (Double.parseDouble(setpointOne.replace(',', '.')) - Double.parseDouble(setpointTwo.replace(',', '.')) > this.eps)
-                return COMPARED_AS_DOUBLE_MORE; 
+                return Compared.AS_DOUBLE_MORE; 
             
-            //Если (первая - eps) уставка меньше второй
+            // If (first value - eps) less than second one:
             else if (Double.parseDouble(setpointOne.replace(',', '.')) - Double.parseDouble(setpointTwo.replace(',', '.')) < -this.eps)
-                return COMPARED_AS_DOUBLE_LESS; 
+                return Compared.AS_DOUBLE_LESS; 
             else 
-                return COMPARED_AS_DOUBLE_EQUALS;
+                return Compared.AS_DOUBLE_EQUALS;
             
-        } catch (Exception e){ //Если сравнить как Double не удалось, сравниваем как строки:
+        } catch (Exception exception){ // If it's impossible to compare values as double, compare them as strings:
             
-            if (!setpointOne.equals(setpointTwo)) return COMPARED_AS_STRING_NOT_EQUALS; 
-            else return COMPARED_AS_STRING_EQUALS;
-        }//catch
-    }//compareSetpoints
-}//Logic
+            if (!setpointOne.equals(setpointTwo)) return Compared.AS_STRING_NOT_EQUALS; 
+            else return Compared.AS_STRING_EQUALS;
+        }// catch
+    }// compareSetpoints
+}// Logic

@@ -5,9 +5,10 @@ import ru.sakhalinenergy.alarmtripsettings.models.entity.TagSetting;
 
 
 /**
+ * Implements abstract parent for classes with tag settings selection logic.
  *
- * @author Denis.Udovenko
- * @version 1.0.1
+ * @author Denis Udovenko
+ * @version 1.0.2
  */
 public abstract class SettingsSelector extends Comparator
 {
@@ -16,7 +17,7 @@ public abstract class SettingsSelector extends Comparator
     protected final Float CONFORMITY_DELTA = 100.0F / 2.0F;
     private final Loop loop;
     
-    //Calculated comnformity for each type or geroup of settings:
+    // Calculated comnformity for each type or group of settings:
     private float intoolsAlarmLLConformity, intoolsAlarmLConformity, 
         intoolsAlarmHConformity, intoolsAlarmHHConformity,
         
@@ -26,7 +27,8 @@ public abstract class SettingsSelector extends Comparator
         systemsAlarmLLConformity, systemsAlarmLConformity,
         systemsAlarmHConformity, systemsAlarmHHConformity;
     
-    //Chosen settings from loop tags set. Each setting is nullable, null means that particular setting wasn't chosen:
+    // Chosen settings from loop tags set. Each setting is nullable, null means
+    // that particular setting wasn't chosen:
     protected TagSetting chosenIntoolsAlarmLL, chosenIntoolsAlarmL,
         chosenIntoolsAlarmH, chosenIntoolsAlarmHH,
     
@@ -45,414 +47,464 @@ public abstract class SettingsSelector extends Comparator
     protected SettingsSelector(Loop loop)
     {
         this.loop = loop;
-    }//SettingsSelectionLogic
+    }// SettingsSelectionLogic
     
     
     /**
-     * Метод рассчитывает для каждого параметра из группы выбранных нижних 
-     * трипов прибора процент совпадения с остальными значениями в группе.
+     * Calculates conformity percentage against other settings in group for each
+     * setting from selected LL alarms.
      */
     protected void _calculateAlarmsLLConformity()
     {
-        byte comparingResult;
+        Enum comparingResult;
         
         if (chosenIntoolsAlarmLL != null && chosenDocumentsAlarmLL != null)
         {    
-            //Проверяем на соответвие нижний трип из SPI и нижний трип из документов: 
+            // Check alarms LL from documents and SPI for matching: 
             comparingResult = _compare(chosenIntoolsAlarmLL.getValue(), chosenDocumentsAlarmLL.getValue());
             
-            if (comparingResult == COMPARED_AS_DOUBLE_EQUALS || comparingResult == COMPARED_AS_STRING_EQUALS)
+            if (comparingResult == Compared.AS_DOUBLE_EQUALS || comparingResult == Compared.AS_STRING_EQUALS)
             {
                 intoolsAlarmLLConformity += CONFORMITY_DELTA;
                 documentsAlarmLLConformity += CONFORMITY_DELTA;
-            }//if
-        }//if
+            }// if
+        }// if
         
         if (chosenIntoolsAlarmLL != null && chosenSystemsAlarmLL != null)
         {
-            //Проверяем на соответвие нижний трип из SPI и нижний трип из систем:       
+            // Check alarms LL from SPI and systems for matching:        
             comparingResult = _compare(chosenIntoolsAlarmLL.getValue(), chosenSystemsAlarmLL.getValue());
             
-            if (comparingResult == COMPARED_AS_DOUBLE_EQUALS || comparingResult == COMPARED_AS_STRING_EQUALS)
+            if (comparingResult == Compared.AS_DOUBLE_EQUALS || comparingResult == Compared.AS_STRING_EQUALS)
             {
                 intoolsAlarmLLConformity += CONFORMITY_DELTA;
                 systemsAlarmLLConformity += CONFORMITY_DELTA;
-            }//if
-        }//if
+            }// if
+        }// if
         
         if (chosenDocumentsAlarmLL != null && chosenSystemsAlarmLL != null)
         { 
-            //Проверяем на соответвие нижний трип из документов и нижний трип из систем:       
+            // Check alarms LL from documents and systems for matching: 
             comparingResult = _compare(chosenDocumentsAlarmLL.getValue(), chosenSystemsAlarmLL.getValue());
             
-            if (comparingResult == COMPARED_AS_DOUBLE_EQUALS || comparingResult == COMPARED_AS_STRING_EQUALS)
+            if (comparingResult == Compared.AS_DOUBLE_EQUALS || comparingResult == Compared.AS_STRING_EQUALS)
             {
                 documentsAlarmLLConformity += CONFORMITY_DELTA;
                 systemsAlarmLLConformity += CONFORMITY_DELTA;
-            }//if
-        }//if
-    }//_calculateAlarmsLLConformity
+            }// if
+        }// if
+    }// _calculateAlarmsLLConformity
     
     
     /**
-     * Метод рассчитывает для каждого параметра из группы выбранных нижних 
-     * алармов прибора процент совпадения с остальными значениями в группе.
+     * Calculates conformity percentage against other settings in group for each
+     * setting from selected L alarms.
      */
     protected void _calculateAlarmsLConformity()
     {
-        byte comparingResult;
+        Enum comparingResult;
         
         if (chosenIntoolsAlarmL != null && chosenDocumentsAlarmL != null)
         {    
-            //Проверяем на соответвие нижний аларм из SPI и нижний аларм из документов: 
+            // Check alarms L from documents and SPI for matching: 
             comparingResult = _compare(chosenIntoolsAlarmL.getValue(), chosenDocumentsAlarmL.getValue());
             
-            if (comparingResult == COMPARED_AS_DOUBLE_EQUALS || comparingResult == COMPARED_AS_STRING_EQUALS)
+            if (comparingResult == Compared.AS_DOUBLE_EQUALS || comparingResult == Compared.AS_STRING_EQUALS)
             {
                 intoolsAlarmLConformity += CONFORMITY_DELTA;
                 documentsAlarmLConformity += CONFORMITY_DELTA;
-            }//if
-        }//if
+            }// if
+        }// if
         
         if (chosenIntoolsAlarmL != null && chosenSystemsAlarmL != null)
         {
-            //Проверяем на соответвие нижний аларм из SPI и нижний аларм из систем:       
+            // Check alarms L from SPI and systems for matching: 
             comparingResult = _compare(chosenIntoolsAlarmL.getValue(), chosenSystemsAlarmL.getValue());
             
-            if (comparingResult == COMPARED_AS_DOUBLE_EQUALS || comparingResult == COMPARED_AS_STRING_EQUALS)
+            if (comparingResult == Compared.AS_DOUBLE_EQUALS || comparingResult == Compared.AS_STRING_EQUALS)
             {
                 intoolsAlarmLConformity += CONFORMITY_DELTA;
                 systemsAlarmLConformity += CONFORMITY_DELTA;
-            }//if
-        }//if
+            }// if
+        }// if
         
         if (chosenDocumentsAlarmL != null && chosenSystemsAlarmL != null)
         { 
-            //Проверяем на соответвие нижний аларм из документов и нижний аларм из систем:       
+            // Check alarms L from documents and systems for matching: 
             comparingResult = _compare(chosenDocumentsAlarmL.getValue(), chosenSystemsAlarmL.getValue());
             
-            if (comparingResult == COMPARED_AS_DOUBLE_EQUALS || comparingResult == COMPARED_AS_STRING_EQUALS)
+            if (comparingResult == Compared.AS_DOUBLE_EQUALS || comparingResult == Compared.AS_STRING_EQUALS)
             {
                 documentsAlarmLConformity += CONFORMITY_DELTA;
                 systemsAlarmLConformity += CONFORMITY_DELTA;
-            }//if
-        }//if
-    }//_calculateAlarmsLConformity
+            }// if
+        }// if
+    }// _calculateAlarmsLConformity
     
     
     /**
-     * Метод рассчитывает для каждого параметра из группы выбранных верхних 
-     * алармов прибора процент совпадения с остальными значениями в группе.
+     * Calculates conformity percentage against other settings in group for each
+     * setting from selected H alarms.
      */
     protected void _calculateAlarmsHConformity()
     {
-        byte comparingResult;
+        Enum comparingResult;
         
         if (chosenIntoolsAlarmH != null && chosenDocumentsAlarmH != null)
         {    
-            //Проверяем на соответвие верхний аларм из SPI и верхний аларм из документов: 
+            // Check alarms H from SPI and documents for matching: 
             comparingResult = _compare(chosenIntoolsAlarmH.getValue(), chosenDocumentsAlarmH.getValue());
             
-            if (comparingResult == COMPARED_AS_DOUBLE_EQUALS || comparingResult == COMPARED_AS_STRING_EQUALS)
+            if (comparingResult == Compared.AS_DOUBLE_EQUALS || comparingResult == Compared.AS_STRING_EQUALS)
             {
                 intoolsAlarmHConformity += CONFORMITY_DELTA;
                 documentsAlarmHConformity += CONFORMITY_DELTA;
-            }//if
-        }//if
+            }// if
+        }// if
         
         if (chosenIntoolsAlarmH != null && chosenSystemsAlarmH != null)
         {
-            //Проверяем на соответвие верхний аларм из SPI и верхний аларм из систем:       
+            // Check alarms H from SPI and systems for matching: 
             comparingResult = _compare(chosenIntoolsAlarmH.getValue(), chosenSystemsAlarmH.getValue());
             
-            if (comparingResult == COMPARED_AS_DOUBLE_EQUALS || comparingResult == COMPARED_AS_STRING_EQUALS)
+            if (comparingResult == Compared.AS_DOUBLE_EQUALS || comparingResult == Compared.AS_STRING_EQUALS)
             {
                 intoolsAlarmHConformity += CONFORMITY_DELTA;
                 systemsAlarmHConformity += CONFORMITY_DELTA;
-            }//if
-        }//if
+            }// if
+        }// if
         
         if (chosenDocumentsAlarmH != null && chosenSystemsAlarmH != null)
         { 
-            //Проверяем на соответвие верхний аларм из документов и верхний аларм из систем:       
+            // Check alarms H from documents and systems for matching: 
             comparingResult = _compare(chosenDocumentsAlarmH.getValue(), chosenSystemsAlarmH.getValue());
             
-            if (comparingResult == COMPARED_AS_DOUBLE_EQUALS || comparingResult == COMPARED_AS_STRING_EQUALS)
+            if (comparingResult == Compared.AS_DOUBLE_EQUALS || comparingResult == Compared.AS_STRING_EQUALS)
             {
                 documentsAlarmHConformity += CONFORMITY_DELTA;
                 systemsAlarmHConformity += CONFORMITY_DELTA;
-            }//if
-        }//if
-    }//_calculateAlarmsHConformity
+            }// if
+        }// if
+    }// _calculateAlarmsHConformity
     
     
     /**
-     * Метод рассчитывает для каждого параметра из группы выбранных верхних 
-     * трипов прибора процент совпадения с остальными значениями в группе.
+     * Calculates conformity percentage against other settings in group for each
+     * setting from selected HH alarms.
      */
     protected void _calculateAlarmsHHConformity()
     {
-        byte comparingResult;
+        Enum comparingResult;
         
         if (chosenIntoolsAlarmHH != null && chosenDocumentsAlarmHH != null)
         {    
-            //Проверяем на соответвие верхний трип из SPI и верхний трип из документов: 
+            // Check alarms HH from SPI and documents for matching: 
             comparingResult = _compare(chosenIntoolsAlarmHH.getValue(), chosenDocumentsAlarmHH.getValue());
             
-            if (comparingResult == COMPARED_AS_DOUBLE_EQUALS || comparingResult == COMPARED_AS_STRING_EQUALS)
+            if (comparingResult == Compared.AS_DOUBLE_EQUALS || comparingResult == Compared.AS_STRING_EQUALS)
             {
                 intoolsAlarmHHConformity += CONFORMITY_DELTA;
                 documentsAlarmHHConformity += CONFORMITY_DELTA;
-            }//if
-        }//if
+            }// if
+        }// if
         
         if (chosenIntoolsAlarmHH != null && chosenSystemsAlarmHH != null)
         {
-            //Проверяем на соответвие верхний трип из SPI и верхний трип из систем:       
+            // Check alarms HH from SPI and systems for matching: 
             comparingResult = _compare(chosenIntoolsAlarmHH.getValue(), chosenSystemsAlarmHH.getValue());
             
-            if (comparingResult == COMPARED_AS_DOUBLE_EQUALS || comparingResult == COMPARED_AS_STRING_EQUALS)
+            if (comparingResult == Compared.AS_DOUBLE_EQUALS || comparingResult == Compared.AS_STRING_EQUALS)
             {
                 intoolsAlarmHHConformity += CONFORMITY_DELTA;
                 systemsAlarmHHConformity += CONFORMITY_DELTA;
-            }//if
-        }//if
+            }// if
+        }// if
         
         if (chosenDocumentsAlarmHH != null && chosenSystemsAlarmHH != null)
         { 
-            //Проверяем на соответвие верхний трип из документов и верхний трип из систем:       
+            // Check alarms HH from documents and systems for matching: 
             comparingResult = _compare(chosenDocumentsAlarmHH.getValue(), chosenSystemsAlarmHH.getValue());
             
-            if (comparingResult == COMPARED_AS_DOUBLE_EQUALS || comparingResult == COMPARED_AS_STRING_EQUALS)
+            if (comparingResult == Compared.AS_DOUBLE_EQUALS || comparingResult == Compared.AS_STRING_EQUALS)
             {
                 documentsAlarmHHConformity += CONFORMITY_DELTA;
                 systemsAlarmHHConformity += CONFORMITY_DELTA;
-            }//if
-        }//if
-    }//_calculateAlarmsHHConformity
+            }// if
+        }// if
+    }// _calculateAlarmsHHConformity
 
     
     /**
-     * @return the loop
+     * Returns loop entity.
+     * 
+     * @return Loop entity
      */
     public Loop getEntity() 
     {
         return loop;
-    }
+    }// getEntity
 
     
     /**
-     * @return the intoolsAlarmLLConformity
+     * Returns calculated SPI alarm LL conformity value.
+     * 
+     * @return Calculated SPI alarm LL conformity
      */
     public float getIntoolsAlarmLLConformity() 
     {
         return intoolsAlarmLLConformity;
-    }
+    }// getIntoolsAlarmLLConformity
 
     
     /**
-     * @return the intoolsAlarmLConformity
+     * Returns calculated SPI alarm L conformity value.
+     * 
+     * @return Calculated SPI alarm L conformity
      */
     public float getIntoolsAlarmLConformity() 
     {
         return intoolsAlarmLConformity;
-    }
+    }// getIntoolsAlarmLConformity
 
     
     /**
-     * @return the intoolsAlarmHConformity
+     * Returns calculated SPI alarm H conformity value.
+     * 
+     * @return Calculated SPI alarm H conformity
      */
     public float getIntoolsAlarmHConformity() 
     {
         return intoolsAlarmHConformity;
-    }
+    }// getIntoolsAlarmHConformity
 
     
     /**
-     * @return the intoolsAlarmHHConformity
+     * Returns calculated SPI alarm HH conformity value.
+     * 
+     * @return Calculated SPI alarm HH conformity
      */
     public float getIntoolsAlarmHHConformity() 
     {
         return intoolsAlarmHHConformity;
-    }
+    }// getIntoolsAlarmHHConformity
 
     
     /**
-     * @return the documentsAlarmLLConformity
+     * Returns calculated documents alarm LL conformity value.
+     * 
+     * @return Calculated documents alarm LL conformity
      */
     public float getDocumentsAlarmLLConformity() 
     {
         return documentsAlarmLLConformity;
-    }
+    }// getDocumentsAlarmLLConformity
 
     
     /**
-     * @return the documentsAlarmLConformity
+     * Returns calculated documents alarm L conformity value.
+     * 
+     * @return Calculated documents alarm L conformity
      */
     public float getDocumentsAlarmLConformity() 
     {
         return documentsAlarmLConformity;
-    }
+    }// getDocumentsAlarmLConformity
 
     
     /**
-     * @return the documentsAlarmHConformity
+     * Returns calculated documents alarm H conformity value.
+     * 
+     * @return Calculated documents alarm H conformity
      */
     public float getDocumentsAlarmHConformity() 
     {
         return documentsAlarmHConformity;
-    }
+    }// getDocumentsAlarmHConformity
 
     
     /**
-     * @return the documentsAlarmHHConformity
+     * Returns calculated documents alarm HH conformity value.
+     * 
+     * @return Calculated documents alarm HH conformity
      */
     public float getDocumentsAlarmHHConformity() 
     {
         return documentsAlarmHHConformity;
-    }
+    }// getDocumentsAlarmHHConformity
 
     
     /**
-     * @return the systemsAlarmLLConformity
+     * Returns calculated systems alarm LL conformity value.
+     * 
+     * @return Calculated systems alarm LL conformity
      */
     public float getSystemsAlarmLLConformity() 
     {
         return systemsAlarmLLConformity;
-    }
+    }// getSystemsAlarmLLConformity
 
     
     /**
-     * @return the systemsAlarmLConformity
+     * Returns calculated systems alarm L conformity value.
+     * 
+     * @return Calculated systems alarm L conformity
      */
     public float getSystemsAlarmLConformity() 
     {
         return systemsAlarmLConformity;
-    }
+    }// getSystemsAlarmLConformity
 
     
     /**
-     * @return the systemsAlarmHConformity
+     * Returns calculated systems alarm H conformity value.
+     * 
+     * @return Calculated systems alarm H conformity
      */
     public float getSystemsAlarmHConformity() 
     {
         return systemsAlarmHConformity;
-    }
+    }// getSystemsAlarmHConformity
 
     
     /**
-     * @return the systemsAlarmHHConformity
+     * Returns calculated systems alarm HH conformity value.
+     * 
+     * @return Calculated systems alarm HH conformity
      */
     public float getSystemsAlarmHHConformity() 
     {
         return systemsAlarmHHConformity;
-    }
+    }// getSystemsAlarmHHConformity
 
     
     /**
-     * @return the chosenIntoolsAlarmLL
+     * Returns chosen SPI alarm LL setting.
+     * 
+     * @return Chosen SPI alarm LL setting
      */
     public TagSetting getChosenIntoolsAlarmLL() 
     {
         return chosenIntoolsAlarmLL;
-    }
+    }// getChosenIntoolsAlarmLL
 
     
     /**
-     * @return the chosenIntoolsAlarmL
+     * Returns chosen SPI alarm L setting.
+     * 
+     * @return Chosen SPI alarm L setting
      */
     public TagSetting getChosenIntoolsAlarmL() 
     {
         return chosenIntoolsAlarmL;
-    }
+    }// getChosenIntoolsAlarmL
 
     
     /**
-     * @return the chosenIntoolsAlarmH
+     * Returns chosen SPI alarm H setting.
+     * 
+     * @return Chosen SPI alarm H setting
      */
     public TagSetting getChosenIntoolsAlarmH() 
     {
         return chosenIntoolsAlarmH;
-    }
+    }// getChosenIntoolsAlarmH
 
     
     /**
-     * @return the chosenIntoolsAlarmHH
+     * Returns chosen SPI alarm HH setting.
+     * 
+     * @return Chosen SPI alarm HH setting
      */
     public TagSetting getChosenIntoolsAlarmHH() 
     {
         return chosenIntoolsAlarmHH;
-    }
+    }// getChosenIntoolsAlarmHH
 
     
     /**
-     * @return the chosenDocumentsAlarmLL
+     * Returns chosen documents alarm LL setting.
+     * 
+     * @return Chosen documents alarm LL setting
      */
     public TagSetting getChosenDocumentsAlarmLL() 
     {
         return chosenDocumentsAlarmLL;
-    }
+    }// getChosenDocumentsAlarmLL
 
     
     /**
-     * @return the chosenDocumentsAlarmL
+     * Returns chosen documents alarm L setting.
+     * 
+     * @return Chosen documents alarm L setting
      */
     public TagSetting getChosenDocumentsAlarmL() 
     {
         return chosenDocumentsAlarmL;
-    }
+    }// getChosenDocumentsAlarmL
 
     
     /**
-     * @return the chosenDocumentsAlarmH
+     * Returns chosen documents alarm H setting.
+     * 
+     * @return Chosen documents alarm H setting
      */
     public TagSetting getChosenDocumentsAlarmH() 
     {
         return chosenDocumentsAlarmH;
-    }
+    }// getChosenDocumentsAlarmH
 
     
     /**
-     * @return the chosenDocumentsAlarmHH
+     * Returns chosen documents alarm HH setting.
+     * 
+     * @return Chosen documents alarm HH setting
      */
     public TagSetting getChosenDocumentsAlarmHH() 
     {
         return chosenDocumentsAlarmHH;
-    }
+    }// getChosenDocumentsAlarmHH
  
     
     /**
-     * @return the chosenSystemsAlarmLL
+     * Returns chosen systems alarm LL setting.
+     * 
+     * @return Chosen systems alarm LL setting
      */
     public TagSetting getChosenSystemsAlarmLL() 
     {
         return chosenSystemsAlarmLL;
-    }
+    }// getChosenSystemsAlarmLL
 
     
     /**
-     * @return the chosenSystemsAlarmL
+     * Returns chosen systems alarm L setting.
+     * 
+     * @return Chosen systems alarm L setting
      */
     public TagSetting getChosenSystemsAlarmL() 
     {
         return chosenSystemsAlarmL;
-    }
+    }// getChosenSystemsAlarmL
 
     
     /**
-     * @return the chosenSystemsAlarmH
+     * Returns chosen systems alarm H setting.
+     * 
+     * @return Chosen systems alarm H setting
      */
     public TagSetting getChosenSystemsAlarmH() 
     {
         return chosenSystemsAlarmH;
-    }
+    }// getChosenSystemsAlarmH
 
     
     /**
-     * @return the chosenSystemsAlarmHH
+     * Returns chosen systems alarm HH setting.
+     * 
+     * @return Chosen systems alarm HH setting
      */
     public TagSetting getChosenSystemsAlarmHH() 
     {
         return chosenSystemsAlarmHH;
-    }
-}//SettingsSelectionLogicNew
+    }// getChosenSystemsAlarmHH
+}// SettingsSelector
