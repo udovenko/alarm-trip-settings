@@ -2,8 +2,6 @@ package ru.sakhalinenergy.alarmtripsettings.models.logic.summary;
 
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
-import ru.sakhalinenergy.alarmtripsettings.models.Model;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.CollectionEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.LoopsTableObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelector;
 
@@ -13,17 +11,11 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelecto
  * compliance data for compliance charts.
  * 
  * @author Denis Udovenko 
- * @version 1.0.6
+ * @version 1.0.7
  */
-public class OveralCompliance extends Model
+public class OveralCompliance extends Compliance
 {
-    
-    public static enum Event
-    {
-        SUMMARY_CALCULATED
-    }// Event
-    
-    
+   
     private final Double FULL_CONFORMITY_MIN = 99.0;
     private final Double SEMI_CONFORMITY_MIN = 20.0;
    
@@ -47,24 +39,38 @@ public class OveralCompliance extends Model
     private int alarmsHighHighWithFullConformity = 0;
     private int alarmsHighHighWithNullConformity = 0;
     
-    private final LoopsTableObservable loopsTable;
-    
-    
-    
+        
     /**
-     * Public constructor.
+     * Public constructor. Subscribes model on wrapped loops table events.
      * 
-     * @param loopsTable LoopsTable instance to be wrapped
+     * @param loopsTable Loops table which overall compliance summary will be calculated
      */
     public OveralCompliance(LoopsTableObservable loopsTable)
     {
-        this.loopsTable = loopsTable;
-        this.loopsTable.on(CollectionEvent.LOOPS_READ, new _LoopsTableUpdateEventHandler());
+        super(loopsTable);
     }// OveralCompliance
     
     
     /**
+     * Abstract factory method which returns instance of inner class - handler 
+     * for for wrapped loops table data read event.
      * 
+     * @return instance of inner class - handler for for wrapped loops table data read event
+     */
+    @Override
+    protected CustomEventListener _getLoopsTableUpdateEventHandler()
+    {
+        return new _LoopsTableUpdateEventHandler();
+    }// _getLoopsTableUpdateEventHandler
+    
+    
+    /**
+     * Inner class - handler for for wrapped loops table data read event. 
+     * Calculates overall compliance summary for each type of alarm and total
+     * overall compliance summary.
+     * 
+     * @author Denis Udovenko
+     * @version 1.0.1
      */
     private class _LoopsTableUpdateEventHandler implements CustomEventListener
     {
@@ -93,47 +99,47 @@ public class OveralCompliance extends Model
         
             Float tempConformity;
         
-            //Обходими всю коллекцию лупов:
+            // Iterate loops collection:
             for (SettingsSelector tempLoop : loopsTable.getWrappedLoops())
             {
-                //Получаем соотношение наижних трипов прибора:
+                // Get LL alams status:
                 if (_hasAlarmLowLow(tempLoop))
                 {
                     tempConformity = _getAlarmsLowLowMaxConformity(tempLoop);
                     if (tempConformity > FULL_CONFORMITY_MIN) alarmsLowLowWithFullConformity++;
                     else if (tempConformity > SEMI_CONFORMITY_MIN) alarmsLowLowWithSemiConformity++;
                     else alarmsLowLowWithNullConformity++;
-                }//if
+                }// if
 
-                //Получаем соотношение наижних трипов прибора:
+                // Get L alams status:
                 if (_hasAlarmLow(tempLoop))
                 {
                     tempConformity = _getAlarmsLowMaxConformity(tempLoop);
                     if (tempConformity > FULL_CONFORMITY_MIN) alarmsLowWithFullConformity++;
                     else if (tempConformity > SEMI_CONFORMITY_MIN) alarmsLowWithSemiConformity++;
                     else alarmsLowWithNullConformity++;
-                }//if
+                }// if
 
-                //Получаем соотношение верхних алармов прибора:
+                // Get H alams status:
                 if (_hasAlarmHigh(tempLoop))
                 {
                     tempConformity = _getAlarmsHighMaxConformity(tempLoop);
                     if (tempConformity > FULL_CONFORMITY_MIN) alarmsHighWithFullConformity++;
                     else if (tempConformity > SEMI_CONFORMITY_MIN) alarmsHighWithSemiConformity++;
                     else alarmsHighWithNullConformity++;
-                }//if
+                }// if
 
-                //Получаем соотношение верхних трипов прибора:
+                // Get HH alams status:
                 if (_hasAlarmHighHigh(tempLoop))
                 {
                     tempConformity = _getAlarmsHighHighMaxConformity(tempLoop);
                     if (tempConformity > FULL_CONFORMITY_MIN) alarmsHighHighWithFullConformity++;
                     else if (tempConformity > SEMI_CONFORMITY_MIN) alarmsHighHighWithSemiConformity++;
                     else alarmsHighHighWithNullConformity++;
-                }//if
-            }//for
+                }// if
+            }// for
 
-            //Рассчитываем суммарные показатели:
+            // Calculate total indexes:
             totalAlarmsWithSemiConformity = alarmsLowLowWithSemiConformity + alarmsLowWithSemiConformity 
                 + alarmsHighWithSemiConformity + alarmsHighHighWithSemiConformity;
             totalAlarmsWithFullConformity = alarmsLowLowWithFullConformity + alarmsLowWithFullConformity 
@@ -146,74 +152,13 @@ public class OveralCompliance extends Model
             events.trigger(Event.SUMMARY_CALCULATED, summaryCalculatedEvent);
         }// customEventOccurred
     }// _LoopsTableUpdateEventHandler
-
+   
     
     /**
-     * Метод возвращает факт наличия у устройства рассчитанного нижнего трипа из 
-     * любого источника данных.
+     * Returns maximum conformity for calculated LL alarms of the loop.
      * 
-     * @param device Экземпляр устройства
-     * @return  Boolean
-     */
-    private static Boolean _hasAlarmLowLow(SettingsSelector loop)
-    {
-        return (loop.getChosenIntoolsAlarmLL()!= null 
-            || loop.getChosenDocumentsAlarmLL() != null 
-            || loop.getChosenSystemsAlarmLL() != null);
-    }// _hasAlarmLowLow
-    
-    
-    /**
-     * Метод возвращает факт наличия у устройства рассчитанного нижнего аларма 
-     * из любого источника данных.
-     * 
-     * @param   device  Экземпляр устройства
-     * @return  Boolean
-     */
-    private static Boolean _hasAlarmHigh(SettingsSelector loop)
-    {
-        return (loop.getChosenIntoolsAlarmH() != null 
-            || loop.getChosenDocumentsAlarmH() != null 
-            || loop.getChosenSystemsAlarmH() != null);
-    }// _hasAlarmHigh
-    
-    
-    /**
-     * Метод возвращает факт наличия у устройства рассчитанного верхнего аларма
-     * из любого источника данных.
-     * 
-     * @param   device  Экземпляр устройства
-     * @return  Boolean
-     */
-    private static Boolean _hasAlarmHighHigh(SettingsSelector loop)
-    {
-        return (loop.getChosenIntoolsAlarmHH() != null 
-            || loop.getChosenDocumentsAlarmHH() != null 
-            || loop.getChosenSystemsAlarmHH() != null);
-    }//_hasAlarmHighHigh
-    
-    
-    /**
-     * Метод возвращает факт наличия у устройства рассчитанного верхнего трипа 
-     * из любого источника данных.
-     * 
-     * @param   device  Экземпляр устройства
-     * @return  Boolean
-     */
-    private static Boolean _hasAlarmLow(SettingsSelector loop)
-    {
-        return (loop.getChosenIntoolsAlarmL() != null 
-            || loop.getChosenDocumentsAlarmL() != null 
-            || loop.getChosenSystemsAlarmL() != null);
-    }//_hasAlarmLowLow
-    
-    
-    /**
-     * Метод получает максимальную величину соответствия среди рассчитанных
-     * нижних трипов устройства.
-     * 
-     * @param   device  Экземпляр устройства
-     * @return  
+     * @param loop Loop instance wrapped in settings selection logic
+     * @return Maximum conformity for calculated LL alarms of the loop 
      */
     private static Float _getAlarmsLowLowMaxConformity(SettingsSelector loop)
     {
@@ -229,15 +174,14 @@ public class OveralCompliance extends Model
             tempConformity = loop.getSystemsAlarmLLConformity();
                     
         return tempConformity;
-    }//_getAlarmsLowLowMaxConformity
+    }// _getAlarmsLowLowMaxConformity
     
     
     /**
-     * Метод получает максимальную величину соответствия среди рассчитанных
-     * нижних алармов устройства.
+     * Returns maximum conformity for calculated L alarms of the loop.
      * 
-     * @param   device  Экземпляр устройства
-     * @return  Double
+     * @param loop Loop instance wrapped in settings selection logic
+     * @return Maximum conformity for calculated L alarms of the loop 
      */
     private static Float _getAlarmsLowMaxConformity(SettingsSelector loop)
     {
@@ -253,15 +197,14 @@ public class OveralCompliance extends Model
                 tempConformity = loop.getSystemsAlarmLConformity();
                 
         return tempConformity;
-    }//_getAlarmsLowMaxConformity
+    }// _getAlarmsLowMaxConformity
     
     
     /**
-     * Метод получает максимальную величину соответствия среди рассчитанных
-     * верхних алармов устройства.
+     * Returns maximum conformity for calculated H alarms of the loop.
      * 
-     * @param   device  Экземпляр устройства
-     * @return  Double
+     * @param loop Loop instance wrapped in settings selection logic
+     * @return Maximum conformity for calculated H alarms of the loop 
      */
     private static Float _getAlarmsHighMaxConformity(SettingsSelector loop)
     {
@@ -277,12 +220,14 @@ public class OveralCompliance extends Model
             tempConformity = loop.getSystemsAlarmHConformity();
         
         return tempConformity;
-    }//_getAlarmsHighMaxConformity
+    }// _getAlarmsHighMaxConformity
     
     
     /**
+     * Returns maximum conformity for calculated HH alarms of the loop.
      * 
-     * 
+     * @param loop Loop instance wrapped in settings selection logic
+     * @return Maximum conformity for calculated HH alarms of the loop 
      */
     private static Float _getAlarmsHighHighMaxConformity(SettingsSelector loop)
     {
@@ -298,11 +243,13 @@ public class OveralCompliance extends Model
             tempConformity = loop.getSystemsAlarmHHConformity();
         
         return tempConformity;
-    }//_getAlarmsHighHighMaxConformity
+    }// _getAlarmsHighHighMaxConformity
     
     
     /**
+     * Returns count of semi-confirmed LL alarms.
      * 
+     * @return Count of semi-confirmed LL alarms
      */
     public int getAlarmsLowLowWithSemiConformity()
     {
@@ -311,7 +258,9 @@ public class OveralCompliance extends Model
             
             
     /**
+     * Returns count of fully confirmed LL alarms.
      * 
+     * @return Count of fully confirmed LL alarms
      */
     public int getAlarmsLowLowWithFullConformity()
     {
@@ -320,7 +269,9 @@ public class OveralCompliance extends Model
     
     
     /**
+     * Returns count of non-confirmed LL alarms.
      * 
+     * @return Count of non-confirmed LL alarms
      */
     public int getAlarmsLowLowWithNullConformity()
     {
@@ -329,7 +280,9 @@ public class OveralCompliance extends Model
     
     
     /**
+     * Returns count of semi-confirmed L alarms.
      * 
+     * @return Count of semi-confirmed L alarms
      */
     public int getAlarmsLowWithSemiConformity()
     {
@@ -338,7 +291,9 @@ public class OveralCompliance extends Model
             
             
     /**
+     * Returns count of fully confirmed L alarms.
      * 
+     * @return Count of fully confirmed L alarms
      */
     public int getAlarmsLowWithFullConformity()
     {
@@ -347,8 +302,9 @@ public class OveralCompliance extends Model
     
     
     /**
+     * Returns count of non-confirmed L alarms.
      * 
-     * 
+     * @return Count of non-confirmed L alarms
      */
     public int getAlarmsLowWithNullConformity()
     {
@@ -357,8 +313,9 @@ public class OveralCompliance extends Model
     
     
     /**
+     * Returns count of semi-confirmed H alarms.
      * 
-     * 
+     * @return Count of semi-confirmed H alarms
      */
     public int getAlarmsHighWithSemiConformity()
     {
@@ -367,7 +324,9 @@ public class OveralCompliance extends Model
             
       
     /**
+     * Returns count of fully confirmed H alarms.
      * 
+     * @return Count of fully confirmed H alarms
      */
     public int getAlarmsHighWithFullConformity()
     {
@@ -376,7 +335,9 @@ public class OveralCompliance extends Model
     
     
     /**
+     * Returns count of non-confirmed H alarms.
      * 
+     * @return Count of non-confirmed H alarms
      */
     public int getAlarmsHighWithNullConformity()
     {
@@ -385,7 +346,9 @@ public class OveralCompliance extends Model
     
     
     /**
+     * Returns count of semi-confirmed HH alarms.
      * 
+     * @return Count of semi-confirmed HH alarms
      */
     public int getAlarmsHighHighWithSemiConformity()
     {
@@ -394,8 +357,9 @@ public class OveralCompliance extends Model
             
            
     /**
+     * Returns count of fully confirmed HH alarms.
      * 
-     * 
+     * @return Count of fully confirmed HH alarms
      */
     public int getAlarmsHighHighWithFullConformity()
     {
@@ -404,8 +368,9 @@ public class OveralCompliance extends Model
     
     
     /**
+     * Returns count of non-confirmed HH alarms.
      * 
-     * 
+     * @return Count of non-confirmed HH alarms
      */
     public int getAlarmsHighHighWithNullConformity()
     {
@@ -414,7 +379,9 @@ public class OveralCompliance extends Model
     
     
     /**
+     * Returns total count of semi-confirmed alarms.
      * 
+     * @return Total count of semi-confirmed alarms
      */
     public int getTotalAlarmsWithSemiConformity()
     {
@@ -423,7 +390,9 @@ public class OveralCompliance extends Model
     
     
     /**
+     * Returns total count of fully confirmed alarms.
      * 
+     * @return Total count of fully confirmed alarms
      */
     public int getTotalAlarmsWithFullConformity()
     {
@@ -432,11 +401,12 @@ public class OveralCompliance extends Model
     
     
     /**
+     * Returns total count of non-confirmed alarms.
      * 
-     * 
+     * @return Total count of non-confirmed alarms
      */
     public int getTotalAlarmsWithNullConformity()
     {
         return this.totalAlarmsWithNullConformity;
     }// getTotalAlarmsWithNullConformity
-}//SummaryCalculation
+}// OveralCompliance

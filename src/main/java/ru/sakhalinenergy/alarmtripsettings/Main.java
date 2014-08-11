@@ -22,14 +22,14 @@ import ru.sakhalinenergy.alarmtripsettings.controllers.MainFormController;
  * также метод - точку входа приложения.
  * 
  * @author Denis Udovenko
- * @version 1.1.1
+ * @version 1.1.3
  */
 public class Main 
 {
     //Информация о версии приложения:
-    public static final String VERSION = "2.0.9.9";
+    public static final String VERSION = "2.1.1.1";
     public static final String LAST_CHANGES_DATE = "11.08.2014";
-    public static final String LAST_CHANGES_TIME = "13:58";
+    public static final String LAST_CHANGES_TIME = "17:12";
     public static final String AUTHOR = "Denis Udovenko";
     
     // Application .jar file directory:

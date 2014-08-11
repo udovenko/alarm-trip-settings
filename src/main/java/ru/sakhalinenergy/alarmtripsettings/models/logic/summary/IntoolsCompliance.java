@@ -2,36 +2,33 @@ package ru.sakhalinenergy.alarmtripsettings.models.logic.summary;
 
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
-import ru.sakhalinenergy.alarmtripsettings.models.Model;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.CollectionEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.LoopsTableObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelector;
 
 
 /**
- * Класс рассчитывает итоги для отрисовки чаpтов соответвия уставок лупов 
- * выбранного объекта из базы данных SPI.
+ * A wrapper for LoopsTable instance. Calculates SPI data compliance summary 
+ * for compliance charts.
  * 
- * @author   Udovenko
- * @version  1.0.4
+ * @author Denis Udovenko
+ * @version 1.0.5
  */
-public class IntoolsCompliance extends Model
+public class IntoolsCompliance extends Compliance
 {
-    
-    public static enum Event
+ 
+    // Loop's chosen setting conformity status enumeration:
+    private static enum _Confirmed
     {
-        SUMMARY_CALCULATED
-    }// Event
+        FULLY,
+        NON,
+        AGAINST_DOCUMENTS,
+        AGAINST_SYSTEMS;
+    }// Confirmed
     
     
     private final static Double FULL_CONFORMITY_MIN = 99.0;
     private final static Double SEMI_CONFORMITY_MIN = 20.0;
     
-    private final static Byte FULLY_CONFIRMED = 1;
-    private final static Byte CONFIRMED_AGAINST_DOCUMENTS = 2;
-    private final static Byte CONFIRMED_AGAINST_SYSTEMS = 3;
-    private final static Byte NOT_CONFIRMED = 4;
-
     private int totalAlarmsCompliantWithDocumentsAndSystems;
     private int totalAlarmsCompliantWithDocuments;
     private int totalAlarmsCompliantWithSystems;
@@ -57,31 +54,44 @@ public class IntoolsCompliance extends Model
     private int alarmsHighHighCompliantWithSystems;
     private int alarmsHighHighNonCompliant;
     
-    private final LoopsTableObservable loopsTable;
-    
     
     /**
-     * Конструктор класса. 
+     * Public constructor. Subscribes model on wrapped loops table events.
+     * 
+     * @param loopsTable Loops table which SPI compliance summary will be calculated
      */
     public IntoolsCompliance(LoopsTableObservable loopsTable)
     {
-        this.loopsTable = loopsTable;
-        this.loopsTable.on(CollectionEvent.LOOPS_READ, new _LoopsTableUpdateEventHandler());
-    }// SummaryCalculationLogic
+        super(loopsTable);
+    }// IntoolsCompliance
     
     
     /**
-     * Метод рассчитывает итоговый анализ уставок на основании коефициентов
-     * соответвия алармов каждого устройства.
+     * Abstract factory method which returns instance of inner class - handler 
+     * for for wrapped loops table data read event.
      * 
-     * @return void 
+     * @return instance of inner class - handler for for wrapped loops table data read event
      */
-     private class _LoopsTableUpdateEventHandler implements CustomEventListener
+    @Override
+    protected CustomEventListener _getLoopsTableUpdateEventHandler()
+    {
+        return new _LoopsTableUpdateEventHandler();
+    }// _getLoopsTableUpdateEventHandler
+    
+    
+    /**
+     * Inner class - handler for wrapped loops table data read event. Calculates
+     * SPI compliance summary for each type of alarm and total summary.
+     *
+     * @author Denis Udovenko
+     * @version 1.0.1
+     */
+    private class _LoopsTableUpdateEventHandler implements CustomEventListener
     {
         @Override
         public void customEventOccurred(CustomEvent event)
         {
-            Byte tempComplianceStatus;
+            Enum tempComplianceStatus;
 
             totalAlarmsCompliantWithDocumentsAndSystems = 0;
             totalAlarmsCompliantWithDocuments = 0;
@@ -108,51 +118,51 @@ public class IntoolsCompliance extends Model
             alarmsHighHighCompliantWithSystems = 0;
             alarmsHighHighNonCompliant = 0;
 
-            //Обходими всю коллекцию лупов:
+            // Iterate loops collection:
             for (SettingsSelector tempLoop : loopsTable.getWrappedLoops())
             {
-                //Получаем соотношение наижних трипов прибора:
+                // Get LL alams status:
                 if (_hasAlarmLowLow(tempLoop))
                 {
                     tempComplianceStatus = _getLoopAlarmsLowLowComplanceType(tempLoop);
-                    if (tempComplianceStatus == FULLY_CONFIRMED) alarmsLowLowCompliantWithDocumentsAndSystems++;
-                    if (tempComplianceStatus == CONFIRMED_AGAINST_DOCUMENTS) alarmsLowLowCompliantWithDocuments++;
-                    if (tempComplianceStatus == CONFIRMED_AGAINST_SYSTEMS) alarmsLowLowCompliantWithSystems++;
-                    if (tempComplianceStatus == NOT_CONFIRMED) alarmsLowLowNonCompliant++;
-                }//if
+                    if (tempComplianceStatus == _Confirmed.FULLY) alarmsLowLowCompliantWithDocumentsAndSystems++;
+                    if (tempComplianceStatus == _Confirmed.AGAINST_DOCUMENTS) alarmsLowLowCompliantWithDocuments++;
+                    if (tempComplianceStatus == _Confirmed.AGAINST_SYSTEMS) alarmsLowLowCompliantWithSystems++;
+                    if (tempComplianceStatus == _Confirmed.NON) alarmsLowLowNonCompliant++;
+                }// if
 
-                //Получаем соотношение наижних трипов прибора:
+                // Get L alams status:
                 if (_hasAlarmLow(tempLoop))
                 {
                     tempComplianceStatus = _getLoopAlarmsLowComplanceType(tempLoop);
-                    if (tempComplianceStatus == FULLY_CONFIRMED) alarmsLowCompliantWithDocumentsAndSystems++;
-                    if (tempComplianceStatus == CONFIRMED_AGAINST_DOCUMENTS) alarmsLowCompliantWithDocuments++;
-                    if (tempComplianceStatus == CONFIRMED_AGAINST_SYSTEMS) alarmsLowCompliantWithSystems++;
-                    if (tempComplianceStatus == NOT_CONFIRMED) alarmsLowNonCompliant++;
-                }//if
+                    if (tempComplianceStatus == _Confirmed.FULLY) alarmsLowCompliantWithDocumentsAndSystems++;
+                    if (tempComplianceStatus == _Confirmed.AGAINST_DOCUMENTS) alarmsLowCompliantWithDocuments++;
+                    if (tempComplianceStatus == _Confirmed.AGAINST_SYSTEMS) alarmsLowCompliantWithSystems++;
+                    if (tempComplianceStatus == _Confirmed.NON) alarmsLowNonCompliant++;
+                }// if
 
-                //Получаем соотношение верхних алармов прибора:
+                // Get H alams status:
                 if (_hasAlarmHigh(tempLoop))
                 {
                     tempComplianceStatus = _getLoopAlarmsHighComplanceType(tempLoop);
-                    if (tempComplianceStatus == FULLY_CONFIRMED) alarmsHighCompliantWithDocumentsAndSystems++;
-                    if (tempComplianceStatus == CONFIRMED_AGAINST_DOCUMENTS) alarmsHighCompliantWithDocuments++;
-                    if (tempComplianceStatus == CONFIRMED_AGAINST_SYSTEMS) alarmsHighCompliantWithSystems++;
-                    if (tempComplianceStatus == NOT_CONFIRMED) alarmsHighNonCompliant++;
-                }//if
+                    if (tempComplianceStatus == _Confirmed.FULLY) alarmsHighCompliantWithDocumentsAndSystems++;
+                    if (tempComplianceStatus == _Confirmed.AGAINST_DOCUMENTS) alarmsHighCompliantWithDocuments++;
+                    if (tempComplianceStatus == _Confirmed.AGAINST_SYSTEMS) alarmsHighCompliantWithSystems++;
+                    if (tempComplianceStatus == _Confirmed.NON) alarmsHighNonCompliant++;
+                }// if
 
-                //Получаем соотношение верхних трипов прибора:
+                // Get HH alams status:
                 if (_hasAlarmHighHigh(tempLoop))
                 {
                     tempComplianceStatus = _getLoopAlarmsHighHighComplanceType(tempLoop);
-                    if (tempComplianceStatus == FULLY_CONFIRMED) alarmsHighHighCompliantWithDocumentsAndSystems++;
-                    if (tempComplianceStatus == CONFIRMED_AGAINST_DOCUMENTS) alarmsHighHighCompliantWithDocuments++;
-                    if (tempComplianceStatus == CONFIRMED_AGAINST_SYSTEMS) alarmsHighHighCompliantWithSystems++;
-                    if (tempComplianceStatus == NOT_CONFIRMED) alarmsHighHighNonCompliant++;
-                }//if
-            }//for
+                    if (tempComplianceStatus == _Confirmed.FULLY) alarmsHighHighCompliantWithDocumentsAndSystems++;
+                    if (tempComplianceStatus == _Confirmed.AGAINST_DOCUMENTS) alarmsHighHighCompliantWithDocuments++;
+                    if (tempComplianceStatus == _Confirmed.AGAINST_SYSTEMS) alarmsHighHighCompliantWithSystems++;
+                    if (tempComplianceStatus == _Confirmed.NON) alarmsHighHighNonCompliant++;
+                }// if
+            }// for
 
-            //Рассчитываем суммарные показатели:
+            // Calculate total indexes:
             totalAlarmsCompliantWithDocumentsAndSystems = alarmsLowLowCompliantWithDocumentsAndSystems + alarmsLowCompliantWithDocumentsAndSystems 
                 + alarmsHighCompliantWithDocumentsAndSystems + alarmsHighHighCompliantWithDocumentsAndSystems;
             totalAlarmsCompliantWithDocuments = alarmsLowLowCompliantWithDocuments + alarmsLowCompliantWithDocuments 
@@ -170,428 +180,360 @@ public class IntoolsCompliance extends Model
      
     
     /**
-     * Метод возвращает факт наличия у устройства рассчитанного нижнего трипа из 
-     * любого источника данных.
+     * Determines conformity status of chosen SPI LL alarm against LL alarms 
+     * from other data sources within given loop.
      * 
-     * @param   device  Экземпляр устройства
-     * @return  Boolean
+     * @param loop Loop instance wrapped in settings selection logic
+     * @return Chosen SPI LL alarm conformity status
      */
-    private static Boolean _hasAlarmLowLow(SettingsSelector loop)
+    private static Enum _getLoopAlarmsLowLowComplanceType(SettingsSelector loop)
     {
-        return (loop.getChosenIntoolsAlarmLL() != null 
-            || loop.getChosenDocumentsAlarmLL() != null 
-            || loop.getChosenSystemsAlarmLL() != null);
-    }// _hasAlarmLowLow
-    
-    
-    /**
-     * Метод возвращает факт наличия у устройства рассчитанного нижнего аларма 
-     * из любого источника данных.
-     * 
-     * @param   device  Экземпляр устройства
-     * @return  Boolean
-     */
-    private static Boolean _hasAlarmHigh(SettingsSelector loop)
-    {
-        return (loop.getChosenIntoolsAlarmH() != null 
-            || loop.getChosenDocumentsAlarmH() != null 
-            || loop.getChosenSystemsAlarmH() != null);
-    }// _hasAlarmHigh
-    
-    
-    /**
-     * Метод возвращает факт наличия у устройства рассчитанного верхнего аларма
-     * из любого источника данных.
-     * 
-     * @param   device  Экземпляр устройства
-     * @return  Boolean
-     */
-    private static Boolean _hasAlarmHighHigh(SettingsSelector loop)
-    {
-        return (loop.getChosenIntoolsAlarmHH() != null 
-            || loop.getChosenDocumentsAlarmHH() != null 
-            || loop.getChosenSystemsAlarmHH() != null);
-    }// _hasAlarmHighHigh
-    
-    
-    /**
-     * Метод возвращает факт наличия у устройства рассчитанного верхнего трипа 
-     * из любого источника данных.
-     * 
-     * @param   device  Экземпляр устройства
-     * @return  Boolean
-     */
-    private static Boolean _hasAlarmLow(SettingsSelector loop)
-    {
-        return (loop.getChosenIntoolsAlarmL() != null 
-            || loop.getChosenDocumentsAlarmL() != null 
-            || loop.getChosenSystemsAlarmL() != null);
-    }// _hasAlarmLowLow
-    
-    
-    /**
-     * Метод определяет статус соответствия уставки нижнего трипа из SPI 
-     * уставкам из других источников.
-     * 
-     * @param loop Экземпляр контура, для которого определяем статус соответсвия нижнего трипа
-     * @return Статус сответсвия нижнего трипа
-     */
-    private static Byte _getLoopAlarmsLowLowComplanceType(SettingsSelector loop)
-    {
-        //Если уставки нет или ее уровень подтвержденности нулевой, возвращаем "уставка не подтвеждена":
+        // If setting wasn't chosen or its conformity is below minimum, consider it as non-conformed:
         if (loop.getChosenIntoolsAlarmLL() == null 
             || loop.getIntoolsAlarmLLConformity() <= SEMI_CONFORMITY_MIN) 
-                return NOT_CONFIRMED;
+                return _Confirmed.NON;
    
-        //Если уставка имеет полный показатель совпадения, значит она подтверждена и документами, и SPI:
-        if (loop.getIntoolsAlarmLLConformity() > FULL_CONFORMITY_MIN) return FULLY_CONFIRMED;
+        // If setting has full conformity level, consider it as conformed against both documents and systems:
+        if (loop.getIntoolsAlarmLLConformity() > FULL_CONFORMITY_MIN) return _Confirmed.FULLY;
         
-        //Если уставка имеет половину показатаеля подтвержденности, также, как и документ, то она подтверждена относительно документа:
+        // If setting is half-conformed, same as chosen document LL alarm, consider it confirmed against documents:
         if (loop.getChosenDocumentsAlarmLL() != null 
             && loop.getIntoolsAlarmLLConformity() > SEMI_CONFORMITY_MIN
             && loop.getDocumentsAlarmLLConformity() > SEMI_CONFORMITY_MIN) 
-                return CONFIRMED_AGAINST_DOCUMENTS;
+                return _Confirmed.AGAINST_DOCUMENTS;
         
-        //Если уставка имеет половину показатаеля подтвержденности, также, как и уставка из систем, то она подтверждена относительно систем:
+        // If setting is half-conformed, same as chosen systems LL alarm, consider it confirmed against systems:
         if (loop.getChosenSystemsAlarmLL() != null 
             && loop.getIntoolsAlarmLLConformity() > SEMI_CONFORMITY_MIN
             && loop.getSystemsAlarmLLConformity() > SEMI_CONFORMITY_MIN)
-                return CONFIRMED_AGAINST_SYSTEMS;
+                return _Confirmed.AGAINST_SYSTEMS;
     
-        return NOT_CONFIRMED;
-    }//_getLoopAlarmsLowLowComplanceType
+        return _Confirmed.NON;
+    }// _getLoopAlarmsLowLowComplanceType
     
     
     /**
-     * Метод определяет статус соответствия уставки нижнего аларма из SPI 
-     * уставкам из других источников.
+     * Determines conformity status of chosen SPI L alarm against L alarms from 
+     * other data sources within given loop.
      * 
-     * @param loop Экземпляр контура, для которого определяем статус соответсвия нижнего трипа
-     * @return Статус сответсвия нижнего трипа
+     * @param loop Loop instance wrapped in settings selection logic
+     * @return Chosen SPI L alarm conformity status
      */
-    private static Byte _getLoopAlarmsLowComplanceType(SettingsSelector loop)
+    private static Enum _getLoopAlarmsLowComplanceType(SettingsSelector loop)
     {
-        //Если уставки нет или ее уровень подтвержденности нулевой, возвращаем "уставка не подтвеждена":
+        // If setting wasn't chosen or its conformity is below minimum, consider it as non-conformed:
         if (loop.getChosenIntoolsAlarmL() == null 
             || loop.getIntoolsAlarmLConformity() <= SEMI_CONFORMITY_MIN) 
-                return NOT_CONFIRMED;
+                return _Confirmed.NON;
    
-        //Если уставка имеет полный показатель совпадения, значит она подтверждена и документами, и SPI:
-        if (loop.getIntoolsAlarmLConformity() > FULL_CONFORMITY_MIN) return FULLY_CONFIRMED;
+        // If setting has full conformity level, consider it as conformed against both documents and systems:
+        if (loop.getIntoolsAlarmLConformity() > FULL_CONFORMITY_MIN) return _Confirmed.FULLY;
         
-        //Если уставка имеет половину показатаеля подтвержденности, также, как и документ, то она подтверждена относительно документа:
+        // If setting is half-conformed, same as chosen document L alarm, consider it confirmed against documents:
         if (loop.getChosenDocumentsAlarmL() != null 
             && loop.getIntoolsAlarmLConformity() > SEMI_CONFORMITY_MIN 
             && loop.getDocumentsAlarmLConformity() > SEMI_CONFORMITY_MIN) 
-                return CONFIRMED_AGAINST_DOCUMENTS;
+                return _Confirmed.AGAINST_DOCUMENTS;
         
-        //Если уставка имеет половину показатаеля подтвержденности, также, как и уставка из систем, то она подтверждена относительно систем:
+        // If setting is half-conformed, same as chosen systems L alarm, consider it confirmed against systems:
         if (loop.getChosenSystemsAlarmL() != null 
             && loop.getIntoolsAlarmLConformity() > SEMI_CONFORMITY_MIN 
             && loop.getSystemsAlarmLConformity() > SEMI_CONFORMITY_MIN) 
-                return CONFIRMED_AGAINST_SYSTEMS;
+                return _Confirmed.AGAINST_SYSTEMS;
     
-        return NOT_CONFIRMED;
+        return _Confirmed.NON;
     }// _getLoopAlarmsLowComplanceType
     
     
     /**
-     * Метод определяет статус соответствия уставки верхнего аларма из SPI 
-     * уставкам из других источников.
+     * Determines conformity status of chosen SPI H alarm against H alarms from 
+     * other data sources within given loop.
      * 
-     * @param loop Экземпляр контура, для которого определяем статус соответсвия нижнего трипа
-     * @return Статус сответсвия нижнего трипа
+     * @param loop Loop instance wrapped in settings selection logic
+     * @return Chosen SPI H alarm conformity status
      */
-    private static Byte _getLoopAlarmsHighComplanceType(SettingsSelector loop)
+    private static Enum _getLoopAlarmsHighComplanceType(SettingsSelector loop)
     {
-        //Если уставки нет или ее уровень подтвержденности нулевой, возвращаем "уставка не подтвеждена":
+        // If setting wasn't chosen or its conformity is below minimum, consider it as non-conformed:
         if (loop.getChosenIntoolsAlarmH() == null 
             || loop.getIntoolsAlarmHConformity() <= SEMI_CONFORMITY_MIN) 
-                return NOT_CONFIRMED;
+                return _Confirmed.NON;
    
-        //Если уставка имеет полный показатель совпадения, значит она подтверждена и документами, и SPI:
-        if (loop.getIntoolsAlarmHConformity() > FULL_CONFORMITY_MIN) return FULLY_CONFIRMED;
+        // If setting has full conformity level, consider it as conformed against both documents and systems:
+        if (loop.getIntoolsAlarmHConformity() > FULL_CONFORMITY_MIN) return _Confirmed.FULLY;
         
-        //Если уставка имеет половину показатаеля подтвержденности, также, как и документ, то она подтверждена относительно документа:
+        // If setting is half-conformed, same as chosen document H alarm, consider it confirmed against documents:
         if (loop.getChosenDocumentsAlarmH() != null 
             && loop.getIntoolsAlarmHConformity() > SEMI_CONFORMITY_MIN 
             && loop.getDocumentsAlarmHConformity() > SEMI_CONFORMITY_MIN) 
-                return CONFIRMED_AGAINST_DOCUMENTS;
+                return _Confirmed.AGAINST_DOCUMENTS;
         
-        //Если уставка имеет половину показатаеля подтвержденности, также, как и уставка из систем, то она подтверждена относительно систем:
+        // If setting is half-conformed, same as chosen systems H alarm, consider it confirmed against systems:
         if (loop.getChosenSystemsAlarmH() != null 
             && loop.getIntoolsAlarmHConformity() > SEMI_CONFORMITY_MIN 
             && loop.getSystemsAlarmHConformity() > SEMI_CONFORMITY_MIN) 
-                return CONFIRMED_AGAINST_SYSTEMS;
+                return _Confirmed.AGAINST_SYSTEMS;
     
-        return NOT_CONFIRMED;
+        return _Confirmed.NON;
     }// _getLoopAlarmsHighComplanceType
     
     
     /**
-     * Метод определяет статус соответствия уставки верхнего трипа из SPI 
-     * уставкам из других источников.
+     * Determines conformity status of chosen SPI HH alarm against HH alarms from 
+     * other data sources within given loop.
      * 
-     * @param loop Экземпляр контура, для которого определяем статус соответсвия нижнего трипа
-     * @return Статус сответсвия нижнего трипа
+     * @param loop Loop instance wrapped in settings selection logic
+     * @return Chosen SPI HH alarm conformity status
      */
-    private static Byte _getLoopAlarmsHighHighComplanceType(SettingsSelector loop)
+    private static Enum _getLoopAlarmsHighHighComplanceType(SettingsSelector loop)
     {
-        //Если уставки нет или ее уровень подтвержденности нулевой, возвращаем "уставка не подтвеждена":
+        // If setting wasn't chosen or its conformity is below minimum, consider it as non-conformed:
         if (loop.getChosenIntoolsAlarmHH() == null
             || loop.getIntoolsAlarmHHConformity() <= SEMI_CONFORMITY_MIN) 
-                return NOT_CONFIRMED;
+                return _Confirmed.NON;
    
-        //Если уставка имеет полный показатель совпадения, значит она подтверждена и документами, и SPI:
-        if (loop.getIntoolsAlarmHHConformity() > FULL_CONFORMITY_MIN) return FULLY_CONFIRMED;
+        // If setting has full conformity level, consider it as conformed against both documents and systems:
+        if (loop.getIntoolsAlarmHHConformity() > FULL_CONFORMITY_MIN) return _Confirmed.FULLY;
         
-        //Если уставка имеет половину показатаеля подтвержденности, также, как и документ, то она подтверждена относительно документа:
+        // If setting is half-conformed, same as chosen document HH alarm, consider it confirmed against documents:
         if (loop.getChosenDocumentsAlarmHH() != null 
             && loop.getIntoolsAlarmHHConformity() > SEMI_CONFORMITY_MIN 
             && loop.getDocumentsAlarmHHConformity() > SEMI_CONFORMITY_MIN) 
-                return CONFIRMED_AGAINST_DOCUMENTS;
+                return _Confirmed.AGAINST_DOCUMENTS;
         
-        //Если уставка имеет половину показатаеля подтвержденности, также, как и уставка из систем, то она подтверждена относительно систем:
+        // If setting is half-conformed, same as chosen systems HH alarm, consider it confirmed against systems:
         if (loop.getChosenSystemsAlarmHH() != null 
             && loop.getIntoolsAlarmHHConformity() > SEMI_CONFORMITY_MIN 
             && loop.getSystemsAlarmHHConformity() > SEMI_CONFORMITY_MIN) 
-                return CONFIRMED_AGAINST_SYSTEMS;
+                return _Confirmed.AGAINST_SYSTEMS;
     
-        return NOT_CONFIRMED;
+        return _Confirmed.NON;
     }// _getLoopAlarmsHighHighComplanceType
     
 
     /**
-     * Метод возвращает рассчитанное общее количество алармов, подтвержденных
-     * данными из документов и систем.
+     * Returns calculated total count of alarms, confirmed against both 
+     * documents and systems data.
      * 
-     * @return Oбщее количество алармов, подтвержденных данными из документов и систем
+     * @return Calculated count of alarms, confirmed against documents and systems data
      */
     public int getTotalAlarmsCompliantWithDocumentsAndSystems()
     {
         return this.totalAlarmsCompliantWithDocumentsAndSystems;
-    }//getTotalAlarmsCompliantWithDocumentsAndSystems
+    }// getTotalAlarmsCompliantWithDocumentsAndSystems
     
     
     /**
-     * Метод возвращает рассчитанное общее количество алармов, подтвержденных
-     * данными из документов.
+     * Returns calculated total count of alarms, confirmed against documents 
+     * data.
      * 
-     * @return Oбщее количество алармов, подтвержденных данными из документов
+     * @return Calculated count of alarms, confirmed against documents data
      */
     public int getTotalAlarmsCompliantWithDocuments()
     {
         return this.totalAlarmsCompliantWithDocuments;
-    }//getTotalAlarmsCompliantWithDocuments
+    }// getTotalAlarmsCompliantWithDocuments
     
     
     /**
-     * Метод возвращает рассчитанное общее количество алармов, подтвержденных
-     * данными из документов и систем.
+     * Returns calculated total count of alarms, confirmed against systems data.
      * 
-     * @return Oбщее количество алармов, подтвержденных данными из систем
+     * @return Calculated count of alarms, confirmed against systems data
      */
     public int getTotalAlarmsCompliantWithSystems()
     {
         return this.totalAlarmsCompliantWithSystems;
-    }//getTotalAlarmsCompliantWithSystems
+    }// getTotalAlarmsCompliantWithSystems
     
     
     /**
-     * Метод возвращает рассчитанное общее количество неподтвержденных алармов.
+     * Returns calculated total count of unconfirmed alarms.
      * 
-     * @return Oбщее количество неподтвержденных алармов
+     * @return Calculated count of unconfirmed alarms
      */
     public int getTotalNonCompliantAlarms()
     {
         return this.totalAlarmsNonCompliant;
-    }//getTotalNonCompliantAlarms
+    }// getTotalNonCompliantAlarms
     
     
     /**
-     * Метод возвращает рассчитанное количество LL алармов, подтвержденных
-     * данными из документов и систем.
+     * Returns calculated count of LL alarms, confirmed against both 
+     * documents and systems data.
      * 
-     * @return Oбщее количество алармов, подтвержденных данными из документов и систем
+     * @return Calculated of LL alarms, confirmed against documents and systems data
      */
     public int getLowLowAlarmsCompliantWithDocumentsAndSystems()
     {
         return this.alarmsLowLowCompliantWithDocumentsAndSystems;
-    }//getLowLowAlarmsCompliantWithDocumentsAndSystems
+    }// getLowLowAlarmsCompliantWithDocumentsAndSystems
     
     
     /**
-     * Метод возвращает рассчитанное количество LL алармов, подтвержденных
-     * данными из документов.
+     * Returns calculated count of LL alarms, confirmed against documents 
+     * data.
      * 
-     * @return Oбщее количество алармов, подтвержденных данными из документов
+     * @return Calculated of LL alarms, confirmed against documents data
      */
     public int getLowLowAlarmsCompliantWithDocuments()
     {
         return this.alarmsLowLowCompliantWithDocuments;
-    }//getLowLowAlarmsCompliantWithDocuments
+    }// getLowLowAlarmsCompliantWithDocuments
     
     
     /**
-     * Метод возвращает рассчитанное количество LL алармов, подтвержденных
-     * данными из документов и систем.
+     * Returns calculated count of LL alarms, confirmed against systems data.
      * 
-     * @return Oбщее количество алармов, подтвержденных данными из систем
+     * @return Calculated of LL alarms, confirmed against systems data
      */
     public int getLowLowAlarmsCompliantWithSystems()
     {
         return this.alarmsLowLowCompliantWithSystems;
-    }//getLowLowAlarmsCompliantWithSystems
+    }// getLowLowAlarmsCompliantWithSystems
     
     
     /**
-     * Метод возвращает рассчитанное количество неподтвержденных LL алармов.
+     * Returns calculated count of unconfirmed LL alarms.
      * 
-     * @return Oбщее количество неподтвержденных алармов
+     * @return Calculated count of unconfirmed LL alarms
      */
     public int getLowLowNonCompliantAlarms()
     {
         return this.alarmsLowLowNonCompliant;
-    }//getLowLowNonCompliantAlarms
+    }// getLowLowNonCompliantAlarms
     
     
     /**
-     * Метод возвращает рассчитанное количество L алармов, подтвержденных
-     * данными из документов и систем.
+     * Returns calculated count of L alarms, confirmed against both documents 
+     * and systems data.
      * 
-     * @return Oбщее количество алармов, подтвержденных данными из документов и систем
+     * @return Calculated of L alarms, confirmed against documents and systems data
      */
     public int getLowAlarmsCompliantWithDocumentsAndSystems()
     {
         return this.alarmsLowCompliantWithDocumentsAndSystems;
-    }//getLowAlarmsCompliantWithDocumentsAndSystems
+    }// getLowAlarmsCompliantWithDocumentsAndSystems
     
     
     /**
-     * Метод возвращает рассчитанное количество L алармов, подтвержденных
-     * данными из документов.
+     * Returns calculated count of L alarms, confirmed against documents data.
      * 
-     * @return Oбщее количество алармов, подтвержденных данными из документов
+     * @return Calculated of L alarms, confirmed against documents data
      */
     public int getLowAlarmsCompliantWithDocuments()
     {
         return this.alarmsLowCompliantWithDocuments;
-    }//getLowAlarmsCompliantWithDocuments
+    }// getLowAlarmsCompliantWithDocuments
     
     
     /**
-     * Метод возвращает рассчитанное количество L алармов, подтвержденных
-     * данными из документов и систем.
+     * Returns calculated count of L alarms, confirmed against systems data.
      * 
-     * @return Oбщее количество алармов, подтвержденных данными из систем
+     * @return Calculated of L alarms, confirmed against systems data
      */
     public int getLowAlarmsCompliantWithSystems()
     {
         return this.alarmsLowCompliantWithSystems;
-    }//getLowAlarmsCompliantWithSystems
+    }// getLowAlarmsCompliantWithSystems
     
     
     /**
-     * Метод возвращает рассчитанное количество неподтвержденных L алармов.
+     * Returns calculated count of unconfirmed L alarms.
      * 
-     * @return Oбщее количество неподтвержденных алармов
+     * @return Calculated count of unconfirmed L alarms
      */
     public int getLowNonCompliantAlarms()
     {
         return this.alarmsLowNonCompliant;
-    }//getLowNonCompliantAlarms
+    }// getLowNonCompliantAlarms
     
     
     /**
-     * Метод возвращает рассчитанное количество H алармов, подтвержденных
-     * данными из документов и систем.
+     * Returns calculated count of H alarms, confirmed against both documents 
+     * and systems data.
      * 
-     * @return Oбщее количество алармов, подтвержденных данными из документов и систем
+     * @return Calculated of H alarms, confirmed against documents and systems data
      */
     public int getHighAlarmsCompliantWithDocumentsAndSystems()
     {
         return this.alarmsHighCompliantWithDocumentsAndSystems;
-    }//getHighAlarmsCompliantWithDocumentsAndSystems
+    }// getHighAlarmsCompliantWithDocumentsAndSystems
     
     
     /**
-     * Метод возвращает рассчитанное количество H алармов, подтвержденных
-     * данными из документов.
+     * Returns calculated count of H alarms, confirmed against documents data.
      * 
-     * @return Oбщее количество алармов, подтвержденных данными из документов
+     * @return Calculated of H alarms, confirmed against documents data
      */
     public int getHighAlarmsCompliantWithDocuments()
     {
         return this.alarmsHighCompliantWithDocuments;
-    }//getHighAlarmsCompliantWithDocuments
+    }// getHighAlarmsCompliantWithDocuments
     
     
     /**
-     * Метод возвращает рассчитанное количество H алармов, подтвержденных
-     * данными из документов и систем.
+     * Returns calculated count of H alarms, confirmed against systems data.
      * 
-     * @return Oбщее количество алармов, подтвержденных данными из систем
+     * @return Calculated of H alarms, confirmed against systems data
      */
     public int getHighAlarmsCompliantWithSystems()
     {
         return this.alarmsHighCompliantWithSystems;
-    }//getHighAlarmsCompliantWithSystems
+    }// getHighAlarmsCompliantWithSystems
     
     
     /**
-     * Метод возвращает рассчитанное количество неподтвержденных H алармов.
+     * Returns calculated count of unconfirmed H alarms.
      * 
-     * @return Oбщее количество неподтвержденных алармов
+     * @return Calculated count of unconfirmed H alarms
      */
     public int getHighNonCompliantAlarms()
     {
         return this.alarmsHighNonCompliant;
-    }//getHighNonCompliantAlarms
+    }// getHighNonCompliantAlarms
     
     
     /**
-     * Метод возвращает рассчитанное количество HH алармов, подтвержденных
-     * данными из документов и систем.
+     * Returns calculated count of HH alarms, confirmed against both documents 
+     * and systems data.
      * 
-     * @return Oбщее количество алармов, подтвержденных данными из документов и систем
+     * @return Calculated of HH alarms, confirmed against documents and systems data
      */
     public int getHighHighAlarmsCompliantWithDocumentsAndSystems()
     {
         return this.alarmsHighHighCompliantWithDocumentsAndSystems;
-    }//getHighHighAlarmsCompliantWithDocumentsAndSystems
+    }// getHighHighAlarmsCompliantWithDocumentsAndSystems
     
     
     /**
-     * Метод возвращает рассчитанное количество HH алармов, подтвержденных
-     * данными из документов.
+     * Returns calculated count of HH alarms, confirmed documents data.
      * 
-     * @return Oбщее количество алармов, подтвержденных данными из документов
+     * @return Calculated of HH alarms, confirmed against documents data
      */
     public int getHighHighAlarmsCompliantWithDocuments()
     {
         return this.alarmsHighHighCompliantWithDocuments;
-    }//getHighHighAlarmsCompliantWithDocuments
+    }// getHighHighAlarmsCompliantWithDocuments
     
     
     /**
-     * Метод возвращает рассчитанное количество HH алармов, подтвержденных
-     * данными из документов и систем.
+     * Returns calculated count of HH alarms, confirmed against systems data.
      * 
-     * @return Oбщее количество алармов, подтвержденных данными из систем
+     * @return Calculated of HH alarms, confirmed against systems data
      */
     public int getHighHighAlarmsCompliantWithSystems()
     {
         return this.alarmsHighHighCompliantWithSystems;
-    }//getHighHighAlarmsCompliantWithSystems
+    }// getHighHighAlarmsCompliantWithSystems
     
     
     /**
-     * Метод возвращает рассчитанное количество неподтвержденных HH алармов.
+     * Returns calculated count of unconfirmed HH alarms.
      * 
-     * @return Oбщее количество неподтвержденных алармов
+     * @return Calculated count of unconfirmed HH alarms
      */
     public int getHighHighNonCompliantAlarms()
     {
         return this.alarmsHighHighNonCompliant;
-    }//getHighHighNonCompliantAlarms
-}//IntoolsComplianceSummary
+    }// getHighHighNonCompliantAlarms
+}// IntoolsComplianceSummary
