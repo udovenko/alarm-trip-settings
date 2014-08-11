@@ -52,8 +52,8 @@ public class OveralCompliance extends Compliance
     
     
     /**
-     * Abstract factory method which returns instance of inner class - handler 
-     * for for wrapped loops table data read event.
+     * Factory method which returns instance of inner class - handler for 
+     * wrapped loops table data read event.
      * 
      * @return instance of inner class - handler for for wrapped loops table data read event
      */

@@ -39,7 +39,7 @@ public abstract class Compliance extends Model
     
     /**
      * Abstract factory method which returns instance of inner class - handler 
-     * for for wrapped loops table data read event.
+     * for wrapped loops table data read event.
      * 
      * @return instance of inner class - handler for for wrapped loops table data read event
      */
