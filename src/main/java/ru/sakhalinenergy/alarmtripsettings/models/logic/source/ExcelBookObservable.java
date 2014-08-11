@@ -5,36 +5,35 @@ import ru.sakhalinenergy.alarmtripsettings.models.entity.Source;
 
 
 /**
- * Интерфейс модели книги MS Excel для использования модели представлениями. 
- * Допускает только использование геттерорв.
+ * Interface of MS Excel book model for using by views. Allows only getters.
  * 
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.3
  */
 public interface ExcelBookObservable extends TagsSourceObservable
 {
  
     /**
-     * Метод возвращает текущий путь к книге, если она подключена.
+     * Returns current book path, if book is connected to provider.
      * 
-     * @return Текущий путь к книге или null, если книга не подключена
+     * @return Path to book or null if book is not connected
      */
     public String getBookFilePath();
         
     
     /**
-     * Метод возвращает значение поля модели с массивом имен листов книги и их 
-     * полей, если таковые были получены.
+     * Returns sheets and fields hash received from book.
      * 
-     * @return Массивом имен листов книги и их полей
+     * @return Book sheets and fields hash
      */
     public HashMap getSheetsAndFields();
         
     
     /**
-     * Метод возвращает сущность источника данных, обернутую в текущую логику.
+     * Returns current data source entity.
      * 
-     * @return Сущность источника данных
+     * @return Data source entity
      */
     public Source getSource(); 
-}//ExcelBookObservable
+
+}// ExcelBookObservable

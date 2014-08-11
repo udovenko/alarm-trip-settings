@@ -9,73 +9,73 @@ import ru.sakhalinenergy.alarmtripsettings.models.entity.TagSettingProperty;
 
 
 /**
- * Интерфейс для управления моделью источника данных тагов контролллером. 
- * Дополняет интерфейс для представлений доступом к сеттерам и методам получения 
- * данных.
+ * Interface of tags data source model for using by controllers. Extends 
+ * interface for views with setters and data control methods.
  * 
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.2
  */
 public interface TagsSourceControllable extends TagsSourceObservable
 {
    
     /**
-     * Метод устанавливает значение текущей сущности ассета модели и рассылает 
-     * всем подписчикам соответвующее событие.
+     * Sets up current plant entity instance and triggers appropriate event for
+     * all subscribers.
      * 
-     * @param plant Код ассета
+     * @param plant Plant entity instance
      */
     public void setPlant(Plant plant);
     
     
     /**
-     * Устанавливает маску (регулярное выражение) для парсинга имен тага.
-     * 
-     * @param mask Маска для парсинга имен тага
+     * Sets up tag mask (format regular expression) for tag names parsing.
+     *  
+     * @param mask Tag mask entity
      */
     public void setTagMask(TagMask mask);
     
     
     /**
-     * Добавляет или обнорвляет свойство источника данных.
+     * Adds or updates data source property.
      * 
-     * @param property Свойство источника
+     * @param property Data source property
      */
     public void setProperty(SourceProperty property);
     
     
     /**
-     * Метод пытается разобрать полученное имя тага по заданной маске, и, если
-     * это удалось, создает соответствующие экземпляры тага и контура и 
-     * связывает их с текущим источником.
+     * Tries to parse given tag name according to current tag mask and, if it 
+     * was successful, crates appropriate tag and its parent loop instances,
+     * ties them to current data source and triggers TAG_SET_UPDATED event.
      * 
-     * @param tagName Имя тага
-     * @param mask Маска, по которой будет разбираться имя тага
-     * @return Ссылку на созданный таг
+     * @throws Exception
+     * @param tagName Tag name
+     * @return Created tag instance
      */
     public Tag addTag(String tagName) throws Exception;
     
     
-     /**
-     * Метод удаляет заданный таг из коллекции тагов источника.
+    /**
+     * Removes given tag from data source's tags collection, triggers 
+     * TAG_SET_UPDATED event.
      * 
-     * @param tag Ссылка на таг, который необходимо удалить
+     * @param tag Tag instance to be removed
      */
     public void removeTag(Tag tag);
     
     
     /**
-     * Метод добавляет настройку заданного тага.
+     * Adds setting to given tag, triggers TAG_SET_UPDATED event.
      * 
-     * @param tag Ссылка на таг, настройку котрого добавляем
-     * @param setting Экземпляр настройки, которую добавляем
+     * @param tag Tag instance to which new setting will be added
+     * @param setting Setting to be added
      */
     public void addTagSetting(Tag tag, TagSetting setting);
     
     
     /**
-     * Updates particular existing tag setting value, is new value passes 
-     * emptiness checking. If value is updated, triggers TAG_SET_UPDATED_EVENT.
+     * Updates particular existing tag setting value if new value passes 
+     * emptiness checking. If value is updated, triggers TAG_SET_UPDATED event.
      * 
      * @param setting Tag setting instance
      * @param newValue New value to be set
@@ -84,7 +84,8 @@ public interface TagsSourceControllable extends TagsSourceObservable
 
     
     /**
-     * Removes given settings from its tag settings collection. 
+     * Removes given settings from its tag settings collection and triggers 
+     * TAG_SET_UPDATED event.
      * 
      * @param settingToRemove Setting to be removed instance
      */
@@ -92,8 +93,8 @@ public interface TagsSourceControllable extends TagsSourceObservable
     
     
     /**
-     * Add property to particular tag setting, if given property value passes
-     * checking for an emptiness.
+     * Add property to particular tag setting and triggers TAG_SET_UPDATED 
+     * event, if given property value passes checking for an emptiness.
      * 
      * @param setting Tag setting to which a new property will added
      * @param property A new property which will be added
@@ -102,7 +103,8 @@ public interface TagsSourceControllable extends TagsSourceObservable
     
     
     /**
-     * Updates given property value if new value passes checking for emptiness.
+     * Updates given property value and triggers TAG_SET_UPDATED event, if new 
+     * value passes checking for emptiness.
      * 
      * @param property Property instance for which new value will be set
      * @param newValue New value for given property
@@ -111,7 +113,8 @@ public interface TagsSourceControllable extends TagsSourceObservable
     
     
     /**
-     * Removes tag setting property from setting properties collection.
+     * Removes tag setting property from setting properties collection and 
+     * triggers TAG_SET_UPDATED event
      * 
      * @param propertyToRemove Tag setting property to be remove
      */
@@ -119,11 +122,11 @@ public interface TagsSourceControllable extends TagsSourceObservable
     
     
     /**
-     * Creates and launches a thread for saving data source to storage and 
-     * handles tread events.
+     * Creates a thread for saving data source to storage. Subscribes models 
+     * events listeners on thread events and executes it.
      * 
      * @param createLoopsIfNotExist Flag defines a necessity of creations new loops and string tags within new loop 
      */
     public void save(boolean createLoopsIfNotExist);
     
-}//TagsSourceControllable
+}// TagsSourceControllable

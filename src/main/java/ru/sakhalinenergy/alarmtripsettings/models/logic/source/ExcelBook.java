@@ -1,11 +1,13 @@
 package ru.sakhalinenergy.alarmtripsettings.models.logic.source;
 
+import java.io.File;
 import java.util.Set;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.sql.SQLException;
+import ru.sakhalinenergy.alarmtripsettings.Main;
 import ru.sakhalinenergy.alarmtripsettings.implemented.SettingsPropertiesTypes;
 import ru.sakhalinenergy.alarmtripsettings.implemented.SettingsTypes;
 import ru.sakhalinenergy.alarmtripsettings.models.WorkerThread;
@@ -19,31 +21,33 @@ import ru.sakhalinenergy.alarmtripsettings.models.entity.Source;
 
 
 /**
- * Класс реализует нить для создания истоника данных путем парсинга данных
- * заданного листа книги MS Excel.
+ * Implements logic for creating data source by parsing sheet form given 
+ * MS Excel book.
  *
- * @author Denis.Udovenko
- * @version 1.0.9
+ * @author Denis Udovenko
+ * @version 1.1.1
  */
 public class ExcelBook extends TagsSource implements ExcelBookObservable, ExcelBookControlable
 {
+    private static final String BOOK_COPY_PATH = Main.TEMP_DIR + File.separator + "resetFormat.xls";
+    
     private XlsDataProvider dataProvider;
-    private HashMap<String, List> sheetsAndFields = new HashMap();
+    private final HashMap<String, List> sheetsAndFields = new HashMap();
        
     
     /**
-     * Конструктор класса.
+     * Public constructor. Sets up initial source instance.
      * 
-     * @param source Экземпляр источника данных, который будет обернут в логику текущего класса
+     * @param source Data source entity instance to be wrapped in this logic
      */
     public ExcelBook(Source source)
     {
         super(source);
-    }//ExcelBook
+    }// ExcelBook
       
     
     /**
-     * Метод отключает провайдер данных от книги.
+     * Disconnects MS Excel data provider form book.
      * 
      * @throws SQLException
      */
@@ -51,69 +55,69 @@ public class ExcelBook extends TagsSource implements ExcelBookObservable, ExcelB
     public void disconnect() throws SQLException
     {
         dataProvider.disconnect();
-    }//disconnect
+    }// disconnect
     
     
     /**
-     * Метод возвращает статус соединения с книгой MS Excel.
+     * Returns MS Excel book connection status.
      * 
      * @throws SQLException
-     * @return true, если соединение открыто, иначе false 
+     * @return True, if connection is open, else false 
      */
     @Override
     public boolean isConnected() throws SQLException
     {
         return dataProvider != null && dataProvider.isConnected();
-    }//isConnected
+    }// isConnected
            
     
     /**
-     * Метод возвращает текущий путь к книге, если она подключена.
+     * Returns current book path, if book is connected to provider.
      * 
-     * @return Текущий путь к книге или null, если книга не подключена
+     * @return Path to book or null if book is not connected
      */
     @Override
     public String getBookFilePath()
     {
         return (dataProvider != null) ? dataProvider.filePath : null;
-    }//getBookFilePath
+    }// getBookFilePath
     
     
     /**
-     * Метод возвращает значение поля модели с массивом имен листов книги и их 
-     * полей, если таковые были получены.
+     * Returns sheets and fields hash received from book.
      * 
-     * @return Массивом имен листов книги и их полей
+     * @return Book sheets and fields hash
      */
     @Override
     public HashMap getSheetsAndFields()
     {
         return sheetsAndFields;
-    }//getSheetsAndFields
+    }// getSheetsAndFields
     
     
     /**
-     * Метод возвращает сущность источника данных, обернутую в текущую логику.
+     * Returns current data source entity.
      * 
-     * @return Сущность источника данных
+     * @return Data source entity
      */
     @Override
     public Source getSource()
     {
         return source;
-    }//getTags    
+    }// getTags    
     
     
     /**
-     * Метод создает и запускает нить для подключения провайдера данных модели 
-     * к заданной книги MS Excel, а также чтения массива имен листов книги и их 
-     * полей. Исключения нити рассылаются подписчикам на исключения модели в 
-     * EDT. 
+     * Creates a thread for connecting provider to MS Excel book and reading 
+     * sheets and fields hash. Subscribes models events listeners on thread 
+     * events and executes it.
+     * 
+     * @param filePath Path to MS Excel book file
      */
     @Override
     public void connectAndReadStructure(final String filePath)
     {
-        //Создаем анонимную нить для получения списка листов и полей текущей книги MS Excel:
+        // Create a thread:
         WorkerThread sheetsAndTablesReader = new WorkerThread()
         {
             @Override
@@ -124,60 +128,57 @@ public class ExcelBook extends TagsSource implements ExcelBookObservable, ExcelB
                               
                 try
                 {    
-                    //Публикуем текущий прогресс:
+                    // Publish current progress:
                     progress.put(ProgressInfoKey.CYCLE_CAPTION, "Connecting to book via ODBC");
                     publish(progress);
                     
-                    //Соединяемся с книгой:
+                    // Connect to book:
                     if (isConnected()) disconnect();
                     if (dataProvider == null) dataProvider = new XlsDataProvider(filePath);
                     dataProvider.connect();
                         
-                    //Публикуем текущий прогресс:
+                    // Publish current progress:
                     progress.put(ProgressInfoKey.CYCLE_CAPTION, "Reading sheets and fields");
                     publish(progress);
                     
                     List<String> tableNames = dataProvider.getTables();
                     List<String> fields;
             
-                    //Собираем списки полей в хэш-массив:
+                    // Gather fields lists into sheets and fields hash:
                     for (String tableName : tableNames)
                     {
                         fields = dataProvider.getFields(tableName);
                         sheetsAndFields.put(tableName, fields);
-                    }//for
+                    }// for
      
-                } catch (final Exception exception) { //Рассылаем событие ошибки в EDT:
+                } catch (Exception exception) { // Invoke exception event in EDT:
                      
                     _invokeExceptionInEdt("Error during book connection", exception, WorkerThread.Event.ERROR);
-                }//catch
+                }// catch
                 
                 return sheetsAndFields;
-            }//doInBackground
-        };//sheetsAndTablesReader
+            }// doInBackground
+        };// sheetsAndTablesReader
         
-        //Подписываем подписчиков модели на события нити:
-        if (events.get(SourceEvent.THREAD_ERROR) != null) sheetsAndTablesReader.events.on(WorkerThread.Event.ERROR, events.get(SourceEvent.THREAD_ERROR));
-        if (events.get(SourceEvent.THREAD_WARNING) != null) sheetsAndTablesReader.events.on(WorkerThread.Event.WARNING, events.get(SourceEvent.THREAD_WARNING));
-        if (events.get(SourceEvent.THREAD_PROGRESS) != null) sheetsAndTablesReader.events.on(WorkerThread.Event.PROGRESS, events.get(SourceEvent.THREAD_PROGRESS));
-        if (events.get(SourceEvent.BOOK_CONNECTED) != null) sheetsAndTablesReader.events.on(WorkerThread.Event.WORK_DONE, events.get(SourceEvent.BOOK_CONNECTED));
+        // Resubscribe model's events listeners on thread events:
+        _subscribeOnThreadEvents(sheetsAndTablesReader, SourceEvent.THREAD_PROGRESS, 
+            SourceEvent.THREAD_WARNING, SourceEvent.THREAD_ERROR, SourceEvent.BOOK_CONNECTED);
 
-        //Запускаем нить:
+        // Execute thread:
         sheetsAndTablesReader.execute();
-    }//readSheetsAndFields
+    }// connectAndReadStructure
     
     
     /**
-     * Метод создает и запускает нить для чтения тагов из выбранного листа 
-     * подключенной книги MS Excel. Исключения нити рассылаются подписчикам на
-     * исключения модели в EDT. 
+     * Creates a thread for reading tags from connected MS Excel book sheet. 
+     * Subscribes models events listeners on thread events and executes it.
      * 
-     * @param tagMask Маска тага, которая будет использоваться для обработки тагов выбранного листа
+     * @param tagMask Tag mask which will be used for processing tags in selected sheet
      */
     @Override
     public void readTags(final TagMask tagMask)
     {
-        // Создаем анонимную нить для создания коллекции тагов из текущего листа книги MS Excel:
+        // Create a thread:
         WorkerThread tagsReader = new WorkerThread()
         {
             @Override
@@ -187,58 +188,54 @@ public class ExcelBook extends TagsSource implements ExcelBookObservable, ExcelB
                 progress.put(ProgressInfoKey.CYCLE_CAPTION, "  ");
                 progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, 0);
                 
-                // Publish progress:
+                // Publish current progress:
                 progress.put(ProgressInfoKey.CYCLE_CAPTION, "Resetting book format");
                 progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, 5);
                 publish(progress);
                 
-                // Создаем провайдер данных для копии текущей книги:
+                // Create data provider for current book copy:
                 XlsDataProvider copyBookDataProvider = null;
-                String copyBookPath = "temp\\resetFormat.xls";
-                
-                try //Создаем копию книги во временной дирректории и сбрасываем формат всех ячеек копии на текстовый:
+                                
+                try // Create a book copy in a temp directory and reset book's cells format to text:
                 {    
-                    dataProvider.createDatabaseCopyWithResetFormat(copyBookPath);
-                    copyBookDataProvider = new XlsDataProvider(copyBookPath);
+                    dataProvider.createDatabaseCopyWithResetFormat(BOOK_COPY_PATH);
+                    copyBookDataProvider = new XlsDataProvider(BOOK_COPY_PATH);
                     copyBookDataProvider.connect();
                 } catch (Exception exception) {
                 
                     _invokeExceptionInEdt("Book copy creation / cells format resetting error", exception, WorkerThread.Event.ERROR);
-                }//catch 
+                }// catch 
                 
-                //Публикуем текущий прогресс:
+                // Publish current progress:
                 progress.put(ProgressInfoKey.CYCLE_CAPTION, "Executing rows query");
                 progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, 70);
                 publish(progress);
                 
                 ExcelBookParsingDialogSettings settingsInstatnce = ExcelBookParsingDialogSettings.getInstance();
         
-                //Определяем необходимый для набор полей листа:
+                // Determine neccessary sheet's fields set:
                 Set<String> distinctFields = _selectDistingFields(settingsInstatnce);
                 
-                //Формируем запрос из полученных полей:
+                // Assemble query from received field names:
                 String query = "SELECT ";
-                for (String field : distinctFields)
-                {
-                    query = query + field + ", ";
-                }//for
+                for (String field : distinctFields) query = query + field + ", ";
                 query = query.substring(0, query.lastIndexOf(", "));
                 query = query + " FROM [" + settingsInstatnce.getSheetName() + "$]";
                 
                 List<HashMap> tagsRecordset = null;
                 int tagsCount = 0;
                 
-                try //Выполняем запрос и получаем набор тагов:
+                try // Execute query and get tags set:
                 {
                     tagsRecordset = copyBookDataProvider.selectQuery(query);
                     tagsCount = tagsRecordset.size();
             
-                } catch (Exception exception) { //Рассылаем событие ошибки в EDT:
+                } catch (Exception exception) { // Invoke exception event in EDT:
                      
                     _invokeExceptionInEdt("Tags recordset creation error", exception, WorkerThread.Event.ERROR);
-                }//catch
+                }// catch
                 
-                //Публикуем текущий прогресс:
+                // Publish current progress:
                 progress.put(ProgressInfoKey.CYCLE_CAPTION, "Creating tags");
                 publish(progress);
 
@@ -247,7 +244,7 @@ public class ExcelBook extends TagsSource implements ExcelBookObservable, ExcelB
                 TagSetting tempSetting;
                 Map<String, Tag> processedTags = new HashMap();
                 
-                //Обходим все найденные по строке поиска записи перкеметров и пытаемся добавить их к прибору:
+                // Iterate through found tag records and try to add tags to collection together with their settings: 
                 for (int i = 0; i < tagsCount; i++)
                 {
                     HashMap row = tagsRecordset.get(i);
@@ -255,18 +252,18 @@ public class ExcelBook extends TagsSource implements ExcelBookObservable, ExcelB
                     
                     try
                     {
-                        //Если таг уже добавлен в хэш-массив, добавляем уставки к нему:
+                        // If tag is already in collection, add settings to existing one:
                         if (processedTags.containsKey(tempTagName)) tempTag = processedTags.get(tempTagName);
                         else {
                         
-                            //Добавляем в коллекцию новый экземпляр тага: 
+                            // Add new tag instance in collection: 
                             tempTag = addTag((String)row.get(settingsInstatnce.getTagNameField()));
                         
-                            //Сохраняем ссылку на созданный таг с ключом из исходного имени тага:
+                            // Save a reference to created tag with tag name key:
                             processedTags.put(tempTagName, tempTag);
-                        }//else
+                        }// else
                         
-                        try //Ищем в текущей строке уставку нижнего трипа:
+                        try // Look for a LL alarm setting in current string:
                         {    
                             tempSetting = _readTagSetting(row, SettingsTypes.ALARM_LL_SETTING.ID, distinctFields,
                                 settingsInstatnce.getAlarmLowLowKeyField(), settingsInstatnce.getAlarmLowLowKeyValue(), 
@@ -274,7 +271,7 @@ public class ExcelBook extends TagsSource implements ExcelBookObservable, ExcelB
                             if (tempSetting != null) addTagSetting(tempTag, tempSetting);
                         } catch (Exception exception) {}
                         
-                        try //Ищем в текущей строке уставку нижнего аларма:
+                        try // Look for a L alarm setting in current string:
                         {
                             tempSetting = _readTagSetting(row, SettingsTypes.ALARM_L_SETTING.ID, distinctFields,
                                 settingsInstatnce.getAlarmLowKeyField(), settingsInstatnce.getAlarmLowKeyValue(), 
@@ -282,7 +279,7 @@ public class ExcelBook extends TagsSource implements ExcelBookObservable, ExcelB
                             if (tempSetting != null) addTagSetting(tempTag, tempSetting);
                         } catch (Exception exception) {}
                         
-                        try //Ищем в текущей строке уставку врерхнего аларма:
+                        try // Look for a H alarm setting in current string:
                         {
                             tempSetting = _readTagSetting(row, SettingsTypes.ALARM_H_SETTING.ID, distinctFields,
                                 settingsInstatnce.getAlarmHighKeyField(), settingsInstatnce.getAlarmHighKeyValue(), 
@@ -290,7 +287,7 @@ public class ExcelBook extends TagsSource implements ExcelBookObservable, ExcelB
                             if (tempSetting != null) addTagSetting(tempTag, tempSetting);
                         } catch (Exception exception) {}
                         
-                        try //Ищем в текущей строке уставку верхнего трипа:
+                        try // Look for a HH alarm setting in current string:
                         {
                             tempSetting = _readTagSetting(row, SettingsTypes.ALARM_HH_SETTING.ID, distinctFields,
                                 settingsInstatnce.getAlarmHighHighKeyField(), settingsInstatnce.getAlarmHighHighKeyValue(), 
@@ -298,7 +295,7 @@ public class ExcelBook extends TagsSource implements ExcelBookObservable, ExcelB
                             if (tempSetting != null) addTagSetting(tempTag, tempSetting);
                         } catch (Exception exception) {}
                         
-                        try //Ищем в текущей строке нижнюю границу диапазона:
+                        try // Look for a range min setting in current string:
                         {
                             tempSetting = _readTagSetting(row, SettingsTypes.RANGE_MIN_SETTING.ID, distinctFields,
                                 settingsInstatnce.getRangeMinKeyField(), settingsInstatnce.getRangeMinKeyValue(), 
@@ -306,7 +303,7 @@ public class ExcelBook extends TagsSource implements ExcelBookObservable, ExcelB
                             if (tempSetting != null) addTagSetting(tempTag, tempSetting);
                         } catch (Exception exception) {}
                         
-                        try //Ищем в текущей строке верхнюю границу диапазона:
+                        try // Look for a range max setting in current string:
                         {
                             tempSetting = _readTagSetting(row, SettingsTypes.RANGE_MAX_SETTING.ID, distinctFields,
                                 settingsInstatnce.getRangeMaxKeyField(), settingsInstatnce.getRangeMaxKeyValue(), 
@@ -314,7 +311,7 @@ public class ExcelBook extends TagsSource implements ExcelBookObservable, ExcelB
                             if (tempSetting != null) addTagSetting(tempTag, tempSetting);
                         } catch (Exception exception) {}
                         
-                        try //Ищем в текущей строке единицы измерения:
+                        try // Look for a units setting in current string:
                         {
                             tempSetting = _readTagSetting(row, SettingsTypes.UNITS_SETTING.ID, distinctFields,
                                 settingsInstatnce.getUnitsKeyField(), settingsInstatnce.getUnitsKeyValue(), 
@@ -322,7 +319,7 @@ public class ExcelBook extends TagsSource implements ExcelBookObservable, ExcelB
                             if (tempSetting != null) addTagSetting(tempTag, tempSetting);
                         } catch (Exception exception) {}
                         
-                        try //Ищем в текущей строке систему - источник сигнала:
+                        try // Look for a source sytem setting in current string:
                         {
                             tempSetting = _readTagSetting(row, SettingsTypes.SOURCE_SYSTEM_SETTING.ID, distinctFields,
                                 settingsInstatnce.getSourceSystemKeyField(), settingsInstatnce.getSourceSystemKeyValue(), 
@@ -330,46 +327,44 @@ public class ExcelBook extends TagsSource implements ExcelBookObservable, ExcelB
                             if (tempSetting != null) addTagSetting(tempTag, tempSetting);
                         } catch (Exception exception) {}
                         
-                    } catch (Exception exception) { //Рассылаем событие ошибки в EDT:
+                    } catch (Exception exception) { // Invoke exception event in EDT and wait:
                         
-                        //Рассылаем исключение и комментарий подписчикам:
                         _invokeExceptionInEdtAndWait("Can't create tag " + tempTagName, exception, WorkerThread.Event.WARNING);
-                    }//catch
+                    }// catch
                     
-                    //Публикуем текущий прогресс:
+                    // Publish current progress:
                     progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, (int)((double)i / (double)tagsCount * 100));
                     publish(progress);
-                }//for
+                }// for
 
-                try //Пытаемся отключиться от исходной книги и от копии со сброшенным форматом:
+                try // Try to disconnect from both initial book and its copy with reseted cells format:
                 {
                     dataProvider.disconnect();
                     copyBookDataProvider.disconnect();
                 } catch (Exception exception) {
                 
                     _invokeExceptionInEdt("Books disconnecting error", exception, WorkerThread.Event.ERROR);
-                }//catch
+                }// catch
                 
                 return new HashMap();
-            }//doInBackground
-        };//sheetsAndTablesReader
+            }// doInBackground
+        };// sheetsAndTablesReader
+       
+        // Resubscribe model's events listeners on thread events:
+        _subscribeOnThreadEvents(tagsReader, SourceEvent.THREAD_PROGRESS, 
+            SourceEvent.THREAD_WARNING, SourceEvent.THREAD_ERROR, SourceEvent.TAGS_READ);
         
-        //Подписываем подписчиков модели на события нити:
-        if (events.get(SourceEvent.THREAD_ERROR) != null) tagsReader.events.on(WorkerThread.Event.ERROR, events.get(SourceEvent.THREAD_ERROR));
-        if (events.get(SourceEvent.THREAD_WARNING) != null) tagsReader.events.on(WorkerThread.Event.WARNING, events.get(SourceEvent.THREAD_WARNING));
-        if (events.get(SourceEvent.THREAD_PROGRESS) != null) tagsReader.events.on(WorkerThread.Event.PROGRESS, events.get(SourceEvent.THREAD_PROGRESS));
-        if (events.get(SourceEvent.TAGS_READ) != null) tagsReader.events.on(WorkerThread.Event.WORK_DONE, events.get(SourceEvent.TAGS_READ));
-                
+        // Execute thread: 
         tagsReader.execute();
-    }//readTags
+    }// readTags
        
     
     /**
-     * Метод отсеивает из значащих полей экземпляра настроек обработки набор
-     * неповторяющихся полей для генерации запроса выбранному листу.
+     * Filters distinct fields set from book parsing settings for tags query
+     * assembling.
      * 
-     * @param settingsInstatnce Экземпляр конфига параметров обработки
-     * @return Множество полоей для формирования запроса
+     * @param settingsInstatnce MS Excel book parsing settings instance
+     * @return Distinct field names set
      */
     private Set<String> _selectDistingFields(ExcelBookParsingDialogSettings settingsInstatnce)
     {
@@ -405,21 +400,20 @@ public class ExcelBook extends TagsSource implements ExcelBookObservable, ExcelB
         if (settingsInstatnce.getSourceSystemValueField() != null && !settingsInstatnce.getSourceSystemValueField().trim().equals("")) distinctFields.add(settingsInstatnce.getSourceSystemValueField());
         
         return distinctFields;
-    }//_selectDistingFields
+    }// _selectDistingFields
     
     
     /**
-     * Метод пытается получить настройки тага заданного типа из заданной строки 
-     * набора записей листа.
+     * Tries to receive tag's setting of given type from tags record set row. 
      * 
      * @throws Exception
-     * @param tagRow Строка из набора записей листа
-     * @param settingType id тип искомой настройки тага
-     * @param distinctFields Множество полей, вошедших в звапрос и доступных в строке из набора записей
-     * @param keyField Назавание поля, хранящего ключи настроек
-     * @param keyValue Значение ключа искомой настройки (например, "SP_HH")
-     * @param valueField Название поля, хранящего значение настройки
-     * @param possibleFlagField Назавание поля, хранящего флаг "Possible" настройки
+     * @param tagRow Tags record set row from MS Excel sheet
+     * @param settingType Type id of setting we're looking for
+     * @param distinctFields Set on field names, included into query and available in record set row
+     * @param keyField Name of field which contains settings keys
+     * @param keyValue Key value for sought-for setting (for example "SP_HH")
+     * @param valueField Name of field which contains settings values
+     * @param possibleFlagField Name of field which contains "Possible" flag values
      */
     private TagSetting _readTagSetting(HashMap tagRow, int settingType, Set distinctFields, 
         String keyField, String keyValue, String valueField, String possibleFlagField) throws Exception
@@ -428,7 +422,7 @@ public class ExcelBook extends TagsSource implements ExcelBookObservable, ExcelB
         TagSettingProperty resultSettingProperty;
         String tempKey;
         
-        //Если поле, хранящее ключ уставки нижнего трипа, входит в список отобранных в запрос полей и текущая запись содерджит в этом поле именно ключ нижней уставки:
+        // If fields with setting key and setting value are query fields:
         if (valueField != null && keyField != null && distinctFields.contains(valueField) && distinctFields.contains(keyField))
         {
             tempKey = (String)tagRow.get(keyField);
@@ -438,30 +432,31 @@ public class ExcelBook extends TagsSource implements ExcelBookObservable, ExcelB
                 resultSetting = new TagSetting();
                 resultSetting.setTypeId(settingType);
                 resultSetting.setValue((String)tagRow.get(valueField));
-            }//if
-                                                    
-        } else if (valueField != null && distinctFields.contains(valueField)) { //Если заданно только поле, храняещее величину нижнего трипа, создаем уставку без учета ключа:
+            }// if
+                     
+        // If only setting value field is set, create setting without key checking:
+        } else if (valueField != null && distinctFields.contains(valueField)) { 
             
             resultSetting = new TagSetting();
             resultSetting.setTypeId(settingType);
             resultSetting.setValue((String)tagRow.get(valueField));
-        }//else
+        }// else
                         
-        //Если настройка была создана, и в настрорйках указано поле, хранящее флаг "Possible", добавляем свойство настройки:
+        // If setting was created and parsing settings contain "Possible" flag field, add property to setting:
         if (resultSetting != null && possibleFlagField != null && distinctFields.contains(possibleFlagField))
         {
             String possibleFlagValue = (String)tagRow.get(possibleFlagField);
             
-            //Если значение флага - не пустая строка:
+            // If flag value string not empty:
             if (!possibleFlagValue.trim().equals(""))
             {    
                 resultSettingProperty = new TagSettingProperty();
                 resultSettingProperty.setTypeId(SettingsPropertiesTypes.POSSIBLE_SETTING_PROPERTY.ID);
                 resultSettingProperty.setValue((String)tagRow.get(possibleFlagField));
                 resultSetting.getProperties().add(resultSettingProperty);
-            }//if
-        }//if
+            }// if
+        }// if
         
         return resultSetting;
-    }//_readTagSetting
-}//ExcelBookDataSourceCreator
+    }// _readTagSetting
+}// ExcelBookDataSourceCreator

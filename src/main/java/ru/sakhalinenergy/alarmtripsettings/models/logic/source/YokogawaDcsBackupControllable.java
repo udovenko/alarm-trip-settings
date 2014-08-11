@@ -23,17 +23,18 @@ public interface YokogawaDcsBackupControllable extends TagsSourceControllable, Y
     
     
     /**
-     * Creates and launches thread for getting backup stations collection. 
-     * Notifies subscribers about thread events. 
+     * Creates a thread for getting Yokogawa DCS backup stations collection. 
+     * Subscribes model's events listeners on thread events and executes it.
      */
     public void readStations();
     
     
     /**
-     * Creates and launches a thread to read tags from found stations.
+     * Creates a thread for getting tags from found stations. Subscribes model's 
+     * events listeners on thread events and executes it.
      * 
      * @param selectedStations List of stations instances references, from which tags will be read
      */
     public void readTags(List<YgStationRecord> selectedStations);
     
-}//YokogawaDcsBackupControlable
+}// YokogawaDcsBackupControlable

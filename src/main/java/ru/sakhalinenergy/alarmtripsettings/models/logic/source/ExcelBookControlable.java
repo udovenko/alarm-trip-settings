@@ -5,17 +5,16 @@ import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
 
 
 /**
- * Интерфейс для управления моделью книги MS Excel контролдлером. Дополняет 
- * интерфейс для представлений доступом к сеттерам дополнительным ключам.
+ * Interface of MS Excel book model for using by controllers.
  * 
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.1
  */
 public interface ExcelBookControlable extends TagsSourceControllable
 {
   
     /**
-     * Метод отключает провайдер данных от книги.
+     * Disconnects MS Excel data provider form book.
      * 
      * @throws SQLException
      */
@@ -23,30 +22,30 @@ public interface ExcelBookControlable extends TagsSourceControllable
         
     
     /**
-     * Метод возвращает статус соединения с книгой MS Excel.
+     * Returns MS Excel book connection status.
      * 
      * @throws SQLException
-     * @return true, если соединение открыто, иначе false 
+     * @return True, if connection is open, else false 
      */
     public boolean isConnected() throws SQLException;
 
     
     /**
-     * Метод создает и запускает нить для подключения провайдера данных модели 
-     * к заданной книги MS Excel, а также чтения массива имен листов книги и их 
-     * полей. Исключения нити рассылаются подписчикам на исключения модели в 
-     * EDT. 
+     * Creates a thread for connecting provider to MS Excel book and reading 
+     * sheets and fields hash. Subscribes models events listeners on thread 
+     * events and executes it.
+     * 
+     * @param filePath Path to MS Excel book file
      */
     public void connectAndReadStructure(final String filePath);
     
     
     /**
-     * Метод создает и запускает нить для чтения тагов из выбранного листа 
-     * подключенной книги MS Excel. Исключения нити рассылаются подписчикам на
-     * исключения модели в EDT. 
+     * Creates a thread for reading tags from connected MS Excel book sheet. 
+     * Subscribes models events listeners on thread events and executes it.
      * 
-     * @param TagMask Маска тага, которая будет использоваться для обработки тагов выбранного листа
+     * @param tagMask Tag mask which will be used for processing tags in selected sheet
      */
     public void readTags(final TagMask tagMask);
     
-}//ExcelBookControlable
+}// ExcelBookControlable

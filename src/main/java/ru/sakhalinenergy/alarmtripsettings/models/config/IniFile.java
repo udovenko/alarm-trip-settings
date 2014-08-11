@@ -3,6 +3,7 @@ package ru.sakhalinenergy.alarmtripsettings.models.config;
 import java.io.File;
 import java.io.IOException;
 import org.ini4j.Wini;
+import ru.sakhalinenergy.alarmtripsettings.Main;
 
 
 /**
@@ -13,7 +14,7 @@ import org.ini4j.Wini;
  */
 public final class IniFile 
 {
-    private static final String INI_FILE_NAME = "config.ini";
+    private static final String INI_FILE_PATH = Main.JAR_DIR + File.separator + "config.ini";
             
     private static IniFile instance;
     private final Wini winiInstance;
@@ -26,15 +27,7 @@ public final class IniFile
      */
     private IniFile() throws IOException
     {
-        // Get jar execution directory:
-        String jarFilePath = IniFile.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String jarDirectory = new File(jarFilePath).getParent();
-        
-        // Get ".ini" file path: 
-        String filePath = jarDirectory + File.separator + INI_FILE_NAME;
-        filePath = filePath.replaceAll("%20"," "); 
-        
-        this.winiInstance =  new Wini(new File(filePath));
+        this.winiInstance =  new Wini(new File(INI_FILE_PATH));
     }// IniFile
     
     

@@ -5,7 +5,7 @@
 
     <groupId>ru.sakhalinenergy</groupId>
     <artifactId>alarm-trip-settings</artifactId>
-    <version>2.0.9.8</version>
+    <version>2.0.9.9</version>
     <packaging>jar</packaging>
 
     <name>AlarmTripSettings</name>
@@ -95,24 +95,18 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
+                <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
-                            <goal>copy-resources</goal>
+                            <goal>run</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/target</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${basedir}/src/main/config</directory>
-                                    <includes>
-                                        <include>config.ini</include>
-                                    </includes>
-                                </resource>
-                            </resources>
+                            <tasks>
+                                <copy file="${basedir}/src/main/config/config.ini" tofile="${basedir}/target/config.ini" />
+                                <mkdir dir="${basedir}/target/temp" />
+                            </tasks>
                         </configuration>
                     </execution>
                 </executions>

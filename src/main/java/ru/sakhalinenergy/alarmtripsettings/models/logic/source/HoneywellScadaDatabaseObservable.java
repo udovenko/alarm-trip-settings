@@ -8,7 +8,4 @@ package ru.sakhalinenergy.alarmtripsettings.models.logic.source;
  * @author Denis Udovenko
  * @version 1.0.2
  */
-public interface HoneywellScadaDatabaseObservable extends TagsSourceObservable
-{
-
-}//HoneywellScadaDatabaseObservable
+public interface HoneywellScadaDatabaseObservable extends TagsSourceObservable{}

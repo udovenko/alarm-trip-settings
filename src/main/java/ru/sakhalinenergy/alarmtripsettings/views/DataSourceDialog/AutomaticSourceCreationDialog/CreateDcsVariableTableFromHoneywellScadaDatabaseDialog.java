@@ -203,7 +203,19 @@ public class CreateDcsVariableTableFromHoneywellScadaDatabaseDialog extends Dial
 
         plantCodeLabelCaption.setText("Plant:");
 
+        plantComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                plantComboBoxActionPerformed(evt);
+            }
+        });
+
         tagFormatComboBoxLabel.setText("Tag format:");
+
+        tagFormatComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tagFormatComboBoxActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -294,6 +306,35 @@ public class CreateDcsVariableTableFromHoneywellScadaDatabaseDialog extends Dial
         );// trigger  
     }//GEN-LAST:event_runHoneywellScadaExportParsingButtonActionPerformed
 
+    
+    /**
+     * Handles plant code selection event and fires an event contains selected 
+     * plant instance.
+     * 
+     * @param evt Plants combo box event
+     */
+    private void plantComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_plantComboBoxActionPerformed
+        
+        Plant plant = getPlant();
+        CustomEvent selectNewPlantEvent = new CustomEvent(plant);
+        events.trigger(ViewEvent.CHANGE_PLANT_SELECTION, selectNewPlantEvent);
+    }//GEN-LAST:event_plantComboBoxActionPerformed
+
+    
+    /**
+     * Handles tag format selection event and fires an event contains selected
+     * tag mask instance.
+     * 
+     * @param evt Tag masks combo box event
+     */
+    private void tagFormatComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tagFormatComboBoxActionPerformed
+        
+        TagMask tagFormat = getTagMask();
+        CustomEvent selectNewTagFormatEvent = new CustomEvent(tagFormat);
+        this.events.trigger(ViewEvent.CHANGE_TAG_FORMAT_SELECTION, selectNewTagFormatEvent);
+    }//GEN-LAST:event_tagFormatComboBoxActionPerformed
+
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel plantCodeLabel;
     private javax.swing.JLabel plantCodeLabelCaption;

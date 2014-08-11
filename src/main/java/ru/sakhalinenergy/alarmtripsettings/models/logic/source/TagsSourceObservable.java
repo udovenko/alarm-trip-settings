@@ -1,6 +1,5 @@
 package ru.sakhalinenergy.alarmtripsettings.models.logic.source;
 
-import ru.sakhalinenergy.alarmtripsettings.events.EventsObservable;
 import java.util.List;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Source;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
@@ -9,38 +8,37 @@ import ru.sakhalinenergy.alarmtripsettings.models.ModelObservable;
 
 
 /**
- * Интерфейс модели источника данных тагов для использования представлениями. 
- * Допускает только использование геттерорв.
+ * Interface of tags data source model for using by views. Allows only getters.
  *
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.4
  */
 public interface TagsSourceObservable extends ModelObservable
 {
    
     /**
-     * Метод возвращает текущую сущность ассета модели.
+     * Returns current selected plant entity.
      * 
-     * @return Текущий код ассета
+     * @return Plant entity
      */
     public Plant getPlant();
     
     
     /**
-     * Возвращает текущую сущность источника данных тагов. Внимание: установка
-     * свойств сущности напрямую не будет вызывать рассылку событий для 
-     * представлений и контроллеров!
+     * Returns current tags data source entity. Attention: direct setting up of
+     * entity's properties will not trigger any events for views and 
+     * controllers.
      * 
-     * @return Cущность источника данных тагов
+     * @return Current data source entity
      */
     public Source getEntity();
 
     
     /**
-     * Возвращает коллекцию тагов, отсортированных по имени.
+     * Returns tags list sorted by tag name.
      * 
-     * @return Коллекцию тагов, отсортированных по имени
+     * @return Tags list sorted by tag name
      */
     public List<Tag> getSortedTags();
     
-}//TagsSourceObservable
+}// TagsSourceObservable

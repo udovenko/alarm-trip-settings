@@ -216,7 +216,7 @@ public class LoopsTable extends Model implements LoopsTableObservable
      */
     public void splitLoop(final List<Tag> tagsToSeparate)
     {
-        // Create an anonymous thread for loop split:
+        // Create a thread for loop split:
         WorkerThread loopSplitter = new WorkerThread()
         {
             @Override

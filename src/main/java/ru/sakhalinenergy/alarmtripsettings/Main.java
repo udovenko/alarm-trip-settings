@@ -1,5 +1,6 @@
 package ru.sakhalinenergy.alarmtripsettings;
 
+import java.io.File;
 import java.awt.Image;
 import java.awt.Toolkit;
 import javax.swing.ImageIcon;
@@ -21,18 +22,24 @@ import ru.sakhalinenergy.alarmtripsettings.controllers.MainFormController;
  * также метод - точку входа приложения.
  * 
  * @author Denis Udovenko
- * @version 1.0.9
+ * @version 1.1.1
  */
 public class Main 
 {
     //Информация о версии приложения:
-    public static final String VERSION = "2.0.9.8";
-    public static final String LAST_CHANGES_DATE = "08.08.2014";
-    public static final String LAST_CHANGES_TIME = "16:13";
+    public static final String VERSION = "2.0.9.9";
+    public static final String LAST_CHANGES_DATE = "11.08.2014";
+    public static final String LAST_CHANGES_TIME = "13:58";
     public static final String AUTHOR = "Denis Udovenko";
     
+    // Application .jar file directory:
+    public static final String JAR_DIR = _getJarDirectory();
+    
+    // Application temp directory:
+    public static final String TEMP_DIR = Main.JAR_DIR + File.separator + "temp";
+    
     // Images source directory:
-    public static final String IMAGES_SOURCE_DIR = "/images";
+    private static final String IMAGES_SOURCE_DIR = "/images";
     
     // Create application icons:
     public static final ImageIcon 
@@ -147,4 +154,19 @@ public class Main
         
         mainFormSettings.fetch();
     }//main
-}//Main
+    
+    
+    /**
+     * Returns application .jar file's directory.
+     * 
+     * @return Application .jar file's directory
+     */
+    private static String _getJarDirectory()
+    {
+        // Get jar execution directory:
+        String jarFilePath = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String jarDirectory = new File(jarFilePath).getParent();
+                
+        return jarDirectory.replaceAll("%20"," "); 
+    }// _getJarDirectory 
+}// Main

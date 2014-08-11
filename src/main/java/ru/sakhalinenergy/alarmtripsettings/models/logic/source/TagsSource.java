@@ -1,6 +1,5 @@
 package ru.sakhalinenergy.alarmtripsettings.models.logic.source;
 
-import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -10,8 +9,14 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.hibernate.Hibernate;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.WorkerThread;
 import ru.sakhalinenergy.alarmtripsettings.models.Model;
+import ru.sakhalinenergy.alarmtripsettings.models.storage.HibernateUtil;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Loop;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Tag;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagSetting;
@@ -20,18 +25,13 @@ import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Source;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.SourceProperty;
-import ru.sakhalinenergy.alarmtripsettings.models.storage.HibernateUtil;
-import org.hibernate.Hibernate;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+
 
 
 /**
- * Реализует логику для работы с набором тагов и контуров в рамках отдельного 
- * источника данных.
+ * Implement logic for work with tags set as within separate data source.
  *
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.5
  */
 public class TagsSource extends Model implements TagsSourceObservable, TagsSourceControllable
@@ -46,71 +46,71 @@ public class TagsSource extends Model implements TagsSourceObservable, TagsSourc
         
     
     /**
-     * Конструктор класса.
+     * Public constructor. Sets up initial source instance.
      * 
-     * @param source Экземпляр источника данных, который будет обернут в логику текущего класса
+     * @param source Source entity instance to be wrapped in current logic
      */
     public TagsSource(Source source)
     {
         this.source = source;
-    }//TagsSource
+    }// TagsSource
     
     
     /**
-     * Возвращает текущую сущность источника данных тагов. Внимание: установка
-     * свойств сущности напрямую не будет вызывать рассылку событий для 
-     * представлений и контроллеров!
+     * Returns current tags data source entity. Attention: direct setting up of
+     * entity's properties will not trigger any events for views and 
+     * controllers.
      * 
-     * @return Cущность источника данных тагов
+     * @return Current data source entity
      */
     @Override
     public Source getEntity()
     {
         return source;
-    }//getEntity
+    }// getEntity
     
     
     /**
-     * Метод возвращает текущую сущность ассета модели.
+     * Returns current selected plant entity.
      * 
-     * @return Текущий код ассета
+     * @return Plant entity
      */
     @Override
     public Plant getPlant()
     {
         return plant;
-    }//getPlantCode
+    }// getPlant
     
     
     /**
-     * Возвращает коллекцию тагов, отсортированных по имени.
+     * Returns tags list sorted by tag name.
      * 
-     * @return Коллекцию тагов, отсортированных по имени
+     * @return Tags list sorted by tag name
      */
     @Override
     public List<Tag> getSortedTags()
     {
         List sortedTags = new ArrayList(source.getTags());
         
-        //Сортируем коллекуию по типу настроек:
+        // Sort tags collection:
         Collections.sort(sortedTags, new Comparator<Tag>()
         {
             @Override
             public int compare(Tag tagOne, Tag tagTwo)
             {
                 return tagOne.getName().compareTo(tagTwo.getName());
-            }//compare
-        });//sort
+            }// compare
+        });// sort
         
         return sortedTags;
-    }//getSortedTags
+    }// getSortedTags
     
     
     /**
-     * Метод устанавливает значение текущей сущности ассета модели и рассылает 
-     * всем подписчикам соответвующее событие.
+     * Sets up current plant entity instance and triggers appropriate event for
+     * all subscribers.
      * 
-     * @param plant Код ассета
+     * @param plant Plant entity instance
      */
     @Override
     public void setPlant(Plant plant)
@@ -118,81 +118,81 @@ public class TagsSource extends Model implements TagsSourceObservable, TagsSourc
         this.plant = plant;
         CustomEvent bookConnectedEvent = new CustomEvent(new Object());
         events.trigger(SourceEvent.PLANT_CODE_SET, bookConnectedEvent);
-    }//setPlantCode
+    }// setPlant
     
     
     /**
-     * Устанавливает маску (регулярное выражение) для парсинга имен тага.
-     * 
-     * @param mask Маска для парсинга имен тага
+     * Sets up tag mask (format regular expression) for tag names parsing.
+     *  
+     * @param mask Tag mask entity
      */
     @Override
     public void setTagMask(TagMask mask)
     {
         tagMask = mask;
-    }//setTagMask
+    }// setTagMask
     
     
     /**
-     * Добавляет или обнорвляет свойство источника данных.
+     * Adds or updates data source property.
      * 
-     * @param property Свойство источника
+     * @param property Data source property
      */
     @Override
     public void setProperty(SourceProperty property)
     {
-        //If data source already has property with same type, just updatind its value:
+        // If data source already has property with same type, just update its value:
         for (SourceProperty tempProperty : source.getProperties())
         {
             if (tempProperty.getTypeId() == property.getTypeId())
             {
                 tempProperty.setValue(property.getValue());
                 return;
-            }//if
-        }//for
+            }// if
+        }// for
         
-        //If property with same type does not exist, adding new one:
+        // If property with same type does not exist, add new one:
         source.getProperties().add(property);
         property.setSource(source);
-    }//setProperty
+    }// setProperty
        
     
     /**
-     * Пытается разобрать полученное имя тага по заданной маске, и, если
-     * это удалось, создает соответствующие экземпляры тага и контура и 
-     * связывает их с текущим источником.
+     * Tries to parse given tag name according to current tag mask and, if it 
+     * was successful, crates appropriate tag and its parent loop instances,
+     * ties them to current data source and triggers TAG_SET_UPDATED event.
      * 
-     * @param tagName Имя тага
-     * @param mask Маска, по которой будет разбираться имя тага
-     * @return Ссылку на созданный таг
+     * @throws Exception
+     * @param tagName Tag name
+     * @return Created tag instance
      */
     @Override
     public Tag addTag(String tagName) throws Exception
     {
-        //Checking if current tag mask or plant is null:
+        // Check if current tag mask or plant is null:
         if (tagMask == null || plant == null) throw new Exception("Current plant or tag mask is null");
         
         Pattern pattern = Pattern.compile(tagMask.getMask());
         Matcher matcher = pattern.matcher(tagName);
 
-        //If tag name does not match regexp:
+        // If tag name does not match regexp:
         if (!matcher.matches()) throw new Exception("tag name \"" + tagName + "\" does not match selected mask");
                 
-        //Triyng to get plant code from tag name:
+        // Try to get plant code from tag name:
         String plantCode = null;
         try {
         
             plantCode = matcher.group("plant"); 
         } catch (Exception exception) {}
             
-        //If tag name has plant code but it does not match current plant code field:
+        // If tag name has plant code but it does not match current plant code field:
         if (plantCode != null && !plantCode.equals(plant.getId()))
         {
-            //Throwing tag creation error:
+            // Throw tag creation error:
             throw new Exception("Plant code in tag name \"" + tagName + "\" does not match selected plant code \"" + plant.getId() + "\"");
-        }//if
+        }// if
         
-        //Crearting a tag:
+        // Crearte a tag:
         Tag tag = new Tag();
         tag.setName(tagName.replace(" ", ""));
         tag.setModifier(matcher.group("modifier"));
@@ -210,33 +210,34 @@ public class TagsSource extends Model implements TagsSourceObservable, TagsSourc
             
         Loop existingLoop = _findLoop(loop);
             
-        //Если такой контур еще не создан и не является родительским ни для одного из тагов источника:
+        // If loop for created tag does not belong to current data source yet:
         if (existingLoop == null)
         {
             tag.setLoop(loop);
             loop.getTags().add(tag);
             
-        } else { //Если такой контур уже создан, добавляем таг к существующему контуру:
+        } else { // If loop for created tag exists in current data surce, just add new tag to it:
             
             tag.setLoop(existingLoop);
             existingLoop.getTags().add(tag);
-        }//else
+        }// else
             
         tag.setSource(source);
         source.getTags().add(tag);
                         
-        //Сообщаем подписчикам об обновлении данных в наборе тагов:
+        // Trigger "tag set updated" event:
         CustomEvent tagSetUpdatedEvent = new CustomEvent(tag);
         events.trigger(SourceEvent.TAG_SET_UPDATED, tagSetUpdatedEvent);
             
         return tag;
-    }//addTag
+    }// addTag
     
     
     /**
-     * Метод удаляет заданный таг из коллекции тагов источника.
+     * Removes given tag from data source's tags collection, triggers 
+     * TAG_SET_UPDATED event.
      * 
-     * @param tag Ссылка на таг, который необходимо удалить
+     * @param tag Tag instance to be removed
      */
     @Override
     public void removeTag(Tag tag)
@@ -249,36 +250,36 @@ public class TagsSource extends Model implements TagsSourceObservable, TagsSourc
         
         tagsToDelete.add(tag);
         
-        //Сообщаем подписчикам об обновлении данных в наборе тагов:
+        // Trigger "tag set updated" event:
         CustomEvent tagSetUpdatedEvent = new CustomEvent(new Object());
         events.trigger(SourceEvent.TAG_SET_UPDATED, tagSetUpdatedEvent);
-    }//removeTag
+    }// removeTag
     
     
     /**
-     * Метод добавляет настройку заданного тага.
+     * Adds setting to given tag, triggers TAG_SET_UPDATED event.
      * 
-     * @param tag Ссылка на таг, настройку котрого добавляем
-     * @param setting Экземпляр настройки, которую добавляем
+     * @param tag Tag instance to which new setting will be added
+     * @param setting Setting to be added
      */
     @Override
     public void addTagSetting(Tag tag, TagSetting setting)
     {
         setting.setValue(setting.getValue().replace(" ", ""));
-        if (_isEmptynessSynonim(setting.getValue())) return;
+        if (_isEmptynessSynonym(setting.getValue())) return;
                 
         tag.getSettings().add(setting);
         setting.setTag(tag);
                 
-        //Сообщаем подписчикам об обновлении данных в наборе тагов:
+        // Trigger "tag set updated" event:
         CustomEvent tagSetUpdatedEvent = new CustomEvent(new Object());
         events.trigger(SourceEvent.TAG_SET_UPDATED, tagSetUpdatedEvent);
-    }//addTagSetting
+    }// addTagSetting
     
     
     /**
-     * Updates particular existing tag setting value, is new value passes 
-     * emptiness checking. If value is updated, triggers TAG_SET_UPDATED_EVENT.
+     * Updates particular existing tag setting value if new value passes 
+     * emptiness checking. If value is updated, triggers TAG_SET_UPDATED event.
      * 
      * @param setting Tag setting instance
      * @param newValue New value to be set
@@ -288,19 +289,20 @@ public class TagsSource extends Model implements TagsSourceObservable, TagsSourc
     {
         newValue = newValue.replace(" ", "");
         
-        if (!_isEmptynessSynonim(newValue))
+        if (!_isEmptynessSynonym(newValue))
         {
             setting.setValue(newValue);
             
-            //Сообщаем подписчикам об обновлении данных в наборе тагов:
+            // Trigger "tag set updated" event:
             CustomEvent tagSetUpdatedEvent = new CustomEvent(new Object());
             events.trigger(SourceEvent.TAG_SET_UPDATED, tagSetUpdatedEvent);
-        }//if
-    }//updateTagSetting
+        }// if
+    }// updateTagSettingValue
     
     
     /**
-     * Removes given settings from its tag settings collection. 
+     * Removes given settings from its tag settings collection and triggers 
+     * TAG_SET_UPDATED event.
      * 
      * @param settingToRemove Setting to be removed instance
      */
@@ -310,15 +312,15 @@ public class TagsSource extends Model implements TagsSourceObservable, TagsSourc
         settingToRemove.getTag().getSettings().remove(settingToRemove);
         settingToRemove.setTag(null);
                 
-        //Сообщаем подписчикам об обновлении данных в наборе тагов:
+        // Trigger "tag set updated" event:
         CustomEvent tagSetUpdatedEvent = new CustomEvent(new Object());
         events.trigger(SourceEvent.TAG_SET_UPDATED, tagSetUpdatedEvent);
-    }//removeTagSetting
+    }// removeTagSetting
     
     
     /**
-     * Add property to particular tag setting, if given property value passes
-     * checking for an emptiness.
+     * Add property to particular tag setting and triggers TAG_SET_UPDATED 
+     * event, if given property value passes checking for an emptiness.
      * 
      * @param setting Tag setting to which a new property will added
      * @param property A new property which will be added
@@ -327,19 +329,20 @@ public class TagsSource extends Model implements TagsSourceObservable, TagsSourc
     public void addTagSettingProperty(TagSetting setting, TagSettingProperty property)
     {
         property.setValue(property.getValue().replace(" ", ""));
-        if (_isEmptynessSynonim(property.getValue())) return;
+        if (_isEmptynessSynonym(property.getValue())) return;
         
         setting.getProperties().add(property);
         property.setSetting(setting);
                 
-        //Сообщаем подписчикам об обновлении данных в наборе тагов:
+        // Trigger "tag set updated" event:
         CustomEvent tagSetUpdatedEvent = new CustomEvent(new Object());
         events.trigger(SourceEvent.TAG_SET_UPDATED, tagSetUpdatedEvent);
-    }//addTagSettingProperty
+    }// addTagSettingProperty
       
     
     /**
-     * Updates given property value if new value passes checking for emptiness.
+     * Updates given property value and triggers TAG_SET_UPDATED event, if new 
+     * value passes checking for emptiness.
      * 
      * @param property Property instance for which new value will be set
      * @param newValue New value for given property
@@ -349,19 +352,20 @@ public class TagsSource extends Model implements TagsSourceObservable, TagsSourc
     {
         newValue = newValue.replace(" ", "");
         
-        if (!_isEmptynessSynonim(newValue))
+        if (!_isEmptynessSynonym(newValue))
         {
             property.setValue(newValue);
             
-            //Сообщаем подписчикам об обновлении данных в наборе тагов:
+            // Trigger "tag set updated" event:
             CustomEvent tagSetUpdatedEvent = new CustomEvent(new Object());
             events.trigger(SourceEvent.TAG_SET_UPDATED, tagSetUpdatedEvent);
-        }//if
-    }//updateTagSettingPropertyValue
+        }// if
+    }// updateTagSettingPropertyValue
     
     
     /**
-     * Removes tag setting property from setting properties collection.
+     * Removes tag setting property from setting properties collection and 
+     * triggers TAG_SET_UPDATED event
      * 
      * @param propertyToRemove Tag setting property to be remove
      */
@@ -371,33 +375,33 @@ public class TagsSource extends Model implements TagsSourceObservable, TagsSourc
         propertyToRemove.getSetting().getProperties().remove(propertyToRemove);
         propertyToRemove.setSetting(null);
                 
-        //Сообщаем подписчикам об обновлении данных в наборе тагов:
+        // Trigger "tag set updated" event:
         CustomEvent tagSetUpdatedEvent = new CustomEvent(new Object());
         events.trigger(SourceEvent.TAG_SET_UPDATED, tagSetUpdatedEvent);
-    }//removeTagSettingProperty
+    }// removeTagSettingProperty
     
     
     /**
+     * Checks if setting value is synonym of nothing.
      * 
-     * 
+     * @param value Value to be checked
+     * @return True if value considered as empty, else false
      */
-    private boolean _isEmptynessSynonim(String value)
+    private boolean _isEmptynessSynonym(String value)
     {
-        //Check if setting value is synonim of nothing:
         Pattern pattern = Pattern.compile(EMPTY_VALUE_SYNONYMS);
         Matcher matcher = pattern.matcher(value);
         if (matcher.matches()) return true;
         
         return false;
-    }//checkValueForEmptynessSynonims
+    }// _isEmptynessSynonym
     
     
     /**
-     * Ищет среди тагов источника родительский контур, совпадающий по всем
-     * параметрам заданным и, в случае успеха, возвращает ссылку на него.
+     * Searches given loop in current source tags parent loops set.
      * 
-     * @param searchedLoop Экземпляр контура, совпадения с которым ищем среди родительских контуров тагов
-     * @return Ссылка на совпадающий контур или null
+     * @param searchedLoop Searched loop
+     * @return Reference to found loop or null if nothing was found
      */
     private Loop _findLoop(Loop searchedLoop)
     {
@@ -407,19 +411,19 @@ public class TagsSource extends Model implements TagsSourceObservable, TagsSourc
         {
             tempLoop = tempTag.getLoop();
             if (tempLoop.equals(searchedLoop)) return tempLoop;
-        }//for
+        }// for
         
         return null;
-    }//findLoop
+    }// _findLoop
     
     
     /**
-     * Создает и запускает нить для инициализиации коллекцию тагов источника и 
-     * их пустые родительские контуры для редактирования источника.
+     * Creates a thread for data source tags and loops collection initialization. 
+     * Subscribes models events listeners on thread events and executes it.
      */
     public void initialize()
     {
-        //Создаем анонимную нить для инициализации коллекции тагов источника данных:
+        // Create a thread:
         WorkerThread sourceInitializer = new WorkerThread()
         {
             @Override
@@ -435,7 +439,7 @@ public class TagsSource extends Model implements TagsSourceObservable, TagsSourc
                     progress.put(ProgressInfoKey.CYCLE_CAPTION, "Initiating remaining tags for selected source"); 
                     publish(progress);                    
                     
-                    //Создаем сессию и открываем транзакцию:
+                    // Create Hibernate session and open transaction:
                     session = HibernateUtil.getSessionFactory().openSession();
                     session.beginTransaction();
                 
@@ -446,7 +450,7 @@ public class TagsSource extends Model implements TagsSourceObservable, TagsSourc
                     {
                         Hibernate.initialize(tempTag.getLoop());
                         tempTag.getLoop().setTags(new HashSet());
-                    }//for
+                    }// for
                     
                     source = mergedSource;          
 
@@ -456,32 +460,31 @@ public class TagsSource extends Model implements TagsSourceObservable, TagsSourc
                 } catch (Exception exception) {
                 
                     _invokeExceptionInEdt("Data source saving error", exception, WorkerThread.Event.ERROR);
-                }//catch
+                }// catch
                 
                 return new HashMap();
-            }//doInBackground
-        };//sourceInitializer
+            }// doInBackground
+        };// sourceInitializer
         
-         //Подписываем подписчиков модели на события нити:
-        if (events.get(SourceEvent.THREAD_ERROR) != null) sourceInitializer.events.on(WorkerThread.Event.ERROR, events.get(SourceEvent.THREAD_ERROR));
-        if (events.get(SourceEvent.THREAD_WARNING) != null) sourceInitializer.events.on(WorkerThread.Event.WARNING, events.get(SourceEvent.THREAD_WARNING));
-        if (events.get(SourceEvent.THREAD_PROGRESS) != null) sourceInitializer.events.on(WorkerThread.Event.PROGRESS, events.get(SourceEvent.THREAD_PROGRESS));
-        if (events.get(SourceEvent.SOURCE_INITIALIZED) != null) sourceInitializer.events.on(WorkerThread.Event.WORK_DONE, events.get(SourceEvent.SOURCE_INITIALIZED));
-                 
+        // Resubscribe model's events listeners on thread events:
+        _subscribeOnThreadEvents(sourceInitializer, SourceEvent.THREAD_PROGRESS, 
+            SourceEvent.THREAD_WARNING, SourceEvent.THREAD_ERROR, SourceEvent.SOURCE_INITIALIZED);
+                
+        // Execute thread:
         sourceInitializer.execute();
-    }//initialize
+    }// initialize
     
     
     /**
-     * Creates and launches a thread for saving data source to storage and 
-     * handles tread events.
+     * Creates a thread for saving data source to storage. Subscribes models 
+     * events listeners on thread events and executes it.
      * 
      * @param createLoopsIfNotExist Flag defines a necessity of creations new loops and string tags within new loop 
      */
     @Override
     public void save(final boolean createLoopsIfNotExist)
     {
-        //Создаем анонимную нить для создания коллекции тагов из текущего листа книги MS Excel:
+        // Create a thread:
         WorkerThread sourceSaver = new WorkerThread()
         {
             @Override
@@ -492,14 +495,14 @@ public class TagsSource extends Model implements TagsSourceObservable, TagsSourc
                 
                 try
                 {
-                    //Создаем сессию и открываем транзакцию:
+                    // Create Hibernate session and open transaction:
                     Session session = HibernateUtil.getSessionFactory().openSession();
                     session.beginTransaction();
                     
-                    //Сохраняем источник данных и его свойства:
+                    // Save data source and its properties:
                     session.saveOrUpdate(source);
 
-                    //Создаем контур для тагов, или относим их к уже соществующему контуру:
+                    // Create loops for tags or tie tags to existing loops:
                     Loop tempLoop, tempExistingLoop;
                     List<Loop> tempExistingLoops;
                     
@@ -531,34 +534,31 @@ public class TagsSource extends Model implements TagsSourceObservable, TagsSourc
                             
                         } else session.saveOrUpdate(tempTag);
                         
-                        //Публикуем текущий прогресс:
+                        // Publish current progress:
                         progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, (int)((double)tagsProcessed / (double)tagsTotal * 90));
                         publish(progress);
                         
                         tagsProcessed++;
-                    }//for
+                    }// for
                     
-                    //Удаляем все таги, отмеченные к удалению:
-                    for (Tag tempTag : tagsToDelete)
-                    {
-                        session.delete(tempTag);
-                    }//for
-
-                    //Публикуем текущий прогресс:
+                    // Remove tags, marked to be deleted:
+                    for (Tag tempTag : tagsToDelete) session.delete(tempTag);
+                    
+                    // Publish current progress:
                     progress.put(ProgressInfoKey.CYCLE_CAPTION, "Removing obsolete loops");
                     progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, 92);
                     publish(progress);
                     
-                    //Удаляем все контуры, больше не содержащие ни одного тага:
+                    // Remove empty loops:
                     String hql = "DELETE FROM Loop loop_table WHERE (SELECT COUNT(id) FROM Tag WHERE loop_id = loop_table.id) = 0";
                     session.createQuery(hql).executeUpdate();
                     
-                    //Публикуем текущий прогресс:
+                    // Publish current progress:
                     progress.put(ProgressInfoKey.CYCLE_CAPTION, "Flushing updates");
                     progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, 97);
                     publish(progress);
                     
-                    //Закрываем транзакцию и сессию:
+                    // Flush changes, close transaction and Hibernate session:
                     session.flush();
                     session.getTransaction().commit();
                     session.close();
@@ -566,29 +566,29 @@ public class TagsSource extends Model implements TagsSourceObservable, TagsSourc
                 } catch (Exception exception) {
                 
                     _invokeExceptionInEdt("Data source saving error", exception, WorkerThread.Event.ERROR);
-                }//catch
+                }// catch
                 
                 return new HashMap();
-            }//doInBackground
-        };//WorkerThread
-                
-        //Подписываем подписчиков модели на события нити:
-        if (events.get(SourceEvent.THREAD_ERROR) != null) sourceSaver.events.on(WorkerThread.Event.ERROR, events.get(SourceEvent.THREAD_ERROR));
-        if (events.get(SourceEvent.THREAD_WARNING) != null) sourceSaver.events.on(WorkerThread.Event.WARNING, events.get(SourceEvent.THREAD_WARNING));
-        if (events.get(SourceEvent.THREAD_PROGRESS) != null) sourceSaver.events.on(WorkerThread.Event.PROGRESS, events.get(SourceEvent.THREAD_PROGRESS));
-        if (events.get(SourceEvent.SOURCE_SAVED) != null) sourceSaver.events.on(WorkerThread.Event.WORK_DONE, events.get(SourceEvent.SOURCE_SAVED));
+            }// doInBackground
+        };// WorkerThread
+             
+        // Resubscribe model's events listeners on thread events:
+        _subscribeOnThreadEvents(sourceSaver, SourceEvent.THREAD_PROGRESS, 
+            SourceEvent.THREAD_WARNING, SourceEvent.THREAD_ERROR, SourceEvent.SOURCE_SAVED);
         
+        // Execute thread:
         sourceSaver.execute();
-    }//save
+    }// save
     
     
     /**
-     * Создает и запускает нить для удаления источника данных и всей связанной 
-     * с ним информации из базы данных.
+     * Creates a thread for removing current data source and all its related 
+     * information form storage. Subscribes models events listeners on thread 
+     * events and executes it.
      */
     public void remove()
     {
-        //Создаем анонимную нить для создания коллекции тагов из текущего листа книги MS Excel:
+        // Create a thread:
         WorkerThread sourceRemover = new WorkerThread()
         {
             @Override
@@ -599,78 +599,77 @@ public class TagsSource extends Model implements TagsSourceObservable, TagsSourc
                 
                 try
                 {
-                    //Создаем сессию и открываем транзакцию:
+                    // Create Hibernate session and open transaction:
                     Session session = HibernateUtil.getSessionFactory().openSession();
                     session.beginTransaction();
                     
-                    //Публикуем текущий прогресс:
+                    // Publish current progress:
                     progress.put(ProgressInfoKey.CYCLE_CAPTION, "Removing source");
                     progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, 0);
                     publish(progress);
                     
-                    //Удаляем источник данных и его свойства:
+                    // Remove data source and its properties:
                     session.delete(source);
                     session.flush();
                            
-                    //Публикуем текущий прогресс:
+                    // Publish current progress:
                     progress.put(ProgressInfoKey.CYCLE_CAPTION, "Removing source tags");
                     progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, 20);
                     publish(progress);
                     
-                    //Удаляем все таги, ссылающиеся на несуществующий источник:
+                    // Remove all tags which reffer to deleted source:
                     String hql = "DELETE FROM Tag WHERE source_id NOT IN (SELECT id FROM Source)";
                     session.createQuery(hql).executeUpdate();
                     
-                    //Публикуем текущий прогресс:
+                    // Publish current progress:
                     progress.put(ProgressInfoKey.CYCLE_CAPTION, "Removing source tags settings");
                     progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, 40);
                     publish(progress);
                     
-                    //Удаляем все настройки тагов, ссылающиеся на несуществующий таг:
+                    // Remove all tags settngs which feffer to deleted tags:
                     hql = "DELETE FROM TagSetting WHERE tag_id NOT IN (SELECT id FROM Tag)";
                     session.createQuery(hql).executeUpdate();
                     
-                    //Публикуем текущий прогресс:
+                    // Publish current progress:
                     progress.put(ProgressInfoKey.CYCLE_CAPTION, "Removing source tags settings properties");
                     progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, 60);
                     publish(progress);
                     
-                    //Удаляем все свойства настроек тагов, ссылающиеся на несуществующие настройки:
+                    // Remove all tags settings properties which reffer to deleted tags settings:
                     hql = "DELETE FROM TagSettingProperty WHERE setting_id NOT IN (SELECT id FROM TagSetting)";
                     session.createQuery(hql).executeUpdate();
                     
-                    //Публикуем текущий прогресс:
+                    // Publish current progress:
                     progress.put(ProgressInfoKey.CYCLE_CAPTION, "Removing obsolete loops");
                     progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, 80);
                     publish(progress);
                     
-                    //Удаляем все контуры, больше не содержащие ни одного тага:
+                    // Remove all empty loops:
                     hql = "DELETE FROM Loop loop_table WHERE (SELECT COUNT(id) FROM Tag WHERE loop_id = loop_table.id) = 0";
                     session.createQuery(hql).executeUpdate();
 
-                    //Публикуем текущий прогресс:
+                    // Publish current progress:
                     progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, 100);
                     publish(progress);
                     
-                    //Закрываем транзакцию и сессию:
+                    // Close transaction and current session:
                     session.getTransaction().commit();
                     session.close();
                 
                 } catch (Exception exception) {
                     
                     _invokeExceptionInEdt("Data source removing error", exception, WorkerThread.Event.ERROR);
-                }//catch
+                }// catch
                 
                 return new HashMap();
-            }//doInBackground
-        };//WorkerThread
+            }// doInBackground
+        };// WorkerThread
         
-        //Подписываем подписчиков модели на события нити:
-        if (events.get(SourceEvent.THREAD_ERROR) != null) sourceRemover.events.on(WorkerThread.Event.ERROR, events.get(SourceEvent.THREAD_ERROR));
-        if (events.get(SourceEvent.THREAD_WARNING) != null) sourceRemover.events.on(WorkerThread.Event.WARNING, events.get(SourceEvent.THREAD_WARNING));
-        if (events.get(SourceEvent.THREAD_PROGRESS) != null) sourceRemover.events.on(WorkerThread.Event.PROGRESS, events.get(SourceEvent.THREAD_PROGRESS));
-        if (events.get(SourceEvent.SOURCE_REMOVED) != null) sourceRemover.events.on(WorkerThread.Event.WORK_DONE, events.get(SourceEvent.SOURCE_REMOVED));
-        
+        // Resubscribe model's events listeners on thread events:
+        _subscribeOnThreadEvents(sourceRemover, SourceEvent.THREAD_PROGRESS, 
+            SourceEvent.THREAD_WARNING, SourceEvent.THREAD_ERROR, SourceEvent.SOURCE_REMOVED);
+                
+        // Execute thread:
         sourceRemover.execute();
-    }//save
-}//Source
+    }// remove
+}// Source
