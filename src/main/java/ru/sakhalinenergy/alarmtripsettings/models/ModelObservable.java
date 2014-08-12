@@ -4,8 +4,11 @@ import ru.sakhalinenergy.alarmtripsettings.events.EventsObservable;
 
 
 /**
- *
+ * Interface of abstract model class. Contains common progress information keys
+ * for descendants interfaces.
+ * 
  * @author Denis Udovenko
+ * @version 1.0.1
  */
 public interface ModelObservable extends EventsObservable
 {

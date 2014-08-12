@@ -5,9 +5,9 @@ import ru.sakhalinenergy.alarmtripsettings.events.Events;
 
 
 /**
- * Абстрактный класс модели. Предоставляет наследникам ряд типовых полей.
+ * Abstract parent for all models classes.
  * 
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.3
  */
 public abstract class Model implements ModelObservable
@@ -17,26 +17,26 @@ public abstract class Model implements ModelObservable
     
     
     /**
-     * Метод добавляет подписчика на заданное событие модели.
+     * Adds new listener for given model's event.
      * 
-     * @param eventType Идентификатор типа события
-     * @param listener Экземпляр подписчика
+     * @param eventType Event type identifier
+     * @param listener Listener instance
      */
     public void on(Enum eventType, CustomEventListener listener)
     {
         this.events.on(eventType, listener);
-    }//on
+    }// on
     
     
     /**
-     * Метод удаляет всех подписчиков на заданное событие модели.
+     * Removes all model's subscribers for given event type.
      * 
-     * @param eventType Идентификатор типа события
+     * @param eventType Event type identifier
      */
     public void off(Enum eventType)
     {
         this.events.off(eventType);
-    }//off
+    }// off
     
     
     /**

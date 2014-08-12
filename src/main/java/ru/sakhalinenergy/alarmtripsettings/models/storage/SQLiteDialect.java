@@ -335,6 +335,7 @@ public class SQLiteDialect extends Dialect
      * 
      * @return Cascade delete feature presence
      */
+    @Override
     public boolean supportsCascadeDelete() 
     {
         return false;
