@@ -2,115 +2,110 @@ package ru.sakhalinenergy.alarmtripsettings.util;
 
 
 /**
- * Класс - библиотека небольших строковых утилит для задач парсинга номеров
- * тагов и инстансов бэкапов проектов.
+ * String utility methods library.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.3
+ * @author Denis Udovenko
+ * @version 1.0.3
  */
 public class StringUtils 
 {
     
     /**
-     * Метод находит первый нечисловой символ в строке. Если строка состоит 
-     * только из числовых символов, метод возвращает -1.
+     * Finds first non-numeric symbol in given string.
      * 
-     * @param   highstack  Строка, в котрой ищем первый нечисловой символ
-     * @return  void
+     * @param highstack String where non-numeric symbol will be searched
+     * @return Position of first non numeric symbol in given string or -1 if no non-numeric symbols were found 
      */
     public static int findFirstNonNumeric(String highstack)
     {
-        for (int i=0; i<highstack.length(); i++)
+        for (int i = 0; i < highstack.length(); i++)
         {
             char c = highstack.charAt(i);
             if (c < '0' || c > '9')
             {
                 return i;
-            }//if
-        }//for
+            }// if
+        }// for
         
         return -1;
-    }//findFirstNonNumeric
+    }// findFirstNonNumeric
     
     
     /**
-     * Метод находит последний нечисловой символ в строке. Если строка состоит 
-     * только из числовых символов, метод возвращает -1.
+     * Finds last non-numeric symbol in given string.
      * 
-     * @param   highstack  Строка, в котрой ищем первый нечисловой символ
-     * @return  void
+     * @param highstack String where non-numeric symbol will be searched
+     * @return Position of last non numeric symbol in given string or -1 if no non-numeric symbols were found 
      */
     public static int findLastNonNumeric(String highstack)
     {
         int lastIndex = -1;
         
-        for (int i=0; i<highstack.length(); i++)
+        for (int i = 0; i < highstack.length(); i++)
         {
             char c = highstack.charAt(i);
             if (c < '0' || c > '9')
             {
                 lastIndex = i;
-            }//if
-        }//for
+            }// if
+        }// for
         
         return lastIndex;
-    }//findLastNonNumeric
+    }// findLastNonNumeric
     
     
     /**
-     * Метод находит первый числовой символ в строке. Если строка состоит 
-     * только из буквенных символов, метод возвращает -1.
+     * Finds first numeric symbol in given string.
      * 
-     * @param   highstack  Строка, в котрой ищем первый числовой символ
-     * @return  void
+     * @param highstack String where numeric symbol will be searched
+     * @return Position of first numeric symbol in given string or -1 if no numeric symbols were found 
      */
     public static int findFirstNumeric(String highstack)
     {
-        for (int i=0; i<highstack.length(); i++)
+        for (int i = 0; i < highstack.length(); i++)
         {
             char c = highstack.charAt(i);
             if (c >= '0' && c <= '9')
             {
                 return i;
-            }//if
-        }//for
+            }// if
+        }// for
         
         return -1;
-    }//findFirstNumeric
+    }// findFirstNumeric
     
     
     /**
-     * Метод находит последний числовой символ в строке. Если строка состоит 
-     * только из буквенных символов, метод возвращает -1.
+     * Finds last numeric symbol in given string.
      * 
-     * @param   highstack  Строка, в котрой ищем первый числовой символ
-     * @return  void
+     * @param highstack String where numeric symbol will be searched
+     * @return Position of last numeric symbol in given string or -1 if no numeric symbols were found 
      */
     public static int findLastNumeric(String highstack)
     {
         int lastIndex = -1;
         
-        for (int i=0; i<highstack.length(); i++)
+        for (int i = 0; i < highstack.length(); i++)
         {
             char c = highstack.charAt(i);
             if (c >= '0' && c <= '9')
             {
                 lastIndex = i;
-            }//if
-        }//for
+            }// if
+        }// for
         
         return lastIndex;
-    }//findLastNumeric
+    }// findLastNumeric
     
     
     /**
-     * Метод реализует буквенно-числовой инкрмент строки, т.е., например, строка
-     * 124V3F становится 124V3G.
+     * Implements alphanumeric increment of given string, for example "124V3F"
+     * increments to "124V3G".
      * 
-     * @param   original  Исходная строка
-     * @param   minDigit  Начальный символ диапазона
-     * @param   maxDigit  Конечный символ диапазона
-     * @return  String
+     * @param original Input string
+     * @param minDigit Increment range minimum symbol
+     * @param maxDigit Increment range maximum symbol
+     * @return Incremented string
      */
     public static String incrementString(String original, char minDigit, char maxDigit)
     {
@@ -122,33 +117,33 @@ public class StringUtils
             char c = buf.charAt(index);
             c++;
        
-            //overflow, carry one:
+            // Overflow, carry one:
             if(c > maxDigit) 
             { 
                 buf.setCharAt(index, minDigit);
                 index--;
                 continue;
-            }//if
+            }// if
             
             buf.setCharAt(index, c);
             return buf.toString();
-        }//while
+        }// while
         
-        //overflow at the first "digit", need to add one more digit:
+        // Overflow at the first "digit", need to add one more digit:
         buf.insert(0, minDigit);
         
         return buf.toString();
-    }//incrementString
+    }// incrementString
     
     
     /**
-     * Метод реализует буквенно-числовой декремент строки, т.е., например, 
-     * строка 124V3G становится 124V3F.
+     * Implements alphanumeric decrement of given string, for example "124V3G"
+     * decrements to "124V3F".
      * 
-     * @param   original  Исходная строка
-     * @param   minDigit  Начальный символ диапазона
-     * @param   maxDigit  Конечный символ диапазона
-     * @return  String
+     * @param original Input string
+     * @param minDigit Decrement range minimum symbol
+     * @param maxDigit Decrement range maximum symbol
+     * @return Decremented string
      */
     public static String decrementString(String original, char minDigit, char maxDigit)
     {
@@ -160,21 +155,21 @@ public class StringUtils
             char c = buf.charAt(index);
             c--;
        
-            //overflow, carry one:
+            // Overflow, carry one:
             if(c < minDigit) 
             { 
                 buf.setCharAt(index, maxDigit);
                 index--;
                 continue;
-            }//if
+            }// if
             
             buf.setCharAt(index, c);
             return buf.toString();
-        }//whilw
+        }// while
         
-        //overflow at the first "digit", need to add one more digit:
+        // Overflow at the first "digit", need to add one more digit:
         buf.insert(0, maxDigit);
         
         return buf.toString();
-    }//incrementString
-}//StringUtils
+    }// decrementString
+}// StringUtils

@@ -2,35 +2,33 @@ package ru.sakhalinenergy.alarmtripsettings.util;
 
 
 /**
- * Класс - библиотека небольших утилит для чтения и преобразования типов данных.
+ * Data types utility methods library.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.1
+ * @author Denis Udovenko
+ * @version 1.0.1
  */
 public class DataTypesUtils 
 {
     
     /**
-     * Метод читает массив из двух байт как беззнаковое короткое целое и 
-     * возвращает его в виде обычного 4-байтового целого.
+     * Reads two bytes array as Unsigned short and returns result in Integer.
      * 
-     * @throws  RuntimeException
-     * @param   bytes             Входной массив из 2 байтов
-     * @return  Обычное целое, представляющее беззнаковое короткое
+     * @throws RuntimeException
+     * @param bytes Input bytes array
+     * @return Unsigned short stored in Integer
      */
     public static int readBytesAsUnsignedShort(byte[] bytes)
     {
         if (bytes.length != 2) throw new RuntimeException("Method readBytesAsUnsignedShort: Wrong parameter length!");
         else return ((bytes[0] & 0xFF) << 0) | ((bytes[1] & 0xFF) << 8);
-    }//readBytesAsUnsignedShort
+    }// readBytesAsUnsignedShort
     
     
     /**
-     * Метод читает массив из 4 байт как беззнаковое длинное целое, 
-     * предворительно проверяя длинну массива.
+     * Reads four bytes array as Unsigned integer and stores result in Long.
      * 
-     * @param   bytes  Массив байт, который необходимо прочитать как число
-     * @return  Беззнаковое целое, записанное в Long, если длина входного массива корректна 
+     * @param bytes Input bytes array
+     * @return Unsigned integer stored in Long
      */
     public static long readAsUnsignedLong(byte[] bytes)
     {
@@ -46,6 +44,6 @@ public class DataTypesUtils
         } else {
         
             throw new RuntimeException("Method readAsUnsignedLong: Wrong parameter length!");
-        }//else
-    }//readAsUnsignedLong
-}//DataTypesUtils
+        }// else
+    }// readAsUnsignedLong
+}// DataTypesUtils
