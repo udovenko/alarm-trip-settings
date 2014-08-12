@@ -1,167 +1,342 @@
 package ru.sakhalinenergy.alarmtripsettings.models.storage;
  
 import java.sql.Types;
- 
+import org.hibernate.Hibernate; 
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.function.StandardSQLFunction;
 import org.hibernate.dialect.function.SQLFunctionTemplate;
 import org.hibernate.dialect.function.VarArgsSQLFunction;
-import org.hibernate.Hibernate;
 
 
 /**
- *
+ * Hibernate dialect for SQLite databases.
  * 
- * @author virasak
+ * @author Virasak
+ * @version 1.0.3
  */
 public class SQLiteDialect extends Dialect
 {
     
     /**
-     * Конструктор класса.
+     * Public constructor. Registers column type and functions constants.
      */
     public SQLiteDialect() 
     {
-    registerColumnType(Types.BIT, "integer");
-    registerColumnType(Types.TINYINT, "tinyint");
-    registerColumnType(Types.SMALLINT, "smallint");
-    registerColumnType(Types.INTEGER, "integer");
-    registerColumnType(Types.BIGINT, "bigint");
-    registerColumnType(Types.FLOAT, "float");
-    registerColumnType(Types.REAL, "real");
-    registerColumnType(Types.DOUBLE, "double");
-    registerColumnType(Types.NUMERIC, "numeric");
-    registerColumnType(Types.DECIMAL, "decimal");
-    registerColumnType(Types.CHAR, "char");
-    registerColumnType(Types.VARCHAR, "varchar");
-    registerColumnType(Types.LONGVARCHAR, "longvarchar");
-    registerColumnType(Types.DATE, "date");
-    registerColumnType(Types.TIME, "time");
-    registerColumnType(Types.TIMESTAMP, "timestamp");
-    registerColumnType(Types.BINARY, "blob");
-    registerColumnType(Types.VARBINARY, "blob");
-    registerColumnType(Types.LONGVARBINARY, "blob");
-    // registerColumnType(Types.NULL, "null");
-    registerColumnType(Types.BLOB, "blob");
-    registerColumnType(Types.CLOB, "clob");
-    registerColumnType(Types.BOOLEAN, "integer");
+        registerColumnType(Types.BIT, "integer");
+        registerColumnType(Types.TINYINT, "tinyint");
+        registerColumnType(Types.SMALLINT, "smallint");
+        registerColumnType(Types.INTEGER, "integer");
+        registerColumnType(Types.BIGINT, "bigint");
+        registerColumnType(Types.FLOAT, "float");
+        registerColumnType(Types.REAL, "real");
+        registerColumnType(Types.DOUBLE, "double");
+        registerColumnType(Types.NUMERIC, "numeric");
+        registerColumnType(Types.DECIMAL, "decimal");
+        registerColumnType(Types.CHAR, "char");
+        registerColumnType(Types.VARCHAR, "varchar");
+        registerColumnType(Types.LONGVARCHAR, "longvarchar");
+        registerColumnType(Types.DATE, "date");
+        registerColumnType(Types.TIME, "time");
+        registerColumnType(Types.TIMESTAMP, "timestamp");
+        registerColumnType(Types.BINARY, "blob");
+        registerColumnType(Types.VARBINARY, "blob");
+        registerColumnType(Types.LONGVARBINARY, "blob");
+        registerColumnType(Types.BLOB, "blob");
+        registerColumnType(Types.CLOB, "clob");
+        registerColumnType(Types.BOOLEAN, "integer");
+
+        registerFunction("concat", new VarArgsSQLFunction(Hibernate.STRING, "", "||", ""));
+        registerFunction("mod", new SQLFunctionTemplate( Hibernate.INTEGER, "?1 % ?2" ));
+        registerFunction("substr", new StandardSQLFunction("substr", Hibernate.STRING));
+        registerFunction("substring", new StandardSQLFunction( "substr", Hibernate.STRING ));
+    }// SQLiteDialect
  
-    registerFunction( "concat", new VarArgsSQLFunction(Hibernate.STRING, "", "||", "") );
-    registerFunction( "mod", new SQLFunctionTemplate( Hibernate.INTEGER, "?1 % ?2" ) );
-    registerFunction( "substr", new StandardSQLFunction("substr", Hibernate.STRING) );
-    registerFunction( "substring", new StandardSQLFunction( "substr", Hibernate.STRING ) );
-  }
+    
+    /**
+     * Specifies identity columns feature presence.
+     * 
+     * @return Identity columns feature presence 
+     */
+    @Override
+    public boolean supportsIdentityColumns() 
+    {
+        return true;
+    }// supportsIdentityColumns 
  
-  public boolean supportsIdentityColumns() {
-    return true;
-  }
+
+    /**
+     * Specifies data type identity column feature presence.
+     *
+     * @return Data type identity column feature presence
+     */
+    @Override
+    public boolean hasDataTypeInIdentityColumn() 
+    {
+        // As specify in NHibernate dialect:
+        return false; 
+    }// hasDataTypeInIdentityColumn
  
-  /*
-  public boolean supportsInsertSelectIdentity() {
-    return true; // As specify in NHibernate dialect
-  }
-  */
  
-  public boolean hasDataTypeInIdentityColumn() {
-    return false; // As specify in NHibernate dialect
-  }
+    /**
+     * Returns identity column data type string.
+     * 
+     * @return Identity column data type string
+     */
+    @Override
+    public String getIdentityColumnString() 
+    {
+        return "integer";
+    }// getIdentityColumnString
  
-  /*
-  public String appendIdentitySelectToInsert(String insertString) {
-    return new StringBuffer(insertString.length()+30). // As specify in NHibernate dialect
-      append(insertString).
-      append("; ").append(getIdentitySelectString()).
-      toString();
-  }
-  */
+    
+    /**
+     * Returns identity selection query string.
+     * 
+     * @return Identity selection query string
+     */
+    @Override
+    public String getIdentitySelectString() 
+    {
+        return "select last_insert_rowid()";
+    }// getIdentitySelectString
  
-  public String getIdentityColumnString() {
-    // return "integer primary key autoincrement";
-    return "integer";
-  }
+    
+    /**
+     * Returns LIMIT keyword feature presence.
+     * 
+     * @return LIMIT keyword feature presence
+     */
+    @Override
+    public boolean supportsLimit() 
+    {
+        return true;
+    }// supportsLimit
+    
+    
+    /**
+     * Returns query limit string.
+     * 
+     * @param query Initial query string
+     * @param hasOffset Offset presence flag
+     * @return Query limit string
+     */
+    @Override
+    protected String getLimitString(String query, boolean hasOffset) 
+    {
+        return new StringBuffer(query.length() + 20).
+            append(query).
+            append(hasOffset ? " limit ? offset ?" : " limit ?").
+            toString();
+    }// getLimitString
  
-  public String getIdentitySelectString() {
-    return "select last_insert_rowid()";
-  }
+    
+    /**
+     * Specifies support of temporary tables.
+     * 
+     * @return Temporary tables feature presence
+     */
+    @Override
+    public boolean supportsTemporaryTables() 
+    {
+        return true;
+    }// supportsTemporaryTables
+    
  
-  public boolean supportsLimit() {
-    return true;
-  }
+    /**
+     * Specifies create temporary table query string.
+     * 
+     * @return Create temporary table query string
+     */
+    @Override
+    public String getCreateTemporaryTableString() 
+    {
+        return "create temporary table if not exists";
+    }// getCreateTemporaryTableString
  
-  protected String getLimitString(String query, boolean hasOffset) {
-    return new StringBuffer(query.length()+20).
-      append(query).
-      append(hasOffset ? " limit ? offset ?" : " limit ?").
-      toString();
-  }
+    
+    /**
+     * Specifies drop temporary table after use feature presence.
+     * 
+     * @return Drop temporary table after use feature presence
+     */
+    @Override
+    public boolean dropTemporaryTableAfterUse() 
+    {
+        return false;
+    }// dropTemporaryTableAfterUse
  
-  public boolean supportsTemporaryTables() {
-    return true;
-  }
+    
+    /**
+     * Specifies current timestamp selection feature presence.
+     * 
+     * @return Current timestamp selection feature presence
+     */
+    @Override
+    public boolean supportsCurrentTimestampSelection() 
+    {
+        return true;
+    }// supportsCurrentTimestampSelection
+    
  
-  public String getCreateTemporaryTableString() {
-    return "create temporary table if not exists";
-  }
+    /**
+     * Specifies if current time stamp select string is callable.
+     * 
+     * @return Current time stamp select string is callable flag
+     */
+    @Override
+    public boolean isCurrentTimestampSelectStringCallable()
+    {
+        return false;
+    }// isCurrentTimestampSelectStringCallable
  
-  public boolean dropTemporaryTableAfterUse() {
-    return false;
-  }
+    
+    /**
+     * Returns current timestamp selection string.
+     * 
+     * @return Current timestamp selection string
+     */
+    @Override
+    public String getCurrentTimestampSelectString() 
+    {
+        return "select current_timestamp";
+    }// getCurrentTimestampSelectString
  
-  public boolean supportsCurrentTimestampSelection() {
-    return true;
-  }
+    
+    /**
+     * Specifies union all feature presence.
+     * 
+     * @return Union all feature presence
+     */
+    @Override
+    public boolean supportsUnionAll() 
+    {
+        return true;
+    }// supportsUnionAll
+    
+    
+    /**
+     * Specifies alter table feature presence.
+     * 
+     * @return Alter table feature presence
+     */
+    @Override
+    public boolean hasAlterTable() 
+    {
+        // As specify in NHibernate dialect:
+        return false; 
+    }// hasAlterTable
  
-  public boolean isCurrentTimestampSelectStringCallable() {
-    return false;
-  }
+    
+    /**
+     * Specifies drop constraints feature presence.
+     * 
+     * @return Drop constraints feature presence
+     */
+    @Override
+    public boolean dropConstraints() 
+    {
+        return false;
+    }// dropConstraints
  
-  public String getCurrentTimestampSelectString() {
-    return "select current_timestamp";
-  }
+    
+    /**
+     * Returns add column query string.
+     * 
+     * @return Add column query string
+     */
+    @Override
+    public String getAddColumnString() 
+    {
+        return "add column";
+    }// getAddColumnString
+    
  
-  public boolean supportsUnionAll() {
-    return true;
-  }
+    /**
+     * Returns message for update query.
+     * 
+     * @return Message for update query
+     */
+    @Override
+    public String getForUpdateString() 
+    {
+        return "";
+    }// getForUpdateString
  
-  public boolean hasAlterTable() {
-    return false; // As specify in NHibernate dialect
-  }
+    
+    /**
+     * Specifies outer join update feature presence.
+     * 
+     * @return Outer join update feature presence
+     */
+    @Override
+    public boolean supportsOuterJoinForUpdate() 
+    {
+        return false;
+    }// supportsOuterJoinForUpdate
+    
+    
+    /**
+     * Returns an exception for drop foreign key query.
+     * 
+     * @return Exception for drop foreign key query
+     */
+    @Override
+    public String getDropForeignKeyString() 
+    {
+        throw new UnsupportedOperationException("No drop foreign key syntax supported by SQLiteDialect");
+    }// getDropForeignKeyString
+    
  
-  public boolean dropConstraints() {
-    return false;
-  }
+    /**
+     * Returns an exception for add foreign key constraint query.
+     * 
+     * @param constraintName Constraint name
+     * @param foreignKey Array of foreign key field names
+     * @param referencedTable Referenced table name
+     * @param primaryKey Array of primary key field names
+     * @param referencesPrimaryKey Specifies is constraint references primary key
+     * @return Exception for add foreign key constraint query
+     */
+    @Override
+    public String getAddForeignKeyConstraintString(String constraintName, String[] foreignKey, 
+        String referencedTable, String[] primaryKey, boolean referencesPrimaryKey) 
+    {
+        throw new UnsupportedOperationException("No add foreign key syntax supported by SQLiteDialect");
+    }// getAddForeignKeyConstraintString
  
-  public String getAddColumnString() {
-    return "add column";
-  }
+    
+    /**
+     * Returns an exception for add primary key constraint query.
+     * 
+     * @param constraintName Constraint name
+     * @return Exception for add primary key constraint query
+     */
+    @Override
+    public String getAddPrimaryKeyConstraintString(String constraintName) 
+    {
+        throw new UnsupportedOperationException("No add primary key syntax supported by SQLiteDialect");
+    }// getAddPrimaryKeyConstraintString
  
-  public String getForUpdateString() {
-    return "";
-  }
+    
+    /**
+     * Specifies "if exists" checking before table name feature presence.
+     * 
+     * @return "if exists" checking before table name feature presence
+     */
+    @Override
+    public boolean supportsIfExistsBeforeTableName() 
+    {
+        return true;
+    }// supportsIfExistsBeforeTableName
  
-  public boolean supportsOuterJoinForUpdate() {
-    return false;
-  }
- 
-  public String getDropForeignKeyString() {
-    throw new UnsupportedOperationException("No drop foreign key syntax supported by SQLiteDialect");
-  }
- 
-  public String getAddForeignKeyConstraintString(String constraintName,
-      String[] foreignKey, String referencedTable, String[] primaryKey,
-      boolean referencesPrimaryKey) {
-    throw new UnsupportedOperationException("No add foreign key syntax supported by SQLiteDialect");
-  }
- 
-  public String getAddPrimaryKeyConstraintString(String constraintName) {
-    throw new UnsupportedOperationException("No add primary key syntax supported by SQLiteDialect");
-  }
- 
-  public boolean supportsIfExistsBeforeTableName() {
-    return true;
-  }
- 
-  public boolean supportsCascadeDelete() {
-    return false;
-  }
-}//SQLiteDialect
+    
+    /**
+     * Specifies cascade delete feature presence.
+     * 
+     * @return Cascade delete feature presence
+     */
+    public boolean supportsCascadeDelete() 
+    {
+        return false;
+    }// supportsCascadeDelete
+}// SQLiteDialect
