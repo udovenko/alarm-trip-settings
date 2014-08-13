@@ -11,7 +11,7 @@ import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
  * @author Denis.Udovenko
  * @version 1.0.1
  */
-public abstract class DialogWithEvents extends javax.swing.JDialog
+public abstract class DialogWithEvents extends Dialog
 {
     
     protected Events events = new Events();

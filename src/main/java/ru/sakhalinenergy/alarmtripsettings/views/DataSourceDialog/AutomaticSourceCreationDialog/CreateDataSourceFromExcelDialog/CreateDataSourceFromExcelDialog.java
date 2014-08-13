@@ -1,39 +1,34 @@
 package ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.AutomaticSourceCreationDialog.CreateDataSourceFromExcelDialog;
 
+import java.awt.Component;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.table.TableColumn;
 import javax.swing.JComboBox;
 import javax.swing.DefaultCellEditor;
+import ru.sakhalinenergy.alarmtripsettings.Main;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
 import ru.sakhalinenergy.alarmtripsettings.implemented.SourcesTypes;
-import ru.sakhalinenergy.alarmtripsettings.Main;
-import java.awt.Component;
-import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
 import ru.sakhalinenergy.alarmtripsettings.models.config.ExcelBookParsingDialogSettingsObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
+import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsLogicObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.ExcelBookObservable;
-import ru.sakhalinenergy.alarmtripsettings.views.DialogWithEvents;
+import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.DataSourceDialog;
 import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.AutomaticSourceCreationDialog.ViewEvent;
 
 
 /**
- * Класс реализует диалог для создания источника данных из листа MS Excel. 
- * Является подписчиком полученной в конструкторе модели (паттерн Observer), 
- * также принимает подписку контроллеров на собственные события. В обоих случаях 
- * используется протокол вытягивания данных, т.е. подписчики не получают 
- * информацию из контекста событий, я запрашивают ее сами через интерфейс 
- * класса-субъекта.
+ * Implements dialog for creating data source from sheet of MS Excel book.
  * 
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.8
  */
-public class CreateDataSourceFromExcelDialog extends DialogWithEvents implements CreateDataSourceFromExcelDialogObservable
+public class CreateDataSourceFromExcelDialog extends DataSourceDialog implements CreateDataSourceFromExcelDialogObservable
 {
 
     private static final String NO_FIELD_SELECTED_VALUE = null;
@@ -51,95 +46,71 @@ public class CreateDataSourceFromExcelDialog extends DialogWithEvents implements
     private static final Byte RANGE_MAX_ROW_INDEX       = 5;
     private static final Byte UNITS_ROW_INDEX           = 6;
     private static final Byte SOURCE_SYSTEM_ROW_INDEX   = 7;
-    
-    private final ExcelBookObservable model;
-    private final PlantsLogicObservable plants;
-    private final TagMasksObservable tagMasks;
-    private final ExcelBookParsingDialogSettingsObservable config;
         
     
     /**
-     * Конструктор диалога.
+     * Public constructor. Sets up dialog fields and initializes components.
+     * 
+     * @param model Wrapper model for creating data source from MS Excel book
+     * @param plants Plants collection
+     * @param tagMasks Tag masks (formats) collection
+     * @param config Dialog configuration object
      */
     public CreateDataSourceFromExcelDialog(ExcelBookObservable model, PlantsLogicObservable plants, 
         TagMasksObservable tagMasks, ExcelBookParsingDialogSettingsObservable config) 
     {
-        this.model = model;
-        this.plants = plants;
-        this.tagMasks = tagMasks;
-        this.config = config;
+        super(model, plants, tagMasks, config);
                   
-        //Подписываеся на события модели:
+        // Subscribe on model's events:
         this.model.on(SourceEvent.BOOK_CONNECTED, new _BookConnectedEventHandler());
                     
         initComponents();
         
-        //Устанавливаем иконку диалога:
+        // Set dialog icon:
         this.setIconImage(Main.excelIcon.getImage());
         this.setModal(true);
         
-        //Запрещаем перемену столбоцов таблицы местами и изменение их ширины:
+        // Forbid columns permutation:
         parsingSettingsTable.getTableHeader().setReorderingAllowed(false);
         parsingSettingsTable.getTableHeader().setResizingAllowed(false);
         
-        //Формируем список доступных типов источников данных:
-        try
+        try // Set data source types list:
         {
             for (Class innerClass : SourcesTypes.class.getClasses())
             {
                 dataSourceToBeCreatedTypeComboBox.addItem(innerClass.getDeclaredField("NAME").get(null));
-            }//for
+            }// for
         } catch (Exception exception) {}
         dataSourceToBeCreatedTypeComboBox.setRenderer(new DataSourcesListCellRenderer());
         dataSourceToBeCreatedTypeComboBox.setSelectedItem(config.getDataSourceTypeName());
-    }//CreateDataSourceFromExcelDialog
+    }// CreateDataSourceFromExcelDialog
 
     
     /**
-     * Отрисовывает списки, применяет настройки диалога и выводит его на экран.
+     * Render required objects lists, applies dialog settings and shows form on
+     * the screen.
      * 
-     * @param parent Родительский фрейм, относитеольно которого будет выведен на экран диалог
+     * @param parent Parent component, relative to which current dialog will be rendered
      */
     public void render(Component parent)
     {
-        //Строим список производственных объектов:
-        for (Plant tempPlant : plants.getPlants()) this.plantsComboBox.addItem(tempPlant);
-        
-        //Восстанавливаем выбранный производственный объект:
-        for (Plant tempPlant : plants.getPlants())
-        {    
-            if (tempPlant.getId().equals(config.getPlantCode()))
-            {    
-                this.plantsComboBox.setSelectedItem(tempPlant);
-                break;
-            }//if
-        }//for
-        
-        //Формируем список форматов тагов:
-        for (TagMask tempMask : tagMasks.getMasks()) tagFormatComboBox.addItem(tempMask);
-        
-        //Восстанавливаем выбранную маску тага:
-        for (TagMask tempTagMask : this.tagMasks.getMasks())
-        {    
-            if (tempTagMask.getExample().equals(config.getTagFormat()))
-            {    
-                this.tagFormatComboBox.setSelectedItem(tempTagMask);
-                break;
-            }//if
-        }//for
-        
-        //Блокируем элементы управления настройками до получения соответствующего события от модели:
+        // Build palants list and restore plant selection:
+        _buildPlantsList(plantsComboBox);
+
+        // Build tag formats list and restore format selection:
+        _buildTagMasksList(tagFormatComboBox);
+                
+        // Block sheet settings controls until sheet structure will be received:
         _setSettingsEnabled(false);
         
-        //Вываодим диалог на экран:
+        // Set relative location and show dialog:
         this.setLocationRelativeTo(parent);
-        this.setVisible(true);
-    }//render
+        _show();
+    }// render
     
     
     /**
-     * Внутренний класс - обработчик события модели установки соединения с 
-     * книгой MS Excel.
+     * Inner class - handler for model's book connection establishing event.
      * 
      * @author Denis Udovenko
      * @version 1.0.2
@@ -149,19 +120,20 @@ public class CreateDataSourceFromExcelDialog extends DialogWithEvents implements
         @Override
         public void customEventOccurred(CustomEvent event)
         {
-            pathToSpreadsheetTextField.setText(model.getBookFilePath());
-            HashMap sheetsAndFields = model.getSheetsAndFields();
+            ExcelBookObservable castedModel = (ExcelBookObservable)model;
+            pathToSpreadsheetTextField.setText(castedModel.getBookFilePath());
+            HashMap sheetsAndFields = castedModel.getSheetsAndFields();
              _setSheetNamesList(new ArrayList(sheetsAndFields.keySet()));
              _setSettingsEnabled(true);
              _applyConfig();
-        }//customEventOccurred
-    }//_BookConnectedEventHandler
+        }// customEventOccurred
+    }// _BookConnectedEventHandler
     
     
     /**
-     * Метод устанавливает набор названий листов подключенной книги MS Excel.
+     * Sets up sheet names list of connected MS Excel book.
      * 
-     * @param sheetNamesList Набор названий листов книги MS Excel
+     * @param sheetNamesList Sheet names list
      */
     private void _setSheetNamesList(List<String> sheetNamesList)
     {
@@ -169,15 +141,14 @@ public class CreateDataSourceFromExcelDialog extends DialogWithEvents implements
         for (String name : sheetNamesList)
         {
             this.sourceSheetNameComboBox.addItem(name);
-        }//for
-    }//setSheetNamesList
+        }// for
+    }// setSheetNamesList
           
     
     /**
-     * Метод управляет доступностью элементов управления для настройки 
-     * параметров обработки книги MS Excel.
+     * Enable/disables MS Excel book parsing control elements.
      * 
-     * @param enabled Флаг, указывающий, сделать доступными или недоступными элементы управления диалога
+     * @param enabled Flag specifies should controls be enabled or disabled
      */
     private void _setSettingsEnabled(boolean enabled)
     {
@@ -185,438 +156,473 @@ public class CreateDataSourceFromExcelDialog extends DialogWithEvents implements
         this.tagNameFieldNameComboBox.setEnabled(enabled);
         this.parsingSettingsTable.setEnabled(enabled);
         this.runParsingButton.setEnabled(enabled);
-    }//disableSettings
+    }// disableSettings
           
     
     /**
-     * Метод применяет сохраненную конфигурацию к таблице нрастроек парсинга при
-     * условии, что сохраненные в конфигурации значения присцутвуют в списке
-     * доступных полей выбранного листа.
+     * Applies MS Excel book parsing configuration if configuration settings 
+     * match to received selected sheet structure.
      */
     private void _applyConfig()
     {
-        //Получаем список доступных полей текущего листа книги:
+        // Cast models to concrete classes:
+        ExcelBookObservable castedModel = (ExcelBookObservable)model;
+        ExcelBookParsingDialogSettingsObservable castedConfig = (ExcelBookParsingDialogSettingsObservable)config;
+
+        // Get available fields list of current sheet:
         String sheetName = (String)sourceSheetNameComboBox.getSelectedItem();
-        List<String> fields = (List)model.getSheetsAndFields().get(sheetName);
+        List<String> fields = (List)castedModel.getSheetsAndFields().get(sheetName);
         
-        //Восстанавливаем поле, хранящее имя тага:
-        for (String tempField : (List<String>)model.getSheetsAndFields().get(sheetName))
+        // Restore tag name selection:
+        for (String tempField : (List<String>)castedModel.getSheetsAndFields().get(sheetName))
         {    
-            if (tempField.equals(config.getTagNameField()))
+            if (tempField.equals(castedConfig.getTagNameField()))
             {    
                 this.tagNameFieldNameComboBox.setSelectedItem(tempField);
                 break;
-            }//if
-        }//for
+            }// if
+        }// for
                 
-        //Настрорйки для нижнего трипа:
-        if (fields.indexOf(config.getAlarmLowLowKeyField()) != -1) parsingSettingsTable.setValueAt(config.getAlarmLowLowKeyField(), ALARM_LOW_LOW_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
-        parsingSettingsTable.setValueAt(config.getAlarmLowLowKeyValue(), ALARM_LOW_LOW_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
-        if (fields.indexOf(config.getAlarmLowLowValueField()) != -1) parsingSettingsTable.setValueAt(config.getAlarmLowLowValueField(), ALARM_LOW_LOW_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
-        if (fields.indexOf(config.getAlarmLowLowPossibleFlagField()) != -1) parsingSettingsTable.setValueAt(config.getAlarmLowLowPossibleFlagField(), ALARM_LOW_LOW_ROW_INDEX, POSSIBLE_FLAG_FIELD_COLUMN_INDEX);
+        // Restore LL alarm parsing settings selection:
+        if (fields.indexOf(castedConfig.getAlarmLowLowKeyField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getAlarmLowLowKeyField(), ALARM_LOW_LOW_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
+        parsingSettingsTable.setValueAt(castedConfig.getAlarmLowLowKeyValue(), ALARM_LOW_LOW_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
+        if (fields.indexOf(castedConfig.getAlarmLowLowValueField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getAlarmLowLowValueField(), ALARM_LOW_LOW_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
+        if (fields.indexOf(castedConfig.getAlarmLowLowPossibleFlagField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getAlarmLowLowPossibleFlagField(), ALARM_LOW_LOW_ROW_INDEX, POSSIBLE_FLAG_FIELD_COLUMN_INDEX);
         
-        //Настройки для нижнего аларма:
-        if (fields.indexOf(config.getAlarmLowKeyField()) != -1) parsingSettingsTable.setValueAt(config.getAlarmLowKeyField(), ALARM_LOW_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
-        parsingSettingsTable.setValueAt(config.getAlarmLowKeyValue(), ALARM_LOW_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
-        if (fields.indexOf(config.getAlarmLowValueField()) != -1) parsingSettingsTable.setValueAt(config.getAlarmLowValueField(), ALARM_LOW_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
-        if (fields.indexOf(config.getAlarmLowPossibleFlagField()) != -1) parsingSettingsTable.setValueAt(config.getAlarmLowPossibleFlagField(), ALARM_LOW_ROW_INDEX, POSSIBLE_FLAG_FIELD_COLUMN_INDEX);
+        // Restore L alarm parsing settings selection:
+        if (fields.indexOf(castedConfig.getAlarmLowKeyField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getAlarmLowKeyField(), ALARM_LOW_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
+        parsingSettingsTable.setValueAt(castedConfig.getAlarmLowKeyValue(), ALARM_LOW_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
+        if (fields.indexOf(castedConfig.getAlarmLowValueField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getAlarmLowValueField(), ALARM_LOW_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
+        if (fields.indexOf(castedConfig.getAlarmLowPossibleFlagField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getAlarmLowPossibleFlagField(), ALARM_LOW_ROW_INDEX, POSSIBLE_FLAG_FIELD_COLUMN_INDEX);
         
-        //Настройки для верхнего аларма:
-        if (fields.indexOf(config.getAlarmHighKeyField()) != -1) parsingSettingsTable.setValueAt(config.getAlarmHighKeyField(), ALARM_HIGH_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
-        parsingSettingsTable.setValueAt(config.getAlarmHighKeyValue(), ALARM_HIGH_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
-        if (fields.indexOf(config.getAlarmHighValueField()) != -1) parsingSettingsTable.setValueAt(config.getAlarmHighValueField(), ALARM_HIGH_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
-        if (fields.indexOf(config.getAlarmHighPossibleFlagField()) != -1) parsingSettingsTable.setValueAt(config.getAlarmHighPossibleFlagField(), ALARM_HIGH_ROW_INDEX, POSSIBLE_FLAG_FIELD_COLUMN_INDEX);
+        // Restore H alarm parsing settings selection:
+        if (fields.indexOf(castedConfig.getAlarmHighKeyField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getAlarmHighKeyField(), ALARM_HIGH_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
+        parsingSettingsTable.setValueAt(castedConfig.getAlarmHighKeyValue(), ALARM_HIGH_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
+        if (fields.indexOf(castedConfig.getAlarmHighValueField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getAlarmHighValueField(), ALARM_HIGH_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
+        if (fields.indexOf(castedConfig.getAlarmHighPossibleFlagField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getAlarmHighPossibleFlagField(), ALARM_HIGH_ROW_INDEX, POSSIBLE_FLAG_FIELD_COLUMN_INDEX);
 
-        //Настройки для верхнего трипа:
-        if (fields.indexOf(config.getAlarmHighHighKeyField()) != -1) parsingSettingsTable.setValueAt(config.getAlarmHighHighKeyField(), ALARM_HIGH_HIGH_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
-        parsingSettingsTable.setValueAt(config.getAlarmHighHighKeyValue(), ALARM_HIGH_HIGH_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
-        if (fields.indexOf(config.getAlarmHighHighValueField()) != -1) parsingSettingsTable.setValueAt(config.getAlarmHighHighValueField(), ALARM_HIGH_HIGH_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
-        if (fields.indexOf(config.getAlarmHighHighPossibleFlagField()) != -1) parsingSettingsTable.setValueAt(config.getAlarmHighHighPossibleFlagField(), ALARM_HIGH_HIGH_ROW_INDEX, POSSIBLE_FLAG_FIELD_COLUMN_INDEX);
+        // Restore HH alarm parsing settings selection:
+        if (fields.indexOf(castedConfig.getAlarmHighHighKeyField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getAlarmHighHighKeyField(), ALARM_HIGH_HIGH_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
+        parsingSettingsTable.setValueAt(castedConfig.getAlarmHighHighKeyValue(), ALARM_HIGH_HIGH_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
+        if (fields.indexOf(castedConfig.getAlarmHighHighValueField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getAlarmHighHighValueField(), ALARM_HIGH_HIGH_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
+        if (fields.indexOf(castedConfig.getAlarmHighHighPossibleFlagField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getAlarmHighHighPossibleFlagField(), ALARM_HIGH_HIGH_ROW_INDEX, POSSIBLE_FLAG_FIELD_COLUMN_INDEX);
         
-        //Настройки для нижней границы диапазона:
-        if (fields.indexOf(config.getRangeMinKeyField()) != -1) parsingSettingsTable.setValueAt(config.getRangeMinKeyField(), RANGE_MIN_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
-        parsingSettingsTable.setValueAt(config.getRangeMinKeyValue(), RANGE_MIN_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
-        if (fields.indexOf(config.getRangeMinValueField()) != -1) parsingSettingsTable.setValueAt(config.getRangeMinValueField(), RANGE_MIN_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
+        // Restore range min parsing settings selection:
+        if (fields.indexOf(castedConfig.getRangeMinKeyField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getRangeMinKeyField(), RANGE_MIN_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
+        parsingSettingsTable.setValueAt(castedConfig.getRangeMinKeyValue(), RANGE_MIN_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
+        if (fields.indexOf(castedConfig.getRangeMinValueField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getRangeMinValueField(), RANGE_MIN_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
         
-        //Настройки для верхней границы диапазона:
-        if (fields.indexOf(config.getRangeMaxKeyField()) != -1) parsingSettingsTable.setValueAt(config.getRangeMaxKeyField(), RANGE_MAX_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
-        parsingSettingsTable.setValueAt(config.getRangeMaxKeyValue(), RANGE_MAX_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
-        if (fields.indexOf(config.getRangeMaxValueField()) != -1) parsingSettingsTable.setValueAt(config.getRangeMaxValueField(), RANGE_MAX_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
+        // Restore range max parsing settings selection:
+        if (fields.indexOf(castedConfig.getRangeMaxKeyField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getRangeMaxKeyField(), RANGE_MAX_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
+        parsingSettingsTable.setValueAt(castedConfig.getRangeMaxKeyValue(), RANGE_MAX_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
+        if (fields.indexOf(castedConfig.getRangeMaxValueField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getRangeMaxValueField(), RANGE_MAX_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
         
-        //Настройки для единиц измерения:
-        if (fields.indexOf(config.getUnitsKeyField()) != -1) parsingSettingsTable.setValueAt(config.getUnitsKeyField(), UNITS_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
-        parsingSettingsTable.setValueAt(config.getUnitsKeyValue(), UNITS_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
-        if (fields.indexOf(config.getUnitsValueField()) != -1) parsingSettingsTable.setValueAt(config.getUnitsValueField(), UNITS_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
+        // Restore engineering units parsing settings selection:
+        if (fields.indexOf(castedConfig.getUnitsKeyField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getUnitsKeyField(), UNITS_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
+        parsingSettingsTable.setValueAt(castedConfig.getUnitsKeyValue(), UNITS_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
+        if (fields.indexOf(castedConfig.getUnitsValueField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getUnitsValueField(), UNITS_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
         
-        //Настройки для верхней границы диапазона:
-        if (fields.indexOf(config.getSourceSystemKeyField()) != -1) parsingSettingsTable.setValueAt(config.getSourceSystemKeyField(), SOURCE_SYSTEM_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
-        parsingSettingsTable.setValueAt(config.getSourceSystemKeyValue(), SOURCE_SYSTEM_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
-        if (fields.indexOf(config.getSourceSystemValueField()) != -1) parsingSettingsTable.setValueAt(config.getSourceSystemValueField(), SOURCE_SYSTEM_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
-    }//_applyConfig
+        // Restore source system parsing settings selection:
+        if (fields.indexOf(castedConfig.getSourceSystemKeyField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getSourceSystemKeyField(), SOURCE_SYSTEM_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
+        parsingSettingsTable.setValueAt(castedConfig.getSourceSystemKeyValue(), SOURCE_SYSTEM_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
+        if (fields.indexOf(castedConfig.getSourceSystemValueField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getSourceSystemValueField(), SOURCE_SYSTEM_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
+    }// _applyConfig
 
     
     /**
-     * Возвращает текущий выбранный производственный объект.
+     * Returns selected plant.
      * 
-     * @return Текущий выбранный производственный объект
+     * @return Selected plant
      */
+    @Override
     public Plant getPlant()
     {
         return (Plant)plantsComboBox.getSelectedItem();
-    }//getPlant
+    }// getPlant
         
     
     /**
-     * Метод возвращает имя выбранного типа источника данных.
+     * Returns selected data source type.
      * 
-     * @return Имя выбранного типа источника данных
+     * @return Selected data source type
      */
+    @Override
     public String getDataSourceType()
     {
         return (String)dataSourceToBeCreatedTypeComboBox.getSelectedItem();
-    }//getDataSourceType
+    }// getDataSourceType
     
     
     /**
-     * Метод возвращает выбранную маску имени тага.
+     * Returns selected tag mask.
      *
-     * @return Маску имени тага
+     * @return Selected tag mask
      */
+    @Override
     public TagMask getTagMask()
     {
         return (TagMask)tagFormatComboBox.getSelectedItem();
-    }//getTagFormat
+    }// getTagMask
     
     
     /**
-     * Метод возвращает выбранное имя листа книги MS Excel.
+     * Returns selected sheet name of MS Excel book. 
      * 
-     * @return Выбранное имя листа книги MS Excel
+     * @return Selected sheet name
      */
+    @Override
     public String getSheetName()
     {
         return (String)this.sourceSheetNameComboBox.getSelectedItem();
-    }//getSheetName
+    }// getSheetName
     
     
     /**
-     * Метод возвращает выбранное поле, содержащее имя тага.
+     * Returns field selected as tag name container.
      * 
-     * @return Поле, содержащее имя тага
+     * @return Field selected as tag name container
      */
+    @Override
     public String getTagFieldName()
     {
         return (String)this.tagNameFieldNameComboBox.getSelectedItem();
-    }//getTagFieldName
+    }// getTagFieldName
     
     
     /**
-     * Метод возвращает имя поля, хранящего ключ уставки нижнего трипа.
+     * Returns field selected as LL alarm setting key container.
      * 
-     * @return Имя поля, хранящего ключ уставки нижнего трипа
+     * @return Field selected as LL alarm key container
      */
+    @Override
     public String getAlarmLowLowKeyField()
     {
         return (String)this.parsingSettingsTable.getValueAt(ALARM_LOW_LOW_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
-    }//getAlarmLowLowKeyField
+    }// getAlarmLowLowKeyField
     
     
     /**
-     * Метод возвращает значение ключа уставки нижнего трипа.
+     * Returns field selected as LL alarm setting key value container.
      * 
-     * @return Значение ключа уставки нижнего трипа
+     * @return Field selected as LL alarm setting key value container
      */
+    @Override
     public String getAlarmLowLowKeyValue()
     {
         return (String)this.parsingSettingsTable.getValueAt(ALARM_LOW_LOW_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
-    }//getAlarmLowLowKeyValue
+    }// getAlarmLowLowKeyValue
     
     
     /**
-     * Метод возвращаяет имя поля, хранящего значение уставки нижнего трипа.
+     * Returns field selected as LL alarm setting value container.
      * 
-     * @return Имя поля, хранящего значение уставки нижнего трипа
+     * @return Field selected as LL alarm setting value container
      */
+    @Override
     public String getAlarmLowLowValueField()
     {
         return (String)this.parsingSettingsTable.getValueAt(ALARM_LOW_LOW_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
-    }//getAlarmLowLowValueField
+    }// getAlarmLowLowValueField
     
     
     /**
-     * Метод возращает имя поля, хранящего значение флага "Possible" нижнего трипа.
+     * Returns field selected as LL alarm setting "Possible" flag container.
      * 
-     * @return Имя поля, хранящего значение флага "Possible" нижнего трипа
+     * @return Field selected as LL alarm setting "Possible" flag container
      */
+    @Override
     public String getAlarmLowLowPossibleFlagField()
     {
         return (String)this.parsingSettingsTable.getValueAt(ALARM_LOW_LOW_ROW_INDEX, POSSIBLE_FLAG_FIELD_COLUMN_INDEX);
-    }//getAlarmLowLowPossibleFlagField
+    }// getAlarmLowLowPossibleFlagField
     
     
     /**
-     * Метод возвращает имя поля, хранящего ключ уставки нижнего аларма.
+     * Returns field selected as L alarm setting key container.
      * 
-     * @return Имя поля, хранящего ключ уставки нижнего аларма
+     * @return Field selected as L alarm key container
      */
+    @Override
     public String getAlarmLowKeyField()
     {
         return (String)this.parsingSettingsTable.getValueAt(ALARM_LOW_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
-    }//getAlarmLowKeyField
+    }// getAlarmLowKeyField
     
     
     /**
-     * Метод возвращает значение ключа уставки нижнего аларма.
+     * Returns field selected as L alarm setting key value container.
      * 
-     * @return Значение ключа уставки нижнего аларма
+     * @return Field selected as L alarm setting key value container
      */
+    @Override
     public String getAlarmLowKeyValue()
     {
         return (String)this.parsingSettingsTable.getValueAt(ALARM_LOW_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
-    }//getAlarmLowKeyValue
+    }// getAlarmLowKeyValue
     
     
     /**
-     * Метод возвращает имя поля, хранящего значение уставки нижнего аларма.
+     * Returns field selected as L alarm setting value container.
      * 
-     * @return Имя поля, хранящего значение уставки нижнего аларма
+     * @return Field selected as L alarm setting value container
      */
+    @Override
     public String getAlarmLowValueField()
     {
         return (String)this.parsingSettingsTable.getValueAt(ALARM_LOW_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
-    }//getAlarmLowValueField
+    }// getAlarmLowValueField
     
     
     /**
-     * Метод возвращает имя поля, хранящего значение флага "Possible" нижнего трипа.
+     * Returns field selected as L alarm setting "Possible" flag container.
      * 
-     * @return Имя поля, хранящего значение флага "Possible" нижнего трипа
+     * @return Field selected as L alarm setting "Possible" flag container
      */
+    @Override
     public String getAlarmLowPossibleFlagField()
     {
         return (String)this.parsingSettingsTable.getValueAt(ALARM_LOW_ROW_INDEX, POSSIBLE_FLAG_FIELD_COLUMN_INDEX);
-    }//getAlarmLowPossibleFlagField
+    }// getAlarmLowPossibleFlagField
     
     
     /**
-     * Метод возвращает имя поля, хранящего ключ уставки верхнего аларма.
+     * Returns field selected as H alarm setting key container.
      * 
-     * @return Имя поля, хранящего ключ уставки верхнего аларма
+     * @return Field selected as H alarm key container
      */
+    @Override
     public String getAlarmHighKeyField()
     {
         return (String)this.parsingSettingsTable.getValueAt(ALARM_HIGH_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
-    }//getAlarmHighKeyField
+    }// getAlarmHighKeyField
     
     
     /**
-     * Метод возвращает значение ключа уставки верхнего аларма.
+     * Returns field selected as H alarm setting key value container.
      * 
-     * @return Значение ключа уставки верхнего аларма
+     * @return Field selected as H alarm setting key value container
      */
+    @Override
     public String getAlarmHighKeyValue()
     {
         return (String)this.parsingSettingsTable.getValueAt(ALARM_HIGH_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
-    }//getAlarmHighKeyValue
+    }// getAlarmHighKeyValue
     
     
     /**
-     * Метод возвращает имя поля, хранящего значение уставки верхнего аларма.
+     * Returns field selected as H alarm setting value container.
      * 
-     * @return Имя поля, хранящего значение уставки верхнего аларма
+     * @return Field selected as H alarm setting value container
      */
+    @Override
     public String getAlarmHighValueField()
     {
         return (String)this.parsingSettingsTable.getValueAt(ALARM_HIGH_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
-    }//getAlarmHighValueField
+    }// getAlarmHighValueField
     
     
     /**
-     * Метод возвращает имя поля, хранящего значение флага "Possible" верхнего аларма.
+     * Returns field selected as H alarm setting "Possible" flag container.
      * 
-     * @return Имя поля, хранящего значение флага "Possible" верхнего аларма
+     * @return Field selected as H alarm setting "Possible" flag container
      */
+    @Override
     public String getAlarmHighPossibleFlagField()
     {
         return (String)this.parsingSettingsTable.getValueAt(ALARM_HIGH_ROW_INDEX, POSSIBLE_FLAG_FIELD_COLUMN_INDEX);
-    }//getAlarmHighPossibleFlagField
+    }// getAlarmHighPossibleFlagField
     
     
     /**
-     * Метод возвращает имя поля, хранящего ключ уставки верхнего трипа.
+     * Returns field selected as HH alarm setting key container.
      * 
-     * @return Имя поля, хранящего ключ уставки верхнего трипа
+     * @return Field selected as HH alarm key container
      */
+    @Override
     public String getAlarmHighHighKeyField()
     {
         return (String)this.parsingSettingsTable.getValueAt(ALARM_HIGH_HIGH_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
-    }//getAlarmHighHighKeyField
+    }// getAlarmHighHighKeyField
     
     
     /**
-     * Метод возвращает значение ключа уставки верхнего трипа.
+     * Returns field selected as HH alarm setting key value container.
      * 
-     * @return Значение ключа уставки верхнего трипа
+     * @return Field selected as HH alarm setting key value container
      */
+    @Override
     public String getAlarmHighHighKeyValue()
     {
         return (String)this.parsingSettingsTable.getValueAt(ALARM_HIGH_HIGH_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
-    }//getAlarmHighHighKeyValue
+    }// getAlarmHighHighKeyValue
     
     
     /**
-     * Метод возвращает имя поля, хранящего значение уставки верхнего трипа.
+     * Returns field selected as HH alarm setting value container.
      * 
-     * @return Имя поля, хранящего значение уставки верхнего трипа
+     * @return Field selected as HH alarm setting value container
      */
+    @Override
     public String getAlarmHighHighValueField()
     {
         return (String)this.parsingSettingsTable.getValueAt(ALARM_HIGH_HIGH_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
-    }//getAlarmHighHighValueField
+    }// getAlarmHighHighValueField
     
     
     /**
-     * Метод возвращает имя поля, хранящего значение флага "Possible" верхнего трипа.
+     * Returns field selected as HH alarm setting "Possible" flag container.
      * 
-     * @return Имя поля, хранящего значение флага "Possible" верхнего трипа
+     * @return Field selected as HH alarm setting "Possible" flag container
      */
+    @Override
     public String getAlarmHighHighPossibleFlagField()
     {
         return (String)this.parsingSettingsTable.getValueAt(ALARM_HIGH_HIGH_ROW_INDEX, POSSIBLE_FLAG_FIELD_COLUMN_INDEX);
-    }//getAlarmHighHighPossibleFlagField
+    }// getAlarmHighHighPossibleFlagField
     
     
     /**
-     * Метод возвращает имя поля, хранящего ключ нижней границы диапазона.
+     * Returns field selected as range min setting key container.
      * 
-     * @return Имя поля, хранящего ключ нижней границы диапазона
+     * @return Field selected as range min setting key container
      */
+    @Override
     public String getRangeMinKeyField()
     {
         return (String)this.parsingSettingsTable.getValueAt(RANGE_MIN_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
-    }//getRangeMinKeyField
+    }// getRangeMinKeyField
     
     
     /**
-     * Метод возвращает значение ключа нижней границы диапазона.
+     * Returns field selected as range min setting key value container.
      * 
-     * @return Значение ключа нижней границы диапазона
+     * @return Field selected as range min setting key value container
      */
+    @Override
     public String getRangeMinKeyValue()
     {
         return (String)this.parsingSettingsTable.getValueAt(RANGE_MIN_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
-    }//getRangeMinKeyValue
+    }// getRangeMinKeyValue
     
     
     /**
-     * Метод возвращает имя поля, хранящего значение нижней границы диапазона.
+     * Returns field selected as range min setting value container.
      * 
-     * @return Имя поля, хранящего значение нижней границы диапазона
+     * @return Field selected as range min setting value container
      */
+    @Override
     public String getRangeMinValueField()
     {
         return (String)this.parsingSettingsTable.getValueAt(RANGE_MIN_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
-    }//getRangeMinValueField
+    }// getRangeMinValueField
         
     
     /**
-     * Метод возвращает имя поля, хранящего ключ верхней границы диапазона.
+     * Returns field selected as range max setting key container.
      * 
-     * @return Имя поля, хранящего ключ верхней границы диапазона
+     * @return Field selected as range max setting key container
      */
+    @Override
     public String getRangeMaxKeyField()
     {
         return (String)this.parsingSettingsTable.getValueAt(RANGE_MAX_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
-    }//getRangeMaxKeyField
+    }// getRangeMaxKeyField
     
     
     /**
-     * Метод возвращает значение ключа верхней границы диапазона.
+     * Returns field selected as range max setting key value container.
      * 
-     * @return Значение ключа верхней границы диапазона
+     * @return Field selected as range max setting key value container
      */
+    @Override
     public String getRangeMaxKeyValue()
     {
         return (String)this.parsingSettingsTable.getValueAt(RANGE_MAX_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
-    }//setRangeMaxKeyValue
+    }// setRangeMaxKeyValue
     
     
     /**
-     * Метод возвращает имя поля, хранящего значение верхней границы диапазона.
+     * Returns field selected as range max setting value container.
      * 
-     * @return Имя поля, хранящего значение верхней границы диапазона
+     * @return Field selected as range max setting value container
      */
+    @Override
     public String getRangeMaxValueField()
     {
         return (String)this.parsingSettingsTable.getValueAt(RANGE_MAX_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
-    }//getRangeMaxValueField
+    }// getRangeMaxValueField
     
     
     /**
-     * Метод возвращает имя поля, хранящего ключ единиц измерения.
+     * Returns field selected as engineering units setting key container.
      * 
-     * @return Имя поля, хранящего ключ единиц измерения
+     * @return Field selected as engineering units setting key container
      */
+    @Override
     public String getUnitsKeyField()
     {
         return (String)this.parsingSettingsTable.getValueAt(UNITS_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
-    }//getUnitsKeyField
+    }// getUnitsKeyField
     
     
     /**
-     * Метод возвращает значение ключа единиц измерения.
+     * Returns field selected as engineering units setting key value container.
      * 
-     * @return Значение ключа единиц измерения
+     * @return Field selected as engineering units setting key value container
      */
+    @Override
     public String getUnitsKeyValue()
     {
         return (String)this.parsingSettingsTable.getValueAt(UNITS_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
-    }//getUnitsKeyValue
+    }// getUnitsKeyValue
     
     
     /**
-     * Метод возвращает имя поля, хранящего значение единиц измерения.
+     * Returns field selected as engineering units setting value container.
      * 
-     * @return Имя поля, хранящего значение единиц измерения
+     * @return Field selected as engineering units setting value container
      */
+    @Override
     public String getUnitsValueField()
     {
         return (String)this.parsingSettingsTable.getValueAt(UNITS_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
-    }//getUnitsValueField
+    }// getUnitsValueField
     
     
     /**
-     * Метод возвращвает имя поля, хранящего ключ названия системы-источника 
-     * данных.
+     * Returns field selected as source system setting key container.
      * 
-     * @return Имя поля, хранящего ключ названия системы-источника данных
+     * @return Field selected as source system units setting key container
      */
+    @Override
     public String getSourceSystemKeyField()
     {
         return (String)this.parsingSettingsTable.getValueAt(SOURCE_SYSTEM_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
-    }//getSourceSystemKeyField
+    }// getSourceSystemKeyField
     
     
     /**
-     * Метод возвращает значение ключа названия системы-источника данных.
+     * Returns field selected as source system setting key value container.
      * 
-     * @return Значение ключа названия системы-источника данных
+     * @return Field selected as source system setting key value container
      */
+    @Override
     public String getSourceSystemKeyValue()
     {
         return (String)this.parsingSettingsTable.getValueAt(SOURCE_SYSTEM_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
-    }//getSourceSystemKeyValue
+    }// getSourceSystemKeyValue
     
     
     /**
-     * Метод возвращает имя поля, хранящего название системы-источника данных.
+     * Returns field selected as source system setting value container.
      * 
-     * @return Имя поля, хранящего название системы-источника данных
+     * @return Field selected as source system setting value container
      */
+    @Override
     public String getSourceSystemValueField()
     {
         return (String)this.parsingSettingsTable.getValueAt(SOURCE_SYSTEM_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
-    }//getSourceSystemValueField
+    }// getSourceSystemValueField
    
     
     /**
@@ -805,33 +811,31 @@ public class CreateDataSourceFromExcelDialog extends DialogWithEvents implements
 
     
     /**
-     * Метод рассылает событие клика по кнопке для выбора пути к файлу книги 
-     * MS Excel всем подписчикам.
-     *  
-     * @param   evt  Cобытие клика
-     * @return  void
+     * Triggers click select path to MS Excel book event for all subscribers.
+     * 
+     * @param evt Click event object
      */
     private void selectPathToSpreadsheetTextFieldButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectPathToSpreadsheetTextFieldButtonActionPerformed
         
-        CustomEvent selectPathToSpreadsheetTextFieldButtonClickEvent = new CustomEvent(this);
+        CustomEvent selectPathToSpreadsheetTextFieldButtonClickEvent = new CustomEvent(new Object());
         this.events.trigger(ViewEvent.SELECT_PATH_TO_SPREADSHEET_TEXT_FIELD_BUTTON_CLICK, selectPathToSpreadsheetTextFieldButtonClickEvent);       
     }//GEN-LAST:event_selectPathToSpreadsheetTextFieldButtonActionPerformed
 
     
     /**
-     * Метод устанавливает наборы значений доступных полей выбранного листа
-     * документа в элементах управления диалога.
+     * Sets up available headers list for selected sheet in dialog control 
+     * elements.
      * 
-     * @param evt Событие выбора в комбобокске
+     * @param evt Sheet names combo box selection event object
      */
     private void sourceSheetNameComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sourceSheetNameComboBoxActionPerformed
         
         String sheetName = (String)sourceSheetNameComboBox.getSelectedItem();
-        List<String> fields = (List)model.getSheetsAndFields().get(sheetName);
+        List<String> fields = (List)((ExcelBookObservable)model).getSheetsAndFields().get(sheetName);
         
         this.tagNameFieldNameComboBox.removeAllItems();
         
-        //Добавляем в комбобокс поле, означающее что колонка листа не указана:
+        // Add value which means unselected column to combo box:
         JComboBox tableCellsEditorComboBox = new JComboBox();
         tableCellsEditorComboBox.addItem(NO_FIELD_SELECTED_VALUE);
         
@@ -839,9 +843,9 @@ public class CreateDataSourceFromExcelDialog extends DialogWithEvents implements
         {    
             this.tagNameFieldNameComboBox.addItem(field);
             tableCellsEditorComboBox.addItem(field);
-        }//for
+        }// for
         
-        //Устанавливаем редактор значений ячеек для необходимых колонок таблицы настроек парсинга:
+        // Set default cell editior instances for parsing settings table columns:
         TableColumn keyFieldColumn = this.parsingSettingsTable.getColumnModel().getColumn(KEY_FIELD_COLUMN_INDEX);
         TableColumn valueFieldColumn = this.parsingSettingsTable.getColumnModel().getColumn(VALUE_FIELD_COLUMN_INDEX);
         TableColumn possibleFlagFieldColumn = this.parsingSettingsTable.getColumnModel().getColumn(POSSIBLE_FLAG_FIELD_COLUMN_INDEX);
@@ -853,15 +857,13 @@ public class CreateDataSourceFromExcelDialog extends DialogWithEvents implements
 
     
     /**
-     * Метод рассылает событие нажатия кнопки запуска парсинга книги MS Excel
-     * всем подписчикам и закрывает текущий диалог.
+     * Triggers run parsing button click event for all subscribers. 
      *  
-     * @param   evt  Cобытие клика
-     * @return  void
+     * @param evt Run parsing button click event object
      */
     private void runParsingButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runParsingButtonActionPerformed
         
-        CustomEvent runParsingButtonClickEvent = new CustomEvent(this);
+        CustomEvent runParsingButtonClickEvent = new CustomEvent(new Object());
         this.events.trigger(ViewEvent.RUN_SPREADSHEET_PARSING_BUTTON_CLICK, runParsingButtonClickEvent);
         
         this.setVisible(false);
@@ -869,23 +871,22 @@ public class CreateDataSourceFromExcelDialog extends DialogWithEvents implements
 
     
     /**
-     * Метод рассылает событие закрытия диалога всем подписчикам.
+     * Triggers window closing event for all subscribers.
      *  
-     * @param   evt  Cобытие клика
-     * @return  void
+     * @param evt Window closing event object
      */
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         
-        CustomEvent dialogClosingEvent = new CustomEvent(this);
+        CustomEvent dialogClosingEvent = new CustomEvent(new Object());
         this.events.trigger(ViewEvent.DIALOG_CLOSING, dialogClosingEvent);
     }//GEN-LAST:event_formWindowClosing
 
     
     /**
-     * Обрабатывает событие выбора нового производственного объекта.
+     * Handles new plant selection event and triggers change plant selection 
+     * event for all subscribers.
      * 
-     * @param evt Событие комбобокса
-     * @return void
+     * @param evt Plants combo box selection event object
      */
     private void plantsComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_plantsComboBoxActionPerformed
         
@@ -896,12 +897,10 @@ public class CreateDataSourceFromExcelDialog extends DialogWithEvents implements
 
     
     /**
-     * Метод обрабатывает событие выбора нового формата тага в выпадающем списке
-     * и рассылает событие с контекстом выбранного формата тага всем 
-     * подписчикам.
+     * Handles new tag mask selection event and triggers change tag mask 
+     * selection event for all subscribers.
      * 
-     * @param evt Cобытие выбора формата тага
-     * @return void 
+     * @param evt Tag masks (formats) combo box selection event object
      */
     private void tagFormatComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tagFormatComboBoxActionPerformed
         
@@ -928,4 +927,4 @@ public class CreateDataSourceFromExcelDialog extends DialogWithEvents implements
     private javax.swing.JComboBox tagNameFieldNameComboBox;
     private javax.swing.JLabel tagNameFieldNameComboBoxLabel;
     // End of variables declaration//GEN-END:variables
-}//CreateDataSourceFromExcelDialog
+}// CreateDataSourceFromExcelDialog

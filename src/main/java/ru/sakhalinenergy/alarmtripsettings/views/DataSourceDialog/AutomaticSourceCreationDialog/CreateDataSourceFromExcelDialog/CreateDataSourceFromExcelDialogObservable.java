@@ -4,7 +4,7 @@ import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.AutomaticSourc
 
 
 /**
- * An interface for using "Create source from MS Excel" dialog by controllers.
+ * Interface for using "Create source from MS Excel" dialog by controllers.
  *
  * @author Denis Udovenko
  * @version 1.0.2
@@ -13,250 +13,249 @@ public interface CreateDataSourceFromExcelDialogObservable extends AutomaticSour
 {
     
     /**
-     * Метод возвращает имя выбранного типа источника данных.
+     * Returns selected data source type.
      * 
-     * @return Имя выбранного типа источника данных
+     * @return Selected data source type
      */
     public String getDataSourceType();
     
     
     /**
-     * Метод возвращает выбранное имя листа книги MS Excel.
+     * Returns selected sheet name of MS Excel book. 
      * 
-     * @return Выбранное имя листа книги MS Excel
+     * @return Selected sheet name
      */
     public String getSheetName();
         
     
     /**
-     * Метод возвращает выбранное поле, содержащее имя тага.
+     * Returns field selected as tag name container.
      * 
-     * @return Поле, содержащее имя тага
+     * @return Field selected as tag name container
      */
     public String getTagFieldName();
         
     
     /**
-     * Метод возвращает имя поля, хранящего ключ уставки нижнего трипа.
+     * Returns field selected as LL alarm setting key container.
      * 
-     * @return Имя поля, хранящего ключ уставки нижнего трипа
+     * @return Field selected as LL alarm key container
      */
     public String getAlarmLowLowKeyField();
     
     
     /**
-     * Метод возвращает значение ключа уставки нижнего трипа.
+     * Returns field selected as LL alarm setting key value container.
      * 
-     * @return Значение ключа уставки нижнего трипа
+     * @return Field selected as LL alarm setting key value container
      */
     public String getAlarmLowLowKeyValue();
     
     
     /**
-     * Метод возвращаяет имя поля, хранящего значение уставки нижнего трипа.
+     * Returns field selected as LL alarm setting value container.
      * 
-     * @return Имя поля, хранящего значение уставки нижнего трипа
+     * @return Field selected as LL alarm setting value container
      */
     public String getAlarmLowLowValueField();
     
     
     /**
-     * Метод возращает имя поля, хранящего значение флага "Possible" нижнего трипа.
+     * Returns field selected as LL alarm setting "Possible" flag container.
      * 
-     * @return Имя поля, хранящего значение флага "Possible" нижнего трипа
+     * @return Field selected as LL alarm setting "Possible" flag container
      */
     public String getAlarmLowLowPossibleFlagField();
     
     
     /**
-     * Метод возвращает имя поля, хранящего ключ уставки нижнего аларма.
+     * Returns field selected as L alarm setting key container.
      * 
-     * @return Имя поля, хранящего ключ уставки нижнего аларма
+     * @return Field selected as L alarm key container
      */
     public String getAlarmLowKeyField();
     
     
     /**
-     * Метод возвращает значение ключа уставки нижнего аларма.
+     * Returns field selected as L alarm setting key value container.
      * 
-     * @return Значение ключа уставки нижнего аларма
+     * @return Field selected as L alarm setting key value container
      */
     public String getAlarmLowKeyValue();
     
     
     /**
-     * Метод возвращает имя поля, хранящего значение уставки нижнего аларма.
+     * Returns field selected as L alarm setting value container.
      * 
-     * @return Имя поля, хранящего значение уставки нижнего аларма
+     * @return Field selected as L alarm setting value container
      */
     public String getAlarmLowValueField();
     
     
     /**
-     * Метод возвращает имя поля, хранящего значение флага "Possible" нижнего трипа.
+     * Returns field selected as L alarm setting "Possible" flag container.
      * 
-     * @return Имя поля, хранящего значение флага "Possible" нижнего трипа
+     * @return Field selected as L alarm setting "Possible" flag container
      */
     public String getAlarmLowPossibleFlagField();
     
     
     /**
-     * Метод возвращает имя поля, хранящего ключ уставки верхнего аларма.
+     * Returns field selected as H alarm setting key container.
      * 
-     * @return Имя поля, хранящего ключ уставки верхнего аларма
+     * @return Field selected as H alarm key container
      */
     public String getAlarmHighKeyField();
     
     
     /**
-     * Метод возвращает значение ключа уставки верхнего аларма.
+     * Returns field selected as H alarm setting key value container.
      * 
-     * @return Значение ключа уставки верхнего аларма
+     * @return Field selected as H alarm setting key value container
      */
     public String getAlarmHighKeyValue();
     
     
     /**
-     * Метод возвращает имя поля, хранящего значение уставки верхнего аларма.
+     * Returns field selected as H alarm setting value container.
      * 
-     * @return Имя поля, хранящего значение уставки верхнего аларма
+     * @return Field selected as H alarm setting value container
      */
     public String getAlarmHighValueField();
     
     
     /**
-     * Метод возвращает имя поля, хранящего значение флага "Possible" верхнего аларма.
+     * Returns field selected as H alarm setting "Possible" flag container.
      * 
-     * @return Имя поля, хранящего значение флага "Possible" верхнего аларма
+     * @return Field selected as H alarm setting "Possible" flag container
      */
     public String getAlarmHighPossibleFlagField();
     
     
     /**
-     * Метод возвращает имя поля, хранящего ключ уставки верхнего трипа.
+     * Returns field selected as HH alarm setting key container.
      * 
-     * @return Имя поля, хранящего ключ уставки верхнего трипа
+     * @return Field selected as HH alarm key container
      */
     public String getAlarmHighHighKeyField();
     
     
     /**
-     * Метод возвращает значение ключа уставки верхнего трипа.
+     * Returns field selected as HH alarm setting key value container.
      * 
-     * @return Значение ключа уставки верхнего трипа
+     * @return Field selected as HH alarm setting key value container
      */
     public String getAlarmHighHighKeyValue();
     
     
     /**
-     * Метод возвращает имя поля, хранящего значение уставки верхнего трипа.
+     * Returns field selected as HH alarm setting value container.
      * 
-     * @return Имя поля, хранящего значение уставки верхнего трипа
+     * @return Field selected as HH alarm setting value container
      */
     public String getAlarmHighHighValueField();
             
             
     /**
-     * Метод возвращает имя поля, хранящего значение флага "Possible" верхнего трипа.
+     * Returns field selected as HH alarm setting "Possible" flag container.
      * 
-     * @return Имя поля, хранящего значение флага "Possible" верхнего трипа
+     * @return Field selected as HH alarm setting "Possible" flag container
      */
     public String getAlarmHighHighPossibleFlagField();
         
     
     /**
-     * Метод возвращает имя поля, хранящего ключ нижней границы диапазона.
+     * Returns field selected as range min setting key container.
      * 
-     * @return Имя поля, хранящего ключ нижней границы диапазона
+     * @return Field selected as range min setting key container
      */
     public String getRangeMinKeyField();
         
     
     /**
-     * Метод возвращает значение ключа нижней границы диапазона.
+     * Returns field selected as range min setting key value container.
      * 
-     * @return Значение ключа нижней границы диапазона
+     * @return Field selected as range min setting key value container
      */
     public String getRangeMinKeyValue();
     
     
     /**
-     * Метод возвращает имя поля, хранящего значение нижней границы диапазона.
+     * Returns field selected as range min setting value container.
      * 
-     * @return Имя поля, хранящего значение нижней границы диапазона
+     * @return Field selected as range min setting value container
      */
     public String getRangeMinValueField();
             
     
     /**
-     * Метод возвращает имя поля, хранящего ключ верхней границы диапазона.
+     * Returns field selected as range max setting key container.
      * 
-     * @return Имя поля, хранящего ключ верхней границы диапазона
+     * @return Field selected as range max setting key container
      */
     public String getRangeMaxKeyField();
     
             
     /**
-     * Метод возвращает значение ключа верхней границы диапазона.
+     * Returns field selected as range max setting key value container.
      * 
-     * @return Значение ключа верхней границы диапазона
+     * @return Field selected as range max setting key value container
      */
     public String getRangeMaxKeyValue();
     
     
     /**
-     * Метод возвращает имя поля, хранящего значение верхней границы диапазона.
+     * Returns field selected as range max setting value container.
      * 
-     * @return Имя поля, хранящего значение верхней границы диапазона
+     * @return Field selected as range max setting value container
      */
     public String getRangeMaxValueField();
     
     
     /**
-     * Метод возвращает имя поля, хранящего ключ единиц измерения.
+     * Returns field selected as engineering units setting key container.
      * 
-     * @return Имя поля, хранящего ключ единиц измерения
+     * @return Field selected as engineering units setting key container
      */
     public String getUnitsKeyField();
     
     
     /**
-     * Метод возвращает значение ключа единиц измерения.
+     * Returns field selected as engineering units setting key value container.
      * 
-     * @return Значение ключа единиц измерения
+     * @return Field selected as engineering units setting key value container
      */
     public String getUnitsKeyValue();
     
     
     /**
-     * Метод возвращает имя поля, хранящего значение единиц измерения.
+     * Returns field selected as engineering units setting value container.
      * 
-     * @return Имя поля, хранящего значение единиц измерения
+     * @return Field selected as engineering units setting value container
      */
     public String getUnitsValueField();
     
     
     /**
-     * Метод возвращвает имя поля, хранящего ключ названия системы-источника 
-     * данных.
+     * Returns field selected as source system setting key container.
      * 
-     * @return Имя поля, хранящего ключ названия системы-источника данных
+     * @return Field selected as source system units setting key container
      */
     public String getSourceSystemKeyField();
         
     
     /**
-     * Метод возвращает значение ключа названия системы-источника данных.
+     * Returns field selected as source system setting key value container.
      * 
-     * @return Значение ключа названия системы-источника данных
+     * @return Field selected as source system setting key value container
      */
     public String getSourceSystemKeyValue();
     
     
     /**
-     * Метод возвращает имя поля, хранящего название системы-источника данных.
+     * Returns field selected as source system setting value container.
      * 
-     * @return Имя поля, хранящего название системы-источника данных
+     * @return Field selected as source system setting value container
      */
     public String getSourceSystemValueField();
     

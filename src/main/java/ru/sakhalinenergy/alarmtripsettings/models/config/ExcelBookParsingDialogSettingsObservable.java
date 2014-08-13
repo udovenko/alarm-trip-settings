@@ -1,7 +1,5 @@
 package ru.sakhalinenergy.alarmtripsettings.models.config;
 
-import ru.sakhalinenergy.alarmtripsettings.events.EventsObservable;
-
 
 /**
  * Interface of MS Excel book parsing settings model for using by views. Allows
@@ -10,25 +8,9 @@ import ru.sakhalinenergy.alarmtripsettings.events.EventsObservable;
  * @author Denis Udovenko
  * @version 1.0.1
  */
-public interface ExcelBookParsingDialogSettingsObservable extends EventsObservable
+public interface ExcelBookParsingDialogSettingsObservable extends PlantAndTagFormatSettingsObservable
 {
-    
-    /**
-     * Returns selected plant code setting value.
-     * 
-     * @return Selected plant code
-     */
-    public String getPlantCode();
-    
-    
-    /**
-     * Returns selected tag format setting value. 
-     * 
-     * @return Selected tag format
-     */
-    public String getTagFormat();
-       
-    
+   
     /**
      * Returns data source type name setting value.
      * 
