@@ -2,11 +2,10 @@ package ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.AutomaticSour
 
 
 /**
- * Класс-обертка для объета с добавлением флага "выбрано". Используется для 
- * отображения объектов в виде чекбоксов в элементах управления.
+ * Implements wrapper class for using object with check box node renderer. 
  * 
- * @author   Denis.Udovenko
- * @version  1.0.3
+ * @author Denis Udovenko
+ * @version 1.0.3
  */
 public class CheckboxNode 
 {
@@ -15,69 +14,72 @@ public class CheckboxNode
 
     
     /**
-     * Конструктор класса. 
+     * Public constructor. Set up object to b wrapped and selection selection 
+     * state flag.
+     * 
+     * @param object Object to be wrapped
+     * @param selected Selection state flag
      */
     public CheckboxNode(Object object, boolean selected) 
     {
         this.object = object;
         this.selected = selected;
-    }//CheckboxNode
+    }// CheckboxNode
 
     
     /**
-     * Метод возвращает значение флага "выбран" текущего экземпляра.
+     * Returns selection state flag.
      * 
-     * @return Значение флага "выбран"
+     * @return Selection state flag
      */
     public boolean isSelected() 
     {
         return this.selected;
-    }//isSelected
+    }// isSelected
     
 
     /**
-     * Метод устанавливает значение флага "выбран" текущего экземпляра.
+     * Sets up selection state flag.
      * 
-     * @param newValue Новое значение флага "выбран"
-     * @return void
+     * @param selected Selection state flag
      */
-    public void setSelected(boolean newValue) 
+    public void setSelected(boolean selected) 
     {
-        this.selected = newValue;
-    }//setSelected
+        this.selected = selected;
+    }// setSelected
 
     
     /**
-     * Метод возвращает объект, обернутый в текущий экземпляр.
+     * Returns wrapped object.
      * 
-     * @return Объект текущего экземпляра
+     * @return Wrapped object
      */
     public Object getObject() 
     {
         return this.object;
-    }//getObject
+    }// getObject
 
     
     /**
-     * Метод устанавливает объект, обернутый в текущий экземпляр.
+     * Sets up wrapped object.
      * 
-     * @param newObject Новый объект текущего экземпляра обертки
-     * @return void
+     * @param newObject Object to be wrapped
      */
     public void setObject(Object newObject) 
     {
         this.object = newObject;
-    }//setObject
+    }// setObject
 
     
     /**
-     * Метод перегружает стандартный метод преобразования объекта в строку.
+     * Overrides parent "toString()" method. Returns current class name, object
+     * and selection state string instead.
      * 
-     * @return Строковое предстваление текущего экземпляра
+     * @return Current class name, object and selection state string
      */
     @Override
     public String toString() 
     {
         return getClass().getName() + "[" + this.object + "/" + this.selected + "]";
-    }//toString 
-}//CheckboxNode
+    }// toString 
+}// CheckboxNode

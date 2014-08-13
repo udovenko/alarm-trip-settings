@@ -1,14 +1,14 @@
 package ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.AutomaticSourceCreationDialog.CreateDcsVariableTableFromYokogawaBackupDialog;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.awt.Component;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import ru.sakhalinenergy.alarmtripsettings.Main;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.classes.yokogawa.YgStationRecord;
-import ru.sakhalinenergy.alarmtripsettings.Main;
-import java.util.ArrayList;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import ru.sakhalinenergy.alarmtripsettings.models.config.CreateDcsVariableTableFromYokogawaBackupDialogSettingsObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.YokogawaDcsBackupObservable;
@@ -17,74 +17,64 @@ import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsLogicObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObservable;
 import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.AutomaticSourceCreationDialog.ViewEvent;
-import ru.sakhalinenergy.alarmtripsettings.views.DialogWithEvents;
+import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.DataSourceDialog;
 
 
 /**
- * Класс реализует диалог для указания настроек парсинга бакапа DCS Yokogawa.
+ * Implements dialog for creating data source from Yokogawa DCS backup.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.3
+ * @author Denis Udovenko
+ * @version 1.0.3
  */
-public class CreateDcsVariableTableFromYokogawaBackupDialog extends DialogWithEvents implements CreateDcsVariableTableFromYokogawaBackupDialogObservable
+public class CreateDcsVariableTableFromYokogawaBackupDialog extends DataSourceDialog implements CreateDcsVariableTableFromYokogawaBackupDialogObservable
 {
-        
-    private final YokogawaDcsBackupObservable model;
-    private final PlantsLogicObservable plants;
-    private final TagMasksObservable tagMasks;
-    private final CreateDcsVariableTableFromYokogawaBackupDialogSettingsObservable config;
-    
-    
+   
     /**
-     * Public constructor.
+     * Public constructor. Sets up dialog fields and initializes components.
      * 
      * @param model Source wrapped into Yokogawa DCS backup parsing logic
      * @param plants Wrapped plants collection
      * @param tagMasks Wrapped tag masks collection
+     * @param config Dialog configuration object
      */
     public CreateDcsVariableTableFromYokogawaBackupDialog(YokogawaDcsBackupObservable model, PlantsLogicObservable plants,
-            TagMasksObservable tagMasks, CreateDcsVariableTableFromYokogawaBackupDialogSettingsObservable config) 
+        TagMasksObservable tagMasks, CreateDcsVariableTableFromYokogawaBackupDialogSettingsObservable config) 
     {
-        this.model = model;
-        this.plants = plants;
-        this.tagMasks = tagMasks;
-        this.config = config;
+        super(model, plants, tagMasks, config);
         
         this.setModal(true);
         initComponents();
         this.setIconImage(Main.yokogawaIcon.getImage());
         
-        //Subscribing on model events:
+        // Subscribe on model's events:
         model.on(SourceEvent.STATIONS_READ, new _StationsReadEventHandler());
-    }//CreateDcsVariableTableFromYokogawaBackupDialog
+    }// CreateDcsVariableTableFromYokogawaBackupDialog
     
     
     /**
-     * Renders the dialog.
+     * Render required objects lists, applies dialog settings and shows form on
+     * the screen.
      * 
      * @param parent Parent component relative to which dialog will be rendered
      */
     public void render(Component parent)
     {
-        this.setLocationRelativeTo(parent);
-        
-        //Формируем список форматов тагов:
-        for (TagMask tempMask : tagMasks.getMasks()) tagMaskComboBox.addItem(tempMask);
+        // Build palants list and restore plant selection:
+        _buildPlantsList(plantsComboBox);
 
-        //Строим список производственных объектов:
-        for (Plant tempPlant : plants.getPlants()) plantsComboBox.addItem(tempPlant);
+        // Build tag formats list and restore format selection:
+        _buildTagMasksList(tagMaskComboBox);
         
-        //Applying config:
-        _applyConfig();
-        
-        this.setVisible(true);
-    }//render  
+        // Set relative location and show dialog:
+        this.setLocationRelativeTo(parent);
+        _show();
+    }// render  
     
     
     /**
-     * Internal class - handler for model stations collection read event.
+     * Inner class - handler for model stations collection read event.
      * 
-     * @author Denis.Udovenko
+     * @author Denis Udovenko
      * @version 1.0.3
      */
     class _StationsReadEventHandler implements CustomEventListener
@@ -92,10 +82,13 @@ public class CreateDcsVariableTableFromYokogawaBackupDialog extends DialogWithEv
         @Override
         public void customEventOccurred(CustomEvent event)
         {
-            //Setting up path to backup folder:
-            pathToBackupFolderTextField.setText(model.getBackupFolderPath());
+            // Cast model to concrete class:
+            YokogawaDcsBackupObservable castedModel = (YokogawaDcsBackupObservable)model;
+
+            // Setting up path to backup folder:
+            pathToBackupFolderTextField.setText(castedModel.getBackupFolderPath());
             
-            //Setting up stations list tree:
+            // Setting up stations list tree:
             stationsCheckBoxesTree.setCellRenderer(new StationsTreeNodeRenderer());
             stationsCheckBoxesTree.setCellEditor(new StationsTreeNodeEditor(stationsCheckBoxesTree));
             stationsCheckBoxesTree.setEditable(true);
@@ -105,50 +98,23 @@ public class CreateDcsVariableTableFromYokogawaBackupDialog extends DialogWithEv
         
             root.removeAllChildren();
         
-            for (YgStationRecord tempStation : model.getStations())
+            for (YgStationRecord tempStation : castedModel.getStations())
             {
                 DefaultMutableTreeNode stationNode = new DefaultMutableTreeNode(new CheckboxNode(tempStation, true));
                 root.add(stationNode);
-            }//for
+            }// for
         
-            //Reloading tree:
+            // Reloading tree:
             treeModel.reload(root);
-        }//customEventOccurred
-    }//_SetPathToBackupFolderButtonClickHandler
-
-    
-    /**
-     * Restores dialog control elements values from current configuration 
-     * instance.
-     */
-    private void _applyConfig()
-    {        
-        //Восстанавливаем выбранный производственный объект:
-        for (Plant tempPlant : plants.getPlants())
-        {    
-            if (tempPlant.getId().equals(config.getPlantCode()))
-            {    
-                this.plantsComboBox.setSelectedItem(tempPlant);
-                break;
-            }//if
-        }//for
-        
-        for (TagMask tempTagMask : this.tagMasks.getMasks())
-        {    
-            if (tempTagMask.getExample().equals(config.getTagFormat()))
-            {    
-                this.tagMaskComboBox.setSelectedItem(tempTagMask);
-                break;
-            }//if
-        }//for
-    }//_applyConfig
+        }// customEventOccurred
+    }// _SetPathToBackupFolderButtonClickHandler
     
     
     /**
-     * Метод возвращает список выбранных в дереве тагов, которые необходимо
-     * вынести в отдельную копию петли.
+     * Returns list of stations selected to be parsed during data source 
+     * creating.
      * 
-     * @return Коллекцию выбранных станций
+     * @return Selected stations list
      */
     @Override
     public List<YgStationRecord> getSelectedStations()
@@ -158,7 +124,7 @@ public class CreateDcsVariableTableFromYokogawaBackupDialog extends DialogWithEv
         DefaultMutableTreeNode stationNode;
         Object stationNodeUserObject;
           
-        //Получаем модель дерева и корневой узел:
+        // Get tree model and root node:
         DefaultTreeModel treeModel = (DefaultTreeModel)stationsCheckBoxesTree.getModel();
         DefaultMutableTreeNode root = (DefaultMutableTreeNode)treeModel.getRoot();
         
@@ -169,77 +135,38 @@ public class CreateDcsVariableTableFromYokogawaBackupDialog extends DialogWithEv
 
             if (stationNodeUserObject.getClass() == CheckboxNode.class)
             {
-                //Если чекбокс выбран - добавляем станцию в список:
+                // If checkbox is selected - add station to result:
                 CheckboxNode checkboxTagNode = (CheckboxNode)stationNodeUserObject;
                 if (checkboxTagNode.isSelected()) result.add((YgStationRecord)checkboxTagNode.getObject());
-            }//if
-        }//for
+            }// if
+        }// for
         
         return result;
-    }//getSelectedTags
+    }// getSelectedStations
     
     
     /**
-     * Метод устанавливает значение текстового поля для указания пути к папке
-     * с бэкапом.
+     * Returns selected plant.
      * 
-     * @param   path  Строка с путем к папке бэкапа
-     * @return  void
-     */
-    public void setPathToBackup(String path)
-    {
-        this.pathToBackupFolderTextField.setText(path);
-    }//setPathToBackup
-    
-    
-    /**
-     * Метод возвращает текущий код ассета.
-     * 
-     * @return Текущий код ассета
+     * @return Selected plant
      */
     @Override
     public Plant getPlant()
     {
-        return (Plant)this.plantsComboBox.getSelectedItem();
-    }//getPlantCode
+        return (Plant)plantsComboBox.getSelectedItem();
+    }// getPlant
     
 
     /**
-     * Return current tag mask.
+     * Returns selected tag mask.
      * 
-     * @return Current tag mask
+     * @return Selected tag mask
      */
     @Override
     public TagMask getTagMask()
     {
         return (TagMask)tagMaskComboBox.getSelectedItem();
-    }//getTagMask
-    
-    
-    /**
-     * Метод возвращает значение текстового поля для указания пути к папке
-     * с бэкапом.
-     * 
-     * @return  String  Значение текстового поля
-     */
-    public String getPathToBackup()
-    {
-        return this.pathToBackupFolderTextField.getText();
-    }//getPathToBackup
-    
-    
-    /**
-     * Метод блокирует/разблокирует набор элементов управления формы кроме 
-     * кнопки вызова диалога для указания пути к бэкапу.
-     * 
-     * @param lock Флаг состояния, в которое устанавливается набор элементов (блокирован/разблокирован)
-     * @return void
-     */
-    public void setControlsEnabled(Boolean lock)
-    {
-        this.stationsCheckBoxesTree.setEnabled(lock);
-        this.runParsingButton.setEnabled(lock);
-    }//setControlsEnabled
+    }// getTagMask
     
     
     /**
@@ -369,25 +296,22 @@ public class CreateDcsVariableTableFromYokogawaBackupDialog extends DialogWithEv
 
     
     /**
-     * Метод рассылает событие клика по кнопке для указания пути к папке с 
-     * бэкапом.
+     * Triggers set path to backup folder button click event for all 
+     * subscribers.
      *  
-     * @param   evt  Cобытие клика
-     * @return  void
+     * @param evt Button click event
      */
     private void setPathToBackupFolderButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setPathToBackupFolderButtonActionPerformed
         
-        CustomEvent myEvent = new CustomEvent(this);
+        CustomEvent myEvent = new CustomEvent(new Object());
         this.trigger(ViewEvent.SET_PATH_TO_BACKUP_FOLDER_BUTTON_CLICK, myEvent);
     }//GEN-LAST:event_setPathToBackupFolderButtonActionPerformed
 
     
     /**
-     * Метод рассылает событие клика по кнопке запуска парсинга выбранного 
-     * бэкапа и создания из него нового источника данных.
+     * Triggers run backup parsing button click event for all subscribers.
      *  
-     * @param   evt  Cобытие клика
-     * @return  void
+     * @param evt Button click event
      */
     private void runParsingButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runParsingButtonActionPerformed
         
@@ -399,8 +323,8 @@ public class CreateDcsVariableTableFromYokogawaBackupDialog extends DialogWithEv
 
     
     /**
-     * Handles plant code selection event and fires an event contains selected 
-     * plant instance.
+     * Handles plant code selection event and triggers an event with selected
+     * plant instance context.
      * 
      * @param evt Plants combo box event
      */
@@ -413,8 +337,8 @@ public class CreateDcsVariableTableFromYokogawaBackupDialog extends DialogWithEv
 
     
     /**
-     * Handles tag format selection event and fires an event contains selected
-     * tag mask instance.
+     * Handles tag format selection event and triggers an event with selected
+     * tag mask instance context.
      * 
      * @param evt Tag masks combo box event
      */
