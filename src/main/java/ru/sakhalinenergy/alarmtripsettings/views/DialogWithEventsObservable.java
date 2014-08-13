@@ -19,7 +19,7 @@ public interface DialogWithEventsObservable
      * @param eventType Type of event we subscribing on
      * @param listener New subscriber instance
      */
-    public void on(Byte eventType, CustomEventListener listener);
+    public void on(Enum eventType, CustomEventListener listener);
     
     
     /**
@@ -27,7 +27,7 @@ public interface DialogWithEventsObservable
      * 
      * @param eventType Type of event for which subscribers will be removed
      */
-    public void off(Byte eventType);
+    public void off(Enum eventType);
         
     
     /**
@@ -36,6 +36,6 @@ public interface DialogWithEventsObservable
      * @param eventType Type id for event will be triggered
      * @param event Custom event object
      */
-    public void trigger(Byte eventType, CustomEvent event);
+    public void trigger(Enum eventType, CustomEvent event);
     
-}//DialogWithEventsObservable
+}// DialogWithEventsObservable

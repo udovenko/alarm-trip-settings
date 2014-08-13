@@ -8,7 +8,5 @@ package ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.AutomaticSour
  * @author Denis Udovenko
  * @version 1.0.2
  */
-public interface CreateDcsVariableTableFromHoneywellScadaDatabaseDialogObservable extends AutomaticSourceCreationDialogObservable
-{
-
-}//CreateDcsVariableTableFromHoneywellScadaExportDialogObservable
+public interface CreateDcsVariableTableFromHoneywellScadaDatabaseDialogObservable 
+    extends AutomaticSourceCreationDialogObservable{}

@@ -66,7 +66,7 @@ public class CreateDcsVariableTableFromYokogawaBackupDialog extends DataSourceDi
         _buildTagMasksList(tagMaskComboBox);
         
         // Set relative location and show dialog:
-        this.setLocationRelativeTo(parent);
+        setLocationRelativeTo(parent);
         _show();
     }// render  
     
@@ -296,8 +296,8 @@ public class CreateDcsVariableTableFromYokogawaBackupDialog extends DataSourceDi
 
     
     /**
-     * Triggers set path to backup folder button click event for all 
-     * subscribers.
+     * Handles set path to backup folder button click event and triggers 
+     * appropriate event for all subscribers.
      *  
      * @param evt Button click event
      */
@@ -309,7 +309,8 @@ public class CreateDcsVariableTableFromYokogawaBackupDialog extends DataSourceDi
 
     
     /**
-     * Triggers run backup parsing button click event for all subscribers.
+     * Handles run backup parsing button click event and triggers appropriate 
+     * event for all subscribers.
      *  
      * @param evt Button click event
      */
@@ -317,14 +318,14 @@ public class CreateDcsVariableTableFromYokogawaBackupDialog extends DataSourceDi
         
         this.setVisible(false);
         
-        CustomEvent myEvent = new CustomEvent(this);
+        CustomEvent myEvent = new CustomEvent(new Object());
         this.trigger(ViewEvent.RUN_BACKUP_PARSING_BUTTON_CLICK, myEvent);
     }//GEN-LAST:event_runParsingButtonActionPerformed
 
     
     /**
      * Handles plant code selection event and triggers an event with selected
-     * plant instance context.
+     * plant instance data.
      * 
      * @param evt Plants combo box event
      */
@@ -338,7 +339,7 @@ public class CreateDcsVariableTableFromYokogawaBackupDialog extends DataSourceDi
     
     /**
      * Handles tag format selection event and triggers an event with selected
-     * tag mask instance context.
+     * tag mask instance data.
      * 
      * @param evt Tag masks combo box event
      */

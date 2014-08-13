@@ -1,37 +1,30 @@
 package ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.AutomaticSourceCreationDialog;
 
+import java.awt.Component;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
 import ru.sakhalinenergy.alarmtripsettings.Main;
-import java.awt.Component;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsLogicObservable;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObservable;
-import ru.sakhalinenergy.alarmtripsettings.views.DialogWithEvents;
 import ru.sakhalinenergy.alarmtripsettings.models.config.CreateDcsVariableTableFromHoneywellScadaDatabaseDialogSettingsObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsLogicObservable;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.HoneywellScadaDatabaseObservable;
+import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.DataSourceDialog;
 
 
 /**
- * Класс реализует вью диалога для создания источника данных из базы данных 
- * SCADA Honeywell.
+ * Implements dialog for creating data source from Honeywell SCADA database.
  * 
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.3
  */
-public class CreateDcsVariableTableFromHoneywellScadaDatabaseDialog extends DialogWithEvents implements CreateDcsVariableTableFromHoneywellScadaDatabaseDialogObservable
+public class CreateDcsVariableTableFromHoneywellScadaDatabaseDialog extends DataSourceDialog implements CreateDcsVariableTableFromHoneywellScadaDatabaseDialogObservable
 {
-    
-    private final HoneywellScadaDatabaseObservable model;
-    private final PlantsLogicObservable plants;
-    private final TagMasksObservable tagMasks;
-    private final CreateDcsVariableTableFromHoneywellScadaDatabaseDialogSettingsObservable config;
-    
-       
+     
     /**
-     * Public constructor.
+     * Public constructor. Sets up dialog fields and initializes components.
      * 
      * @param model Source instance wrapped into Honeywell SCADA database model logic
      * @param plants Wrapped plants collection
@@ -41,21 +34,17 @@ public class CreateDcsVariableTableFromHoneywellScadaDatabaseDialog extends Dial
     public CreateDcsVariableTableFromHoneywellScadaDatabaseDialog(HoneywellScadaDatabaseObservable model, PlantsLogicObservable plants,
         TagMasksObservable tagMasks, CreateDcsVariableTableFromHoneywellScadaDatabaseDialogSettingsObservable config)
     {
-        // Setting up instance fields:
-        this.model = model;
-        this.plants = plants;
-        this.tagMasks = tagMasks;
-        this.config = config;
-        
+        // Set up instance fields:
+        super(model, plants, tagMasks, config);
+
         initComponents();
         
-        // Устанавливаем иконку диалога:
+        // Set dialog icon:
         this.setIconImage(Main.honeywellIcon.getImage());
         this.setModal(true);
         
         // Subscribe on model events:
-        model.on(SourceEvent.FILE_PATH_UPDATED, new _DatabaseFilePathUpdateHandler()
-        );// on
+        model.on(SourceEvent.FILE_PATH_UPDATED, new _DatabaseFilePathUpdateHandler());
     }// CreateDcsVariableTableFromHoneywellBackupDialog
 
     
@@ -67,23 +56,20 @@ public class CreateDcsVariableTableFromHoneywellScadaDatabaseDialog extends Dial
      */
     public void render(Component parent)
     {
-        this.setLocationRelativeTo(parent);
-        
-        //Формируем список форматов тагов:
-        for (TagMask tempMask : tagMasks.getMasks()) tagFormatComboBox.addItem(tempMask);
+        // Build palants list and restore plant selection:
+        _buildPlantsList(plantComboBox);
 
-        //Строим список производственных объектов:
-        for (Plant tempPlant : plants.getPlants()) plantComboBox.addItem(tempPlant);
+        // Build tag formats list and restore format selection:
+        _buildTagMasksList(tagFormatComboBox);
         
-        //Applying config:
-        _applyConfig();
-        
-        this.setVisible(true);
-    }//render
+        // Set relative location and show dialog:
+        setLocationRelativeTo(parent);
+        _show();
+    }// render
     
     
     /**
-     * Internal class - handler for model extract file path update events.
+     * Inner class - handler for model extract file path update events.
      * 
      * @author Denis Udovenko
      * @version 1.0.1
@@ -95,37 +81,10 @@ public class CreateDcsVariableTableFromHoneywellScadaDatabaseDialog extends Dial
         {
             String exportFilePath = (String)event.getSource();
             CreateDcsVariableTableFromHoneywellScadaDatabaseDialog.this.scadaExportFilePathTextField.setText(exportFilePath);
-        }//customEventOccurred
-    }//_DatabaseFilePathUpdateHandler
+        }// customEventOccurred
+    }// _DatabaseFilePathUpdateHandler
     
-    
-    /**
-     * Restores dialog control elements values from current configuration 
-     * instance.
-     */
-    private void _applyConfig()
-    {        
-        //Восстанавливаем выбранный производственный объект:
-        for (Plant tempPlant : plants.getPlants())
-        {    
-            if (tempPlant.getId().equals(config.getPlantCode()))
-            {    
-                this.plantComboBox.setSelectedItem(tempPlant);
-                break;
-            }//if
-        }//for
-        
-        for (TagMask tempTagMask : this.tagMasks.getMasks())
-        {    
-            if (tempTagMask.getExample().equals(config.getTagFormat()))
-            {    
-                this.tagFormatComboBox.setSelectedItem(tempTagMask);
-                break;
-            }//if
-        }//for
-    }//_applyConfig
-    
-    
+   
     /**
      * Returns selected plant from plants combo box.
      * 
@@ -135,7 +94,7 @@ public class CreateDcsVariableTableFromHoneywellScadaDatabaseDialog extends Dial
     public Plant getPlant()
     {
         return (Plant)plantComboBox.getSelectedItem();
-    }//getPlant
+    }// getPlant
     
     
     /**
@@ -147,18 +106,7 @@ public class CreateDcsVariableTableFromHoneywellScadaDatabaseDialog extends Dial
     public TagMask getTagMask()
     {
         return (TagMask)tagFormatComboBox.getSelectedItem();
-    }//getTagMask
-    
-    
-    /**
-     * Метод возвращает текущий путь к файлу экспорта DCS Honeywell.
-     * 
-     * @return Путь к файлу экспорта DCS Honeywell
-     */
-    public String getScadaDatabaseFilePath()
-    {
-        return this.scadaExportFilePathTextField.getText();
-    }//getDcsExportFilePath
+    }// getTagMask
     
     
     /**
@@ -275,13 +223,14 @@ public class CreateDcsVariableTableFromHoneywellScadaDatabaseDialog extends Dial
 
     
     /**
-     * Метод обрабатывает нажатие конопки выбора пути к файлу базы данных SCADA.
+     * Handles select path to SCADA database button click event and triggers
+     * appropriate event for all subscribers.
      * 
-     * @param evt Событие нажатия кнопки
+     * @param evt Select path to SCADA database button click event object
      */
     private void selectScadaExportFilePathButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectScadaExportFilePathButtonActionPerformed
         
-        CustomEvent selectScadaDatabaseFilePathButtonClickEvent = new CustomEvent(this);
+        CustomEvent selectScadaDatabaseFilePathButtonClickEvent = new CustomEvent(new Object());
         events.trigger(
             ViewEvent.SELECT_SCADA_DATABASE_PATH_BUTTON_CLICK,
             selectScadaDatabaseFilePathButtonClickEvent
@@ -290,10 +239,10 @@ public class CreateDcsVariableTableFromHoneywellScadaDatabaseDialog extends Dial
 
     
     /**
-     * Метод обрабатывает нажатие конопки запуска парсинга выбранного файла 
-     * базы данных SCADA.
+     * Handles run parsing button click event and triggers appropriate event for
+     * all subscribers.
      * 
-     * @param evt Событие нажатия кнопки
+     * @param evt Run parsing button click event
      */
     private void runHoneywellScadaExportParsingButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runHoneywellScadaExportParsingButtonActionPerformed
         
@@ -308,8 +257,8 @@ public class CreateDcsVariableTableFromHoneywellScadaDatabaseDialog extends Dial
 
     
     /**
-     * Handles plant code selection event and fires an event contains selected 
-     * plant instance.
+     * Handles plant code selection event and triggers appropriate event with 
+     * selected plant instance data.
      * 
      * @param evt Plants combo box event
      */
@@ -322,8 +271,8 @@ public class CreateDcsVariableTableFromHoneywellScadaDatabaseDialog extends Dial
 
     
     /**
-     * Handles tag format selection event and fires an event contains selected
-     * tag mask instance.
+     * Handles tag format selection event and triggers appropriate event with
+     * selected tag mask instance data.
      * 
      * @param evt Tag masks combo box event
      */
@@ -346,4 +295,4 @@ public class CreateDcsVariableTableFromHoneywellScadaDatabaseDialog extends Dial
     private javax.swing.JComboBox tagFormatComboBox;
     private javax.swing.JLabel tagFormatComboBoxLabel;
     // End of variables declaration//GEN-END:variables
-}//CreateDcsVariableTableFromHoneywellScadaExportDialog
+}// CreateDcsVariableTableFromHoneywellScadaDatabaseDialog

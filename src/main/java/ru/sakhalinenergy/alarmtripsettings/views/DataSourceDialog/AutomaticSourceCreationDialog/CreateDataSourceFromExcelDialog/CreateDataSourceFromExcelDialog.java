@@ -104,7 +104,7 @@ public class CreateDataSourceFromExcelDialog extends DataSourceDialog implements
         _setSettingsEnabled(false);
         
         // Set relative location and show dialog:
-        this.setLocationRelativeTo(parent);
+        setLocationRelativeTo(parent);
         _show();
     }// render
     
@@ -811,7 +811,8 @@ public class CreateDataSourceFromExcelDialog extends DataSourceDialog implements
 
     
     /**
-     * Triggers click select path to MS Excel book event for all subscribers.
+     * Handles select path to MS Excel book button click event and triggers 
+     * appropriate event for all subscribers.
      * 
      * @param evt Click event object
      */
@@ -823,8 +824,8 @@ public class CreateDataSourceFromExcelDialog extends DataSourceDialog implements
 
     
     /**
-     * Sets up available headers list for selected sheet in dialog control 
-     * elements.
+     * Handles sheet name selection event and sets up available headers list for
+     * selected sheet in dialog control elements.
      * 
      * @param evt Sheet names combo box selection event object
      */
@@ -857,7 +858,8 @@ public class CreateDataSourceFromExcelDialog extends DataSourceDialog implements
 
     
     /**
-     * Triggers run parsing button click event for all subscribers. 
+     * Handles run parsing button click event and triggers appropriate event for
+     * all subscribers.
      *  
      * @param evt Run parsing button click event object
      */
@@ -871,7 +873,8 @@ public class CreateDataSourceFromExcelDialog extends DataSourceDialog implements
 
     
     /**
-     * Triggers window closing event for all subscribers.
+     * Handles form closing event and triggers appropriate event for all 
+     * subscribers.
      *  
      * @param evt Window closing event object
      */

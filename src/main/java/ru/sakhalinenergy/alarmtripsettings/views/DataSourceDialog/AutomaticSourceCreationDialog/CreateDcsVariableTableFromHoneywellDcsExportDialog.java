@@ -1,10 +1,9 @@
 package ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.AutomaticSourceCreationDialog;
 
+import java.awt.Component;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
 import ru.sakhalinenergy.alarmtripsettings.Main;
-import java.awt.Component;
-import ru.sakhalinenergy.alarmtripsettings.views.DialogWithEvents;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsLogicObservable;
@@ -12,26 +11,20 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObser
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.HoneywellDcsExportObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.config.CreateDcsVariableTableFromHoneywellDcsExportDialogSettingsObservable;
+import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.DataSourceDialog;
 
 
 /**
  * Implements dialog for creating data source from Honeywell DCS export.
- * Honeywell.
  * 
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.4
  */
-public class CreateDcsVariableTableFromHoneywellDcsExportDialog extends DialogWithEvents implements CreateDcsVariableTableFromHoneywellDcsExportDialogObservable
+public class CreateDcsVariableTableFromHoneywellDcsExportDialog extends DataSourceDialog implements CreateDcsVariableTableFromHoneywellDcsExportDialogObservable
 {
-    
-    private final HoneywellDcsExportObservable model;
-    private final PlantsLogicObservable plants;
-    private final TagMasksObservable tagMasks;
-    private final CreateDcsVariableTableFromHoneywellDcsExportDialogSettingsObservable config;
-    
        
     /**
-     * Public constructor.
+     * Public constructor. Sets up dialog fields and initializes components.
      * 
      * @param model Data source instance wrapped into Honeywell DCS extract logic
      * @param plants Wrapped plants collection
@@ -41,22 +34,19 @@ public class CreateDcsVariableTableFromHoneywellDcsExportDialog extends DialogWi
     public CreateDcsVariableTableFromHoneywellDcsExportDialog(HoneywellDcsExportObservable model, 
         PlantsLogicObservable plants, TagMasksObservable tagMasks, CreateDcsVariableTableFromHoneywellDcsExportDialogSettingsObservable config)
     {
-        //Setting up instance fields:
-        this.model = model;
-        this.plants = plants;
-        this.tagMasks = tagMasks;
-        this.config = config;
+        // Set up instance fields:
+        super(model, plants, tagMasks, config);
         
-        //Initializing dialog components:
+        // Initialize dialog components:
         initComponents();
         
-        //Setting up dialog icon:
+        // Set up dialog icon:
         setIconImage(Main.honeywellIcon.getImage());
         setModal(true);
         
-        //Subscribing on models' events:
+        // Subscribe on models' events:
         model.on(SourceEvent.FILE_PATH_UPDATED, new _ExtractFilePathUpdateHandler());
-    }//CreateDcsVariableTableFromHoneywellBackupDialog
+    }// CreateDcsVariableTableFromHoneywellBackupDialog
 
     
     /**
@@ -67,23 +57,20 @@ public class CreateDcsVariableTableFromHoneywellDcsExportDialog extends DialogWi
      */
     public void render(Component parent)
     {
-        this.setLocationRelativeTo(parent);
-        
-        //Формируем список форматов тагов:
-        for (TagMask tempMask : tagMasks.getMasks()) tagFormatComboBox.addItem(tempMask);
+        // Build palants list and restore plant selection:
+        _buildPlantsList(plantComboBox);
 
-        //Строим список производственных объектов:
-        for (Plant tempPlant : plants.getPlants()) plantComboBox.addItem(tempPlant);
+        // Build tag formats list and restore format selection:
+        _buildTagMasksList(tagFormatComboBox);
         
-        //Applying config:
-        _applyConfig();
-        
-        this.setVisible(true);
-    }//render
+        // Set relative location and show dialog:
+        setLocationRelativeTo(parent);
+        _show();
+    }// render
     
     
     /**
-     * Internal class - handler for model extract file path update events.
+     * Inner class - handler for model extract file path update events.
      * 
      * @author Denis Udovenko
      * @version 1.0.1
@@ -95,46 +82,8 @@ public class CreateDcsVariableTableFromHoneywellDcsExportDialog extends DialogWi
         {
             String exportFilePath = (String)event.getSource();
             dcsExportFilePathTextField.setText(exportFilePath);
-        }//customEventOccurred
-    }//_ExtractFilePathUpdateHandler
-    
-    
-    /**
-     * Restores dialog control elements values from current configuration 
-     * instance.
-     */
-    private void _applyConfig()
-    {        
-        //Восстанавливаем выбранный производственный объект:
-        for (Plant tempPlant : plants.getPlants())
-        {    
-            if (tempPlant.getId().equals(config.getPlantCode()))
-            {    
-                this.plantComboBox.setSelectedItem(tempPlant);
-                break;
-            }//if
-        }//for
-        
-        for (TagMask tempTagMask : this.tagMasks.getMasks())
-        {    
-            if (tempTagMask.getExample().equals(config.getTagFormat()))
-            {    
-                this.tagFormatComboBox.setSelectedItem(tempTagMask);
-                break;
-            }//if
-        }//for
-    }//_applyConfig
-    
-    
-    /**
-     * Метод устанавливает путь к файлу экспорта DCS Honeywell.
-     * 
-     * @param path Путь к файлу экспорта DCS Honeywell
-     */
-    public void setDcsExportFilePath(String path)
-    {
-        this.dcsExportFilePathTextField.setText(path);
-    }//setDcsExportFilePath
+        }// customEventOccurred
+    }// _ExtractFilePathUpdateHandler
     
     
     /**
@@ -146,7 +95,7 @@ public class CreateDcsVariableTableFromHoneywellDcsExportDialog extends DialogWi
     public Plant getPlant()
     {
         return (Plant)plantComboBox.getSelectedItem();
-    }//getPlantCode
+    }// getPlantCode
     
     
     /**
@@ -158,19 +107,8 @@ public class CreateDcsVariableTableFromHoneywellDcsExportDialog extends DialogWi
     public TagMask getTagMask()
     {
         return (TagMask)tagFormatComboBox.getSelectedItem();
-    }//getTagMask
-    
-    
-    /**
-     * Метод возвращает текущий путь к файлу экспорта DCS Honeywell.
-     * 
-     * @return Путь к файлу экспорта DCS Honeywell
-     */
-    public String getDcsExportFilePath()
-    {
-        return this.dcsExportFilePathTextField.getText();
-    }//getDcsExportFilePath
-    
+    }// getTagMask
+        
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -279,14 +217,14 @@ public class CreateDcsVariableTableFromHoneywellDcsExportDialog extends DialogWi
 
     
     /**
-     * Метод обрабатывает нажатие конопки выбора пути к файлу экспорта DCS
-     * Honeywell.
+     * Handles select path to DCS export file button click event and triggers 
+     * "select DCS export file path button click" event for all subscribers.
      * 
-     * @param evt Событие нажатия кнопки
+     * @param evt Select path to DCS export file button click event object
      */
     private void selectDcsExportFilePathButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectDcsExportFilePathButtonActionPerformed
         
-        CustomEvent selectDcsExportFilePathButtonClickEvent = new CustomEvent(this);
+        CustomEvent selectDcsExportFilePathButtonClickEvent = new CustomEvent(new Object());
         events.trigger(
             ViewEvent.SELECT_DCS_EXPORT_FILE_PATH_BUTTON_CLICK, 
             selectDcsExportFilePathButtonClickEvent
@@ -295,16 +233,16 @@ public class CreateDcsVariableTableFromHoneywellDcsExportDialog extends DialogWi
 
     
     /**
-     * Метод обрабатывает нажатие конопки запуска парсинга выбранного файла 
-     * экспорта DCS Honeywell.
+     * Handles run parsing button click event and triggers an event with 
+     * selected plant instance data.
      * 
-     * @param evt Событие нажатия кнопки
+     * @param evt Run parsing button click event object
      */
     private void runHoneywellDcsExportParsingButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runHoneywellDcsExportParsingButtonActionPerformed
         
         this.setVisible(false);
         
-        CustomEvent runHoneywellDcsExportParsingButtonClickEvent = new CustomEvent(this);
+        CustomEvent runHoneywellDcsExportParsingButtonClickEvent = new CustomEvent(new Object());
         events.trigger(
             ViewEvent.RUN_HONEYWELL_DCS_EXPORT_PARSING_BUTTON_CLICK, 
             runHoneywellDcsExportParsingButtonClickEvent
@@ -313,8 +251,8 @@ public class CreateDcsVariableTableFromHoneywellDcsExportDialog extends DialogWi
 
     
     /**
-     * Handles plant code selection event and fires an event contains selected 
-     * plant instance.
+     * Handles plant code selection event and triggers an event with selected 
+     * plant instance data.
      * 
      * @param evt Plants combo box event
      */
@@ -327,8 +265,8 @@ public class CreateDcsVariableTableFromHoneywellDcsExportDialog extends DialogWi
 
     
     /**
-     * Handles tag format selection event and fires an event contains selected
-     * tag mask instance.
+     * Handles tag format selection event and triggers an event with selected
+     * tag mask instance data.
      * 
      * @param evt Tag masks combo box event
      */
@@ -349,4 +287,4 @@ public class CreateDcsVariableTableFromHoneywellDcsExportDialog extends DialogWi
     private javax.swing.JComboBox tagFormatComboBox;
     private javax.swing.JLabel tagFormatComboBoxLabel;
     // End of variables declaration//GEN-END:variables
-}//CreateDcsVariableTableFromHoneywellBackupDialog
+}// CreateDcsVariableTableFromHoneywellDcsExportDialog
