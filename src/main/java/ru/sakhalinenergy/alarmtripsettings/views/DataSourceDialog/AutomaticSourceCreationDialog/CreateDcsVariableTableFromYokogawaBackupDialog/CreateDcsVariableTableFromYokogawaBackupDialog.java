@@ -16,7 +16,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsLogicObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObservable;
-import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.AutomaticSourceCreationDialog.ViewEvent;
+import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.DataSourceDialog;
 
 
@@ -64,6 +64,9 @@ public class CreateDcsVariableTableFromYokogawaBackupDialog extends DataSourceDi
 
         // Build tag formats list and restore format selection:
         _buildTagMasksList(tagMaskComboBox);
+        
+        // Apply config:
+        _applyConfig(plantsComboBox, tagMaskComboBox);
         
         // Set relative location and show dialog:
         setLocationRelativeTo(parent);

@@ -1,5 +1,6 @@
 package ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ManualSourceEditingDialog;
 
+import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import java.util.List;
 import java.util.ArrayList;

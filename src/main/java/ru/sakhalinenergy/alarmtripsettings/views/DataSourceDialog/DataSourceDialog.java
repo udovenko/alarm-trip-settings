@@ -43,14 +43,46 @@ public abstract class DataSourceDialog extends DialogWithEvents
     
     
     /**
-     * Builds plants list in given combo box object and restores plant selection
-     * from dialog configuration object.
+     * Builds plants list in given combo box object.
      * 
      * @param plantsComboBox Combo box object where plants list will be built
      */
     protected void _buildPlantsList(JComboBox plantsComboBox)
     {
         for (Plant tempPlant : plants.getPlants()) plantsComboBox.addItem(tempPlant);
+    }// _buildPlantsList
+    
+    
+    /**
+     * Builds tag masks list in given combo box object.
+     * 
+     * @param tagMasksComboBox Combo box object where tag masks list will be built
+     */
+    protected void _buildTagMasksList(JComboBox tagMasksComboBox)
+    {
+        // Build tag formats list:
+        for (TagMask tempMask : tagMasks.getMasks()) tagMasksComboBox.addItem(tempMask);
+    }// _buildTagMasksList
+    
+    
+    /**
+     * Restores plant and tagMask selection from dialog configuration object.
+     * 
+     * @param plantsComboBox Plants list combo box object
+     * @param tagMasksComboBox Tag masks list combo box object
+     */
+    protected void _applyConfig(JComboBox plantsComboBox, JComboBox tagMasksComboBox)
+    {
+        // Restore tag mask selection:
+        for (TagMask tempTagMask : this.tagMasks.getMasks())
+        {    
+            if (tempTagMask.getExample().equals(config.getTagFormat()))
+            {    
+                tagMasksComboBox.setSelectedItem(tempTagMask);
+                break;
+            }// if
+        }// for
+        
         
         // Restore plant selection:
         for (Plant tempPlant : plants.getPlants())
@@ -61,28 +93,5 @@ public abstract class DataSourceDialog extends DialogWithEvents
                 break;
             }// if
         }// for
-    }// _buildPlantsList
-    
-    
-    /**
-     * Builds tag masks list in given combo box object and restores tag mask
-     * selection from dialog configuration object.
-     * 
-     * @param tagMasksComboBox Combo box object where tag masks list will be built
-     */
-    protected void _buildTagMasksList(JComboBox tagMasksComboBox)
-    {
-        // Build tag formats list:
-        for (TagMask tempMask : tagMasks.getMasks()) tagMasksComboBox.addItem(tempMask);
-        
-        //Восстанавливаем выбранную маску тага:
-        for (TagMask tempTagMask : this.tagMasks.getMasks())
-        {    
-            if (tempTagMask.getExample().equals(config.getTagFormat()))
-            {    
-                tagMasksComboBox.setSelectedItem(tempTagMask);
-                break;
-            }// if
-        }// for
-    }// _buildTagMasksList
+    }// _applyConfig
 }// DataSourceDialog

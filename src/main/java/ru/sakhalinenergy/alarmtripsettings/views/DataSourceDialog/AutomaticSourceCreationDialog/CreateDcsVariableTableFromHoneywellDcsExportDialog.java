@@ -11,6 +11,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObser
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.HoneywellDcsExportObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.config.CreateDcsVariableTableFromHoneywellDcsExportDialogSettingsObservable;
+import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.DataSourceDialog;
 
 
@@ -62,6 +63,9 @@ public class CreateDcsVariableTableFromHoneywellDcsExportDialog extends DataSour
 
         // Build tag formats list and restore format selection:
         _buildTagMasksList(tagFormatComboBox);
+        
+        // Apply config:
+        _applyConfig(plantComboBox, tagFormatComboBox);        
         
         // Set relative location and show dialog:
         setLocationRelativeTo(parent);

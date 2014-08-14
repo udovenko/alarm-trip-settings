@@ -8,7 +8,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.config.DcsVariableTableDataSou
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Source;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.SourceProperty;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSourceControllable;
-import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ManualSourceEditingDialog.ViewEvent;
+import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ManualSourceEditingDialog.DcsVariableTableDataSourceDialog;
 
 
@@ -57,10 +57,10 @@ public class DcsVariableTableDataSourceDialogController extends ManualSourceEdit
             dialogSettings.setBackupDate(castedView.getBackupDateAsString());
             dialogSettings.setComment(castedView.getComment());
             dialogSettings.setDataSourceName(castedView.getDataSourceName());
-            dialogSettings.setDialogHeight(castedView.getFormHeigt());
-            dialogSettings.setDialogLeft(castedView.getFormX());
-            dialogSettings.setDialogTop(castedView.getFormY());
-            dialogSettings.setDialogWidth(castedView.getFormWidth());
+            dialogSettings.setDialogHeight(castedView.getDialogHeight());
+            dialogSettings.setDialogLeft(castedView.getDialogLeft());
+            dialogSettings.setDialogTop(castedView.getDialogTop());
+            dialogSettings.setDialogWidth(castedView.getDialogWidth());
             dialogSettings.setPriority(castedView.getPriority());
             dialogSettings.setTagFormat(castedView.getTagMask().getExample());
             dialogSettings.setCreateLoopsIfNotExistFlag(castedView.getCreateLoopsIfNotExistFlag());

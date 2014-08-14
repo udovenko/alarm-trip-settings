@@ -11,6 +11,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsLogicOb
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.HoneywellScadaDatabaseObservable;
+import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.DataSourceDialog;
 
 
@@ -61,6 +62,9 @@ public class CreateDcsVariableTableFromHoneywellScadaDatabaseDialog extends Data
 
         // Build tag formats list and restore format selection:
         _buildTagMasksList(tagFormatComboBox);
+        
+        // Apply config:
+        _applyConfig(plantComboBox, tagFormatComboBox);
         
         // Set relative location and show dialog:
         setLocationRelativeTo(parent);
@@ -248,7 +252,7 @@ public class CreateDcsVariableTableFromHoneywellScadaDatabaseDialog extends Data
         
         this.setVisible(false);
         
-        CustomEvent runScadaDatabaseParsingButtonClickEvent = new CustomEvent(this);
+        CustomEvent runScadaDatabaseParsingButtonClickEvent = new CustomEvent(new Object());
         events.trigger(
             ViewEvent.RUN_SCADA_DATABASE_PARSING_BUTTON_CLICK,
             runScadaDatabaseParsingButtonClickEvent

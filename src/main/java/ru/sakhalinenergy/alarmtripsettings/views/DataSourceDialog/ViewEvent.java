@@ -1,16 +1,15 @@
-package ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.AutomaticSourceCreationDialog;
-
+package ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog;
 
 /**
- * Events enumeration for current package and sub-packages views.
- *
+ * Events enumeration for current package views.
+ * 
  * @author Denis Udovenko
- * @version 1.0.1
+ * @version 1.0.2
  */
 public enum ViewEvent 
 {
-    CHANGE_PLANT_SELECTION,
     CHANGE_TAG_FORMAT_SELECTION,
+    CHANGE_PLANT_SELECTION,
     SELECT_PATH_TO_SPREADSHEET_TEXT_FIELD_BUTTON_CLICK,
     RUN_SPREADSHEET_PARSING_BUTTON_CLICK,     
     SELECT_SCADA_DATABASE_PATH_BUTTON_CLICK,
@@ -19,5 +18,14 @@ public enum ViewEvent
     SELECT_DCS_EXPORT_FILE_PATH_BUTTON_CLICK,
     RUN_HONEYWELL_DCS_EXPORT_PARSING_BUTTON_CLICK,
     RUN_BACKUP_PARSING_BUTTON_CLICK,
-    DIALOG_CLOSING
-}// ViewEvent
+    DIALOG_CLOSING,
+    SAVE_SOURCE_DATA,
+    TAG_NAME_INPUT,
+    REMOVE_TAG,
+    TAG_SETTING_ADD,
+    TAG_SETTING_UPDATE,
+    TAG_SETTING_DELETE,
+    TAG_SETTING_PROPERTY_INPUT,
+    TAG_SETTING_PROPERTY_UPDATE,
+    TAG_SETTING_PROPERTY_DELETE
+}// Event

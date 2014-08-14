@@ -1,84 +1,64 @@
 package ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ManualSourceEditingDialog;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.awt.Component;
 import javax.swing.table.TableColumn;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
-import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
-import ru.sakhalinenergy.alarmtripsettings.implemented.SourcesPropertiesTypes;
 import ru.sakhalinenergy.alarmtripsettings.Main;
 import ru.sakhalinenergy.alarmtripsettings.models.config.DcsVariableTableDataSourceDialogSettingsObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Source;
-import ru.sakhalinenergy.alarmtripsettings.models.entity.SourceProperty;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsLogicObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSourceObservable;
-import ru.sakhalinenergy.alarmtripsettings.views.DialogWithEvents;
+import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ViewEvent;
 
 
 /**
- * Класс реализует панель настроек для добавления в базу новой таблицы 
- * переменных DCS.
+ * Implements dialog for create/edit DCS Variable Table data source.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.3
+ * @author Denis Udovenko
+ * @version 1.0.4
  */
-public class DcsVariableTableDataSourceDialog extends DialogWithEvents implements ManualSourceEditingDialogObservable
+public class DcsVariableTableDataSourceDialog extends ManualSourceEditingDialog implements ManualSourceEditingDialogObservable
 {
-    
-    private final DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-    private final TagsSourceObservable model;
-    private final PlantsLogicObservable plants;
-    private final TagMasksObservable tagMasks;
-    private final DcsVariableTableDataSourceDialogSettingsObservable config;
-    private final boolean editMode;
-    
-    
+   
     /**
-     * Public constructor.
+     * Public constructor. Sets up dialog fields and initializes components.
      * 
      * @param model Tags source wrapper
      * @param plants Plants list wrapper
      * @param tagMasks Wrapped masks collection for tag parsing
      * @param config Configuration instance
      * @param editMode New source / edit source mode flag
+     * @param title Dialog title
      */
     public DcsVariableTableDataSourceDialog(TagsSourceObservable model, PlantsLogicObservable plants,
         TagMasksObservable tagMasks, DcsVariableTableDataSourceDialogSettingsObservable config,
         boolean editMode, String title) 
     {
+        // Call superclass constructor:
+        super(model, plants, tagMasks, config, editMode, title);
+        
         initComponents();
-        
-        //Setting instance fields:
-        this.model = model;
-        this.plants = plants;
-        this.tagMasks = tagMasks;
-        this.config = config;
-        this.editMode = editMode;
                
-        //Setting dialog icon and title:
+        // Set dialog icon:
         setIconImage(Main.dcsIcon.getImage());
-        setTitle(title);
         
-        //Устанавливаем формат даты календаря:
-        this.backupDatePicker.setFormats(this.dateFormat);
+        // Set up calendar date format:
+        backupDatePicker.setFormats(dateFormat);
         
-        //Подписываемся на события модели:
-        this.model.on(SourceEvent.TAG_SET_UPDATED, new ModelTagSetUpdateHandler());
+        // Subscribe on model's events:
+        model.on(SourceEvent.TAG_SET_UPDATED, _getModelTagSetUpdateHandler(sourceTagsTable));
         
-        //Создаем модель данных таблицы тагов:
-        this.sourceTagsTable.setModel(new DcsTagsTableModel(model, this));
+        // Set tags table model:
+        sourceTagsTable.setModel(new DcsTagsTableModel(model, this));
         DcsTagsTableModel tagsTableModel = (DcsTagsTableModel)this.sourceTagsTable.getModel();
                 
-        //Назначаем всем колонкам таблицы рендерер текущего набора устройств:
+        // Set cell renderes depending on column name:
         for (TableColumn column : Collections.list(this.sourceTagsTable.getColumnModel().getColumns()))
         {
             if (column.getHeaderValue().equals(tagsTableModel.REMOVE_TAG_BUTTON_COLUMN_NAME))
@@ -89,264 +69,157 @@ public class DcsVariableTableDataSourceDialog extends DialogWithEvents implement
             } else {   
                 
                 column.setCellRenderer(new TagsTableCellRenderer());
-            }//else
-        }//for
-    }//DcsVariableTableSettingsPanel
+            }// else
+        }// for
+    }// DcsVariableTableSettingsPanel
        
     
     /**
-     * Sets dialog lists, applies configuration and renders view.
+     * Render required objects lists, applies dialog settings and shows form on
+     * the screen.
      * 
      * @param parent Parent component, dialog will be rendered relative to it
      */
     public void render(Component parent)
     {
-        setLocationRelativeTo(parent);
-        
-        //Формируем список форматов тагов:
+        // Build palants list and restore plant selection:
         for (TagMask tempMask : tagMasks.getMasks()) tagFormatsComboBox.addItem(tempMask);
 
-        //Строим список производственных объектов:
+        // Build tag formats list and restore format selection:
         for (Plant tempPlant : plants.getPlants()) plantsComboBox.addItem(tempPlant);
         
-        try //Восстанавливаем конфигурацию:
-        {
-            _applyConfig();
-        } catch (Exception exception) {}
-        
-         //Отображаем диалог:
-        this.setVisible(true);
-    }//render
+        // Apply config:
+        _applyConfig();
+                
+        // Set relative location and show dialog:
+        setLocationRelativeTo(parent);
+        _show();
+    }// render
     
     
     /**
-     * Внутренний класс-обработчик события обновления набора тагов модели.
+     * Returns selected plant.
      * 
-     * @author   Denis.Udovenko
-     * @version  1.0.1
+     * @return Selected plant
      */
-    class ModelTagSetUpdateHandler implements CustomEventListener
-    {
-        @Override
-        public void customEventOccurred(CustomEvent evt)
-        {
-            TagsTableModel tagsTableModel = (TagsTableModel)sourceTagsTable.getModel();
-            tagsTableModel.fireTableDataChanged();
-        }//customEventOccurred
-    }//TagNameInputHandler
-    
-    
-    /**
-     * Возвращает горизонтальный отступ левого верхнего угла формы от 
-     * начала координат экрана.
-     *
-     * @return Горизонтальный отступ левого верхнего угла формы от начала координат экрана
-     */
-    public String getFormX()
-    {
-        return Integer.toString(this.getX());
-    }//getFormX    
-    
-    
-    /**
-     * Возвращает вертикальный отступ левого верхнего угла формы от 
-     * начала координат экрана.
-     *
-     * @return Вертикальный отступ левого верхнего угла формы от начала координат экрана
-     */
-    public String getFormY()
-    {
-        return Integer.toString(this.getY());
-    }//getFormX
-    
-    
-    /**
-     * Возвращает ширину формы.
-     * 
-     * @return Ширина формы
-     */
-    public String getFormWidth()
-    {
-        return Integer.toString(this.getWidth());
-    }//getFormWidth
-    
-    
-    /**
-     * Возвращает высоту формы.
-     * 
-     * @return Высота формы
-     */
-    public String getFormHeigt()
-    {
-        return Integer.toString(this.getHeight());
-    }//getFormHeigt
-    
-    
-    /**
-     * Возвращает выбранный производственный объект.
-     * 
-     * @return Выбранный производственный объект
-     */
+    @Override
     public Plant getPlant()
     {
         return (Plant)plantsComboBox.getSelectedItem();
-    }//getPlant
+    }// getPlant
     
     
     /**
-     * Возвращает имя источника данных.
+     * Returns data source name.
      * 
-     * @return Имя источника данных
+     * @return Data source name
      */
     public String getDataSourceName()
     {
         return this.backupNameTextField.getText();
-    }//getDataSourceName
+    }// getDataSourceName
            
     
     /**
-     * Возвращвает приоритет источника данных.
+     * Returns data source priority.
      * 
-     * @return Приоритет источника данных
+     * @return Data source priority
      */
     public String getPriority()
     {
         return prioritySpinner.getValue().toString();
-    }//getPriority
+    }// getPriority
     
     
     /**
-     * Возвращает текущий формат тага.
+     * Returns selected tag mask.
      * 
-     * @return Текущий формат тага
+     * @return Selected tag mask
      */
+    @Override
     public TagMask getTagMask()
     {
         return (TagMask)tagFormatsComboBox.getSelectedItem();
-    }//getTagFormat
+    }// getTagMask
     
     
     /**
-     * Возвращает комментарий к источнику данных.
+     * Returns data source comment.
      * 
-     * @return Комментарий к источнику данных
+     * @return Data source comment
      */
     public String getComment()
     {
         return (String)commentTextArea.getText();
-    }//getComment
+    }// getComment
     
     
     /**
-     * Метод возвращает дату ревизии документа.
+     * Returns DCS backup date.
      * 
-     * @return Дата ревизии документа
+     * @return DCS backup date
      */
     public Date getBackupDate()
     {
         return backupDatePicker.getDate();
-    }//getRevisionDate
+    }// getRevisionDate
     
     
     /**
-     * Метод возвращает дату ревизии документа в строковом предствалении.
+     * Returns DCS backup date as string.
      * 
-     * @return Дата ревизии документа в строковом предствалении
+     * @return DCS backup date as string
      */
     public String getBackupDateAsString()
     {
         Date date = backupDatePicker.getDate();
         return dateFormat.format(date);
-    }//getRevisionDate
+    }// getRevisionDate
        
     
     /**
-     * Возвращает значение флага, указывающего на необходимость создавать 
-     * контуры для тагов, для которых они не созданы.
+     * Returns value of flag which specifies necessity of loops creation for
+     * tags currently do not related to any of existing loops in storage.
      * 
-     * @return Значение флага, указывающего на необходимость создавать контуры
+     * @return Create not existed loops flag
      */
     public String getCreateLoopsIfNotExistFlag()
     {
         Boolean createLoopsIfNotExist  = this.createLoopsIfNotExistCheckBox.isSelected();
         return createLoopsIfNotExist.toString();
-    }//getCreateLoopsIfNotExistFlag
+    }// getCreateLoopsIfNotExistFlag
          
     
     /**
-     * Метод восстанавливает настройки панели из полученного экземпляра 
-     * настроек.
-     * 
-     * @throws ParseException
-     * @param settings Экземпляр настроек панели
-     * @return void
+     * Restores dialog's settings from configuration object.
      */
-    private void _applyConfig() throws ParseException
+    private void _applyConfig() 
     {
-        this.setSize(Integer.parseInt(config.getDialogWidth()), Integer.parseInt(config.getDialogHeight()));
-        this.setLocation(Integer.parseInt(config.getDialogLeft()), Integer.parseInt(config.getDialogTop()));
+        // Call superclass configuration method:
+        _applyConfig(plantsComboBox, tagFormatsComboBox, prioritySpinner,
+            backupNameTextField, commentTextArea);
         
+        // Cast models to concrete classes:
+        DcsVariableTableDataSourceDialogSettingsObservable castedConfig 
+            = (DcsVariableTableDataSourceDialogSettingsObservable)config;
+             
+        // Aplly rest of settings:
         if (editMode)
         {
-            Source source = model.getEntity();
-            prioritySpinner.setValue(source.getPriority());
+            Source source = ((TagsSourceObservable)model).getEntity();
             backupDatePicker.setDate(source.getDate());
-            backupNameTextField.setText(source.getName());
-            
-            for (SourceProperty tempProperty : source.getProperties())
-            {
-                if (tempProperty.getTypeId() == SourcesPropertiesTypes.COMMENT.ID) commentTextArea.setText(tempProperty.getValue());
-            }//for
-     
+
         } else {
             
-            backupNameTextField.setText(config.getDataSourceName());
-            prioritySpinner.setValue(Integer.parseInt(config.getPriority()));
-            commentTextArea.setText(config.getComment());
-            Date date = this.dateFormat.parse(config.getBackupDate());
-            backupDatePicker.setDate(date);
-        }//else
-        
-        //Восстанавливаем выбранный производственный объект:
-        for (Plant tempPlant : plants.getPlants())
-        {    
-            if (tempPlant.getId().equals(config.getPlantCode()))
+            try
             {    
-                this.plantsComboBox.setSelectedItem(tempPlant);
-                break;
-            }//if
-        }//for
-        
-        for (TagMask tempTagMask : this.tagMasks.getMasks())
-        {    
-            if (tempTagMask.getExample().equals(config.getTagFormat()))
-            {    
-                this.tagFormatsComboBox.setSelectedItem(tempTagMask);
-                break;
-            }//if
-        }//for
-        
-        this.createLoopsIfNotExistCheckBox.setSelected(new Boolean(config.getCreateLoopsIfNotExistFlag()));
-    }//_applyConfig
-    
-    
-    /**
-     * Метод устанавливает список реализованых форматов тагов.
-     * 
-     * @param   formats  Список реализованых форматов тагов
-     * @return  void
-     */
-    public void setTagNumberFormatsList(List<String> formats)
-    {
-        //Очищаем предыдуще перечни форматов:
-        this.tagFormatsComboBox.removeAllItems();
+                Date date = this.dateFormat.parse(castedConfig.getBackupDate());
+                backupDatePicker.setDate(date);
+            } catch (Exception exception){}
+        }// else
                 
-        //Вносим в комбо-боксы новый список форматов:
-        for (int i=0; i<formats.size(); i++)
-        {
-            this.tagFormatsComboBox.addItem(formats.get(i));
-        }//for
-    }//setTagNumberFormatsList
+        this.createLoopsIfNotExistCheckBox.setSelected(new Boolean(castedConfig.getCreateLoopsIfNotExistFlag()));
+    }// _applyConfig
 
     
     /**
@@ -530,11 +403,10 @@ public class DcsVariableTableDataSourceDialog extends DialogWithEvents implement
 
     
     /**
-     * Метод обрабатывает событие выбора нового формата тага в выпадающем списке
-     * и рассылает событие с контекстом выбранного формата тага всем 
-     * подписчикам.
+     * Handles tag mask (format) selection event and triggers appropriate event with 
+     * selected tag mask instance data.
      * 
-     * @param evt Cобытие выбора формата тага
+     * @param evt Tag formats combo box selection event object
      */
     private void tagFormatsComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tagFormatsComboBoxActionPerformed
         
@@ -545,27 +417,27 @@ public class DcsVariableTableDataSourceDialog extends DialogWithEvents implement
 
     
     /**
-     * Метод обрабатывает нажатие кнопки "Save DCS Variable Table data source"
-     * и рассылает всем подписчикам событие.
+     * Handles "Save DCS Variable Table data source" button click event and 
+     * triggers appropriate for all subscribers.
      * 
-     * @param evt Событие нажатия кнопки
-     * @return void
+     * @param evt Button click event object
      */
     private void addDumpSourceToStorageButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDumpSourceToStorageButtonActionPerformed
         
-        //Hiding dialog:
-        this.setVisible(false);
+        // Hide dialog:
+        _close();
         
-        //Triggering an event:
+        // Trigger an event:
         CustomEvent saveSourceEvent = new CustomEvent(new Object());
         this.events.trigger(ViewEvent.SAVE_SOURCE_DATA, saveSourceEvent);
     }//GEN-LAST:event_addDumpSourceToStorageButtonActionPerformed
 
     
     /**
-     * Обрабатывает событие нажатия кнопки добавления тага.
+     * Handles add tag button click event and triggers appropriate event with 
+     * new tag name data.
      * 
-     * @param evt Событие нажатия кнопки
+     * @param evt Button click event object
      */
     private void addTagButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addTagButtonActionPerformed
         
@@ -575,9 +447,10 @@ public class DcsVariableTableDataSourceDialog extends DialogWithEvents implement
 
     
     /**
-     * Обрабатывает событие выбора нового производственного объекта.
+     * Handles plant selection event and triggers appropriate event with 
+     * selected plant data.
      * 
-     * @param evt Событие комбобокса
+     * @param evt Plants combo box selection event object
      */
     private void plantsComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_plantsComboBoxActionPerformed
         
@@ -609,4 +482,4 @@ public class DcsVariableTableDataSourceDialog extends DialogWithEvents implement
     private javax.swing.JComboBox tagFormatsComboBox;
     private javax.swing.JLabel tagFormatsComboBoxLabel;
     // End of variables declaration//GEN-END:variables
-}//DcsVariableTableSettingsPanel
+}// DcsVariableTableDataSourceDialog

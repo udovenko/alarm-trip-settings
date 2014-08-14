@@ -5,8 +5,8 @@ import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSourceControllable;
+import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.AutomaticSourceCreationDialog.AutomaticSourceCreationDialogObservable;
-import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.AutomaticSourceCreationDialog.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.controllers.Controller;
 
 
@@ -49,7 +49,7 @@ abstract public class AutomaticSourceCreationDialogController extends Controller
     {
         @Override
         public void customEventOccurred(CustomEvent event)
-        {
+        {   System.out.println("set plant!");
             Plant plant = (Plant)event.getSource();
             model.setPlant(plant);
         }// customEventOccurred

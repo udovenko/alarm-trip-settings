@@ -19,7 +19,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObser
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.ExcelBookObservable;
 import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.DataSourceDialog;
-import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.AutomaticSourceCreationDialog.ViewEvent;
+import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ViewEvent;
 
 
 /**
@@ -100,6 +100,9 @@ public class CreateDataSourceFromExcelDialog extends DataSourceDialog implements
         // Build tag formats list and restore format selection:
         _buildTagMasksList(tagFormatComboBox);
                 
+        // Apply config:
+        _applyConfig(plantsComboBox, tagFormatComboBox);
+        
         // Block sheet settings controls until sheet structure will be received:
         _setSettingsEnabled(false);
         
@@ -125,7 +128,7 @@ public class CreateDataSourceFromExcelDialog extends DataSourceDialog implements
             HashMap sheetsAndFields = castedModel.getSheetsAndFields();
              _setSheetNamesList(new ArrayList(sheetsAndFields.keySet()));
              _setSettingsEnabled(true);
-             _applyConfig();
+             _applyParsingSettingsConfig();
         }// customEventOccurred
     }// _BookConnectedEventHandler
     
@@ -163,7 +166,7 @@ public class CreateDataSourceFromExcelDialog extends DataSourceDialog implements
      * Applies MS Excel book parsing configuration if configuration settings 
      * match to received selected sheet structure.
      */
-    private void _applyConfig()
+    private void _applyParsingSettingsConfig()
     {
         // Cast models to concrete classes:
         ExcelBookObservable castedModel = (ExcelBookObservable)model;
@@ -226,7 +229,7 @@ public class CreateDataSourceFromExcelDialog extends DataSourceDialog implements
         if (fields.indexOf(castedConfig.getSourceSystemKeyField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getSourceSystemKeyField(), SOURCE_SYSTEM_ROW_INDEX, KEY_FIELD_COLUMN_INDEX);
         parsingSettingsTable.setValueAt(castedConfig.getSourceSystemKeyValue(), SOURCE_SYSTEM_ROW_INDEX, KEY_VALUE_COLUMN_INDEX);
         if (fields.indexOf(castedConfig.getSourceSystemValueField()) != -1) parsingSettingsTable.setValueAt(castedConfig.getSourceSystemValueField(), SOURCE_SYSTEM_ROW_INDEX, VALUE_FIELD_COLUMN_INDEX);
-    }// _applyConfig
+    }// _applyParsingSettingsConfig
 
     
     /**

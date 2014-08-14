@@ -8,7 +8,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.config.EsdVariableTableDataSou
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Source;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.SourceProperty;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSourceControllable;
-import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ManualSourceEditingDialog.ViewEvent;
+import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ManualSourceEditingDialog.EsdVariableTableDataSourceDialog;
 
 

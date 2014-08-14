@@ -1,5 +1,6 @@
 package ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ManualSourceEditingDialog;
 
+import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ViewEvent;
 import java.util.Date;
 import java.util.Collections;
 import javax.swing.table.TableColumn;
