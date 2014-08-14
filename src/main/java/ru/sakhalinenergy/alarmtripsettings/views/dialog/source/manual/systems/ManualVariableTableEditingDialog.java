@@ -1,4 +1,4 @@
-package ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual;
+package ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.systems;
 
 import java.util.Date;
 import javax.swing.JComboBox;
@@ -11,6 +11,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.entity.Source;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsLogicObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSourceObservable;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.ManualSourceEditingDialog;
 
 
 /**

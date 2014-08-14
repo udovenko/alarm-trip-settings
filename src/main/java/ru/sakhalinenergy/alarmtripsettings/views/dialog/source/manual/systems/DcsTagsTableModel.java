@@ -1,6 +1,5 @@
-package ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual;
+package ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.systems;
 
-import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.ViewEvent;
 import java.util.Arrays;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.implemented.SettingsTypes;
@@ -9,6 +8,9 @@ import ru.sakhalinenergy.alarmtripsettings.models.entity.Tag;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagSetting;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagSettingProperty;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSourceObservable;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.ViewEvent;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.ManualSourceEditingDialogObservable;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.TagsTableModel;
 
 
 /**

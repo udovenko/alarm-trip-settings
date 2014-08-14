@@ -1,4 +1,4 @@
-package ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual;
+package ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.systems;
 
 import java.util.Date;
 import java.util.Collections;
@@ -14,6 +14,11 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObser
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSourceObservable;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.ViewEvent;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.ManualSourceEditingDialogObservable;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.TagsTableButtonEditor;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.TagsTableButtonRenderer;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.TagsTableCellRenderer;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.TagsTableModel;
 
 
 /**

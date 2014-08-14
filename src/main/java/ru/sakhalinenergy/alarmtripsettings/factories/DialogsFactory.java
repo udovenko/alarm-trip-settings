@@ -35,9 +35,9 @@ import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.automatic.yokogaw
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.automatic.honeywell.CreateDcsVariableTableFromHoneywellDcsExportDialog;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.automatic.honeywell.CreateDcsVariableTableFromHoneywellScadaDatabaseDialog;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.DocumentDataSourceDialog;
-import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.DcsVariableTableDataSourceDialog;
-import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.EsdVariableTableDataSourceDialog;
-import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.FgsVariableTableDataSourceDialog;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.systems.DcsVariableTableDataSourceDialog;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.systems.EsdVariableTableDataSourceDialog;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.systems.FgsVariableTableDataSourceDialog;
 import ru.sakhalinenergy.alarmtripsettings.controllers.DataSourceDialog.IntoolsExportDataSourceDialogController;
 import ru.sakhalinenergy.alarmtripsettings.controllers.DataSourceDialog.CreateDataSourceFromMsExcelController;
 import ru.sakhalinenergy.alarmtripsettings.controllers.DataSourceDialog.CreateDcsVariableTableFromYokogawaBackupDialogController;
