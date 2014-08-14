@@ -11,7 +11,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.CollectionEve
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsTree;
 import ru.sakhalinenergy.alarmtripsettings.models.storage.HibernateUtil;
 import ru.sakhalinenergy.alarmtripsettings.views.PlantsTreePanel.PlantsTreePanel;
-import ru.sakhalinenergy.alarmtripsettings.views.Progress.ProgressInformationDialog;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.progress.ProgressInformationDialog;
 import ru.sakhalinenergy.alarmtripsettings.views.StorageConnectionDialog.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.StorageConnectionDialog.StorageConnectionDialog;
 

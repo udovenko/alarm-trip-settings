@@ -14,7 +14,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.classes.plantstree.TreeU
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.summary.OveralCompliance;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.summary.IntoolsCompliance;
-import ru.sakhalinenergy.alarmtripsettings.views.Progress.OneProgressBarDialog;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.progress.OneProgressBarDialog;
 import ru.sakhalinenergy.alarmtripsettings.views.PlantsTreePanel.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.PlantsTreePanel.PlantsTreePanel;
 import ru.sakhalinenergy.alarmtripsettings.views.LoopsTablePanel.LoopsTablePanel;

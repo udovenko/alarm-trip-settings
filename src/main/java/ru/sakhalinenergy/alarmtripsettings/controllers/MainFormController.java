@@ -6,7 +6,7 @@ import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
 import ru.sakhalinenergy.alarmtripsettings.factories.DialogsFactory;
 import ru.sakhalinenergy.alarmtripsettings.models.config.ConfigEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.config.MainFormSettings;
-import ru.sakhalinenergy.alarmtripsettings.views.AboutDialog;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.AboutDialog;
 import ru.sakhalinenergy.alarmtripsettings.views.MainForm.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.MainForm.MainForm;
 

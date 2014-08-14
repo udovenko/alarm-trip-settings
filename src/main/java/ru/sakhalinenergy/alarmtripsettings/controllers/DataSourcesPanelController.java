@@ -19,8 +19,8 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.source.YokogawaDcsBackup
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.HoneywellDcsExport;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.HoneywellScadaDatabase;
 import ru.sakhalinenergy.alarmtripsettings.models.config.StorageConnectionDialogSettings;
-import ru.sakhalinenergy.alarmtripsettings.views.Progress.OneProgressBarDialog;
-import ru.sakhalinenergy.alarmtripsettings.views.Progress.ProgressInformationDialog;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.progress.OneProgressBarDialog;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.progress.ProgressInformationDialog;
 import ru.sakhalinenergy.alarmtripsettings.views.DataSourcesPanel.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.DataSourcesPanel.DataSourcesPanel;
 

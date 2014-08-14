@@ -14,7 +14,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSource;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.YokogawaDcsBackupControllable;
-import ru.sakhalinenergy.alarmtripsettings.views.Progress.TwoProgressBarsWithLogDialog;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.progress.TwoProgressBarsWithLogDialog;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.automatic.yokogawa.CreateDcsVariableTableFromYokogawaBackupDialogObservable;
 import ru.sakhalinenergy.alarmtripsettings.controllers.Controller;

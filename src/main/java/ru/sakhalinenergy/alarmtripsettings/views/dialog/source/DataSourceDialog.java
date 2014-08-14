@@ -7,7 +7,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObser
 import ru.sakhalinenergy.alarmtripsettings.models.ModelObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
-import ru.sakhalinenergy.alarmtripsettings.views.DialogWithEvents;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.DialogWithEvents;
 
 
 /**

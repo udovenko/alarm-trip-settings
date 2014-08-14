@@ -2,7 +2,7 @@ package ru.sakhalinenergy.alarmtripsettings.views.dialog.source.automatic.yokoga
 
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
-import ru.sakhalinenergy.alarmtripsettings.views.DialogWithEventsObservable;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.DialogWithEventsObservable;
 
 
 /**

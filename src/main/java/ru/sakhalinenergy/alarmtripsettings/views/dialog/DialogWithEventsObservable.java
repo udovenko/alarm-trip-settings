@@ -1,4 +1,4 @@
-package ru.sakhalinenergy.alarmtripsettings.views;
+package ru.sakhalinenergy.alarmtripsettings.views.dialog;
 
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;

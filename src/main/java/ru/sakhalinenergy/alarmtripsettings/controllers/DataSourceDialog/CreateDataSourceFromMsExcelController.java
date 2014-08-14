@@ -12,8 +12,8 @@ import ru.sakhalinenergy.alarmtripsettings.models.config.ExcelBookParsingDialogS
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.ExcelBookControlable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSource;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
-import ru.sakhalinenergy.alarmtripsettings.views.Progress.ProgressInformationDialog;
-import ru.sakhalinenergy.alarmtripsettings.views.Progress.OneProgressBarWithLogDialog;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.progress.ProgressInformationDialog;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.progress.OneProgressBarWithLogDialog;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.automatic.excel.CreateDataSourceFromExcelDialogObservable;
 

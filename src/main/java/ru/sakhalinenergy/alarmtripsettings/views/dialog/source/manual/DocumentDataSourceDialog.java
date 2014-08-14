@@ -21,7 +21,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSourceObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsLogicObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObservable;
-import ru.sakhalinenergy.alarmtripsettings.views.DialogWithEvents;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.DialogWithEvents;
 
 
 /**

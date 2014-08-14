@@ -1,4 +1,4 @@
-package ru.sakhalinenergy.alarmtripsettings.views.Progress;
+package ru.sakhalinenergy.alarmtripsettings.views.dialog.progress;
 
 import java.awt.Component;
 import javax.swing.SwingUtilities;

@@ -1,4 +1,4 @@
-package ru.sakhalinenergy.alarmtripsettings.views;
+package ru.sakhalinenergy.alarmtripsettings.views.dialog;
 
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
