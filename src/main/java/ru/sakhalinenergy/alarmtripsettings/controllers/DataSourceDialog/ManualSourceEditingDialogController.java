@@ -11,8 +11,8 @@ import ru.sakhalinenergy.alarmtripsettings.models.entity.TagSettingProperty;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSourceControllable;
 import ru.sakhalinenergy.alarmtripsettings.views.Progress.OneProgressBarDialog;
-import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ViewEvent;
-import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ManualSourceEditingDialog.ManualSourceEditingDialogObservable;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.ViewEvent;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.ManualSourceEditingDialogObservable;
 
 
 /**

@@ -5,8 +5,8 @@ import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSourceControllable;
-import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ViewEvent;
-import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.AutomaticSourceCreationDialog.AutomaticSourceCreationDialogObservable;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.ViewEvent;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.automatic.yokogawa.AutomaticSourceCreationDialogObservable;
 import ru.sakhalinenergy.alarmtripsettings.controllers.Controller;
 
 

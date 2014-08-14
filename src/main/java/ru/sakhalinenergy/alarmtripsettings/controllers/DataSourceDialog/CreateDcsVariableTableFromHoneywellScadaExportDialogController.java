@@ -11,8 +11,8 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSource;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.HoneywellScadaDatabase;
 import ru.sakhalinenergy.alarmtripsettings.models.config.CreateDcsVariableTableFromHoneywellScadaDatabaseDialogSettings;
-import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ViewEvent;
-import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.AutomaticSourceCreationDialog.CreateDcsVariableTableFromHoneywellScadaDatabaseDialogObservable;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.ViewEvent;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.automatic.honeywell.CreateDcsVariableTableFromHoneywellScadaDatabaseDialogObservable;
 import ru.sakhalinenergy.alarmtripsettings.views.Progress.OneProgressBarWithLogDialog;
 
 

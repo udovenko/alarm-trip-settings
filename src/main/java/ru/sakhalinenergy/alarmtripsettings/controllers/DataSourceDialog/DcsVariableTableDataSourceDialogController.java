@@ -8,8 +8,8 @@ import ru.sakhalinenergy.alarmtripsettings.models.config.DcsVariableTableDataSou
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Source;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.SourceProperty;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSourceControllable;
-import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ViewEvent;
-import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ManualSourceEditingDialog.DcsVariableTableDataSourceDialog;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.ViewEvent;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.DcsVariableTableDataSourceDialog;
 
 
 /**

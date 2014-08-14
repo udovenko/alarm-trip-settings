@@ -14,8 +14,8 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSource;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.Progress.ProgressInformationDialog;
 import ru.sakhalinenergy.alarmtripsettings.views.Progress.OneProgressBarWithLogDialog;
-import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.ViewEvent;
-import ru.sakhalinenergy.alarmtripsettings.views.DataSourceDialog.AutomaticSourceCreationDialog.CreateDataSourceFromExcelDialog.CreateDataSourceFromExcelDialogObservable;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.ViewEvent;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.automatic.excel.CreateDataSourceFromExcelDialogObservable;
 
 
 /**
