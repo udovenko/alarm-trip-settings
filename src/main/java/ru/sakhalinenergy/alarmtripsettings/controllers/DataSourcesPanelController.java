@@ -324,7 +324,7 @@ public class DataSourcesPanelController extends Controller
                         DialogsFactory.produceEsdVariableTableDataSourceDialog(sourceLogic, true, "Edit selected ESD Variable Table data source");
                                         
                     if (clonedSource.getTypeId() == SourcesTypes.FGS_VARIABLE_TABLE.ID)
-                        DialogsFactory.produceEsdVariableTableDataSourceDialog(sourceLogic, true, "Edit selected FGS Variable Table data source");
+                        DialogsFactory.produceFgsVariableTableDataSourceDialog(sourceLogic, true, "Edit selected FGS Variable Table data source");
                 }// customEventOccurred
             });// on
             

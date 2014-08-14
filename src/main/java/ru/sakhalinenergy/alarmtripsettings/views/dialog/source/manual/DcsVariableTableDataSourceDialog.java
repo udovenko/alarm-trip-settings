@@ -32,7 +32,7 @@ public class DcsVariableTableDataSourceDialog extends ManualVariableTableEditing
      * @param plants Plants list wrapper
      * @param tagMasks Wrapped masks collection for tag parsing
      * @param config Configuration instance
-     * @param editMode New source / edit source mode flag
+     * @param editMode Create/edit data source mode flag
      * @param title Dialog title
      */
     public DcsVariableTableDataSourceDialog(TagsSourceObservable model, PlantsLogicObservable plants,

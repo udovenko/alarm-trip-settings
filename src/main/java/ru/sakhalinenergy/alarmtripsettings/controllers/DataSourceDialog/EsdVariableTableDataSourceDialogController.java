@@ -57,10 +57,10 @@ public class EsdVariableTableDataSourceDialogController extends ManualSourceEdit
             dialogSettings.setBackupDate(castedView.getBackupDateAsString());
             dialogSettings.setComment(castedView.getComment());
             dialogSettings.setDataSourceName(castedView.getDataSourceName());
-            dialogSettings.setDialogHeight(castedView.getFormHeigt());
-            dialogSettings.setDialogLeft(castedView.getFormX());
-            dialogSettings.setDialogTop(castedView.getFormY());
-            dialogSettings.setDialogWidth(castedView.getFormWidth());
+            dialogSettings.setDialogHeight(castedView.getDialogHeight());
+            dialogSettings.setDialogLeft(castedView.getDialogLeft());
+            dialogSettings.setDialogTop(castedView.getDialogTop());
+            dialogSettings.setDialogWidth(castedView.getDialogWidth());
             dialogSettings.setPriority(castedView.getPriority());
             dialogSettings.setTagFormat(castedView.getTagMask().getExample());
             

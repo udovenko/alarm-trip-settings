@@ -1,78 +1,63 @@
 package ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual;
 
-import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.ViewEvent;
-import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
-import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
-import ru.sakhalinenergy.alarmtripsettings.implemented.SourcesPropertiesTypes;
-import ru.sakhalinenergy.alarmtripsettings.Main;
-import java.awt.Component;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
+import java.util.Collections;
+import java.awt.Component;
 import javax.swing.table.TableColumn;
+import ru.sakhalinenergy.alarmtripsettings.Main;
+import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.config.VariableTableDataSourceDialogSettingsObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
-import ru.sakhalinenergy.alarmtripsettings.models.entity.Source;
-import ru.sakhalinenergy.alarmtripsettings.models.entity.SourceProperty;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsLogicObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSourceObservable;
-import ru.sakhalinenergy.alarmtripsettings.views.dialog.DialogWithEvents;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.ViewEvent;
 
 
 /**
- * Класс реализует панель для добавления нового источника данных - таблицы 
- * переменных FGS вручную.
+ * Implements dialog for create/edit FGS System Variable Table data source.
  * 
  * @author Denis Udovenko
- * @version 1.0.3
+ * @version 1.0.4
  */
-public class FgsVariableTableDataSourceDialog extends DialogWithEvents implements ManualSourceEditingDialogObservable
+public class FgsVariableTableDataSourceDialog extends ManualVariableTableEditingDialog implements ManualSourceEditingDialogObservable
 {
-    
-    private DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-    private final TagsSourceObservable model;
-    private final PlantsLogicObservable plants;
-    private final TagMasksObservable tagMasks;
-    private final VariableTableDataSourceDialogSettingsObservable config;
-    private final boolean editMode;
-    
-    
+   
     /**
-     * Конструктор класса. Инициализирует основные компоненты.
+     * Public constructor. Sets up dialog fields and initializes components.
+     * 
+     * @param model Tags source wrapper
+     * @param plants Plants list wrapper
+     * @param tagMasks Wrapped masks collection for tag parsing
+     * @param config Configuration instance
+     * @param editMode Create/edit data source mode flag
+     * @param title Dialog title
      */
     public FgsVariableTableDataSourceDialog(TagsSourceObservable model, PlantsLogicObservable plants, 
         TagMasksObservable tagMasks, VariableTableDataSourceDialogSettingsObservable config, 
         boolean editMode, String title)
     {
-        initComponents();
-        
-        //Setting up instance fields:
-        this.model = model;
-        this.plants = plants;
-        this.tagMasks = tagMasks;
-        this.config = config;
-        this.editMode = editMode;
+        // Call superclass constructor:
+        super(model, plants, tagMasks, config, editMode, title);
                 
-        //Subsceribing on model events:
-        this.model.on(SourceEvent.TAG_SET_UPDATED, new ModelTagSetUpdateHandler());
+        initComponents();
+                        
+        // Subsribe on model's events:
+        model.on(SourceEvent.TAG_SET_UPDATED, _getModelTagSetUpdateHandler(sourceTagsTable));
         
-        //Setting up dialog icon and title:
-        this.setIconImage(Main.fgsIcon.getImage());
-        this.setTitle(title);
+        // Set dialog icon:
+        setIconImage(Main.fgsIcon.getImage());
+                
+        // Set calendar date format:
+        backupDatePicker.setFormats(dateFormat);
         
-        //Устанавливаем формат даты календаря:
-        this.backupDatePicker.setFormats(this.dateFormat);
-        
-        //Создаем модель данных таблицы тагов:
-        this.sourceTagsTable.setModel(new TagsTableModel(model, this));
+        // Set tags table model:
+        sourceTagsTable.setModel(new TagsTableModel(model, this));
         TagsTableModel tagsTableModel = (TagsTableModel)this.sourceTagsTable.getModel();
                         
-        //Назначаем всем колонкам таблицы рендерер текущего набора устройств:
+        // Set cell renderes depending on column name:
         for (TableColumn column : Collections.list(this.sourceTagsTable.getColumnModel().getColumns()))
         {
             if (column.getHeaderValue().equals(tagsTableModel.REMOVE_TAG_BUTTON_COLUMN_NAME))
@@ -83,235 +68,116 @@ public class FgsVariableTableDataSourceDialog extends DialogWithEvents implement
             } else {   
                 
                 column.setCellRenderer(new TagsTableCellRenderer());
-            }//else
-        }//for
-    }//FgsVariableTableSettingsPanel
+            }// else
+        }// for
+    }// FgsVariableTableSettingsPanel
    
     
     /**
-     * Отрисовывает списки, применяет настройки диалога и выводит его на экран.
+     * Render required objects lists, applies dialog settings and shows form on
+     * the screen.
      * 
-     * @param parent Родительский фрейм, относитеольно которого будет выведен на экран диалог
+     * @param parent Parent component, dialog will be rendered relative to it
      */
     public void render(Component parent)
     {
-        this.setLocationRelativeTo(parent);
+        // Build palants list and restore plant selection:
+        for (TagMask tempMask : tagMasks.getMasks()) tagFormatComboBox.addItem(tempMask);
+
+        // Build tag formats list and restore format selection:
+        for (Plant tempPlant : plants.getPlants()) plantsComboBox.addItem(tempPlant);
+            
+        // Set relative location:
+        setLocationRelativeTo(parent);
         
-        //Формируем список форматов тагов:
-        for (TagMask tempMask : tagMasks.getMasks())
-        {
-            tagFormatComboBox.addItem(tempMask);
-        }//for
-        
-        //Строим список производственных объектов:
-        for (Plant tempPlant : plants.getPlants()) this.plantsComboBox.addItem(tempPlant);
-                        
-        try //Восстанавливаем конфигурацию:
-        {
-            _applyConfig();
-        } catch (Exception exception) {}
-        
-        //Отображаем диалог:
-        this.setVisible(true);
-    }//render
+        // Call superclass apply configuration method:
+        _applyConfig(plantsComboBox, tagFormatComboBox, prioritySpinner,
+            sourceNameTextField, commentTextArea, backupDatePicker);
+                
+        // Show dialog:
+        _show();
+    }// render
     
     
     /**
-     * Внутренний класс-обработчик события обновления набора тагов модели.
+     * Returns data source name.
      * 
-     * @author   Denis.Udovenko
-     * @version  1.0.1
-     */
-    class ModelTagSetUpdateHandler implements CustomEventListener
-    {
-        @Override
-        public void customEventOccurred(CustomEvent evt)
-        {
-            TagsTableModel tagsTableModel = (TagsTableModel)sourceTagsTable.getModel();
-            tagsTableModel.fireTableDataChanged();
-        }//customEventOccurred
-    }//TagNameInputHandler    
-    
-    
-    /**
-     * Возвращает горизонтальный отступ левого верхнего угла формы от 
-     * начала координат экрана.
-     *
-     * @return Горизонтальный отступ левого верхнего угла формы от начала координат экрана
-     */
-    public String getFormX()
-    {
-        return Integer.toString(this.getX());
-    }//getFormX    
-    
-    
-    /**
-     * Возвращает вертикальный отступ левого верхнего угла формы от 
-     * начала координат экрана.
-     *
-     * @return Вертикальный отступ левого верхнего угла формы от начала координат экрана
-     */
-    public String getFormY()
-    {
-        return Integer.toString(this.getY());
-    }//getFormX
-    
-    
-    /**
-     * Возвращает ширину формы.
-     * 
-     * @return Ширина формы
-     */
-    public String getFormWidth()
-    {
-        return Integer.toString(this.getWidth());
-    }//getFormWidth
-    
-    
-    /**
-     * Возвращает высоту формы.
-     * 
-     * @return Высота формы
-     */
-    public String getFormHeigt()
-    {
-        return Integer.toString(this.getHeight());
-    }//getFormHeigt
-    
-    
-    /**
-     * Возвращает имя источника данных.
-     * 
-     * @return Имя источника данных
+     * @return Data source name
      */
     public String getDataSourceName()
     {
         return sourceNameTextField.getText();
-    }//getDataSourceName
+    }// getDataSourceName
          
     
     /**
-     * Возвращает выбранный производственный объект.
+     * Returns selected plant.
      * 
-     * @return Выбранный производственный объект
+     * @return Selected plant
      */
+    @Override
     public Plant getPlant()
     {
         return (Plant)plantsComboBox.getSelectedItem();
-    }//getPlant
+    }// getPlant
     
     
     /**
-     * Возвращвает приоритет источника данных.
+     * Returns data source priority.
      * 
-     * @return Приоритет источника данных
+     * @return Data source priority
      */
     public String getPriority()
     {
         return prioritySpinner.getValue().toString();
-    }//getPriority
+    }// getPriority
     
     
     /**
-     * Возвращает текущий формат тага.
+     * Returns selected tag mask.
      * 
-     * @return Текущий формат тага
+     * @return Selected tag mask
      */
     @Override
     public TagMask getTagMask()
     {
         return (TagMask)tagFormatComboBox.getSelectedItem();
-    }//getTagFormat
+    }// getTagFormat
     
     
     /**
-     * Возвращает комментарий к источнику данных.
+     * Returns data source comment.
      * 
-     * @return Комментарий к источнику данных
+     * @return Data source comment
      */
     public String getComment()
     {
         return (String)commentTextArea.getText();
-    }//getComment
+    }// getComment
    
     
-     /**
-     * Метод возвращает дату ревизии документа.
+    /**
+     * Returns FGS system backup date.
      * 
-     * @return Дата ревизии документа
+     * @return FGS system backup date
      */
     public Date getBackupDate()
     {
         return backupDatePicker.getDate();
-    }//getBackupDate
+    }// getBackupDate
     
     
     /**
-     * Метод возвращает дату ревизии документа.
+     * Returns ESD system date as string.
      * 
-     * @return Дата ревизии документа
+     * @return ESD system date as string
      */
     public String getBackupDateAsString()
     {
         Date date = backupDatePicker.getDate();
         return dateFormat.format(date);
-    }//getBackupDateAsString
+    }// getBackupDateAsString
     
-    
-    /**
-     * Метод восстанавливает настройки панели из полученного экземпляра 
-     * настроек.
-     * 
-     * @throws ParseException
-     * @param settings Экземпляр настроек панели
-     * @return void
-     */
-    private void _applyConfig() throws ParseException
-    {
-        this.setSize(Integer.parseInt(config.getDialogWidth()), Integer.parseInt(config.getDialogHeight()));
-        this.setLocation(Integer.parseInt(config.getDialogLeft()), Integer.parseInt(config.getDialogTop()));
-        
-        if (editMode)
-        {
-            Source source = model.getEntity();
-            prioritySpinner.setValue(source.getPriority());
-            backupDatePicker.setDate(source.getDate());
-            sourceNameTextField.setText(source.getName());
-            
-            for (SourceProperty tempProperty : source.getProperties())
-            {
-                if (tempProperty.getTypeId() == SourcesPropertiesTypes.COMMENT.ID) commentTextArea.setText(tempProperty.getValue());
-            }//for
-     
-        } else {
-            
-            sourceNameTextField.setText(config.getDataSourceName());
-            prioritySpinner.setValue(Integer.parseInt(config.getPriority()));
-            commentTextArea.setText(config.getComment());
-            Date date = this.dateFormat.parse(config.getBackupDate());
-            backupDatePicker.setDate(date);
-        }//else
-        
-        //Восстанавливаем выбранный производственный объект:
-        for (Plant tempPlant : plants.getPlants())
-        {    
-            if (tempPlant.getId().equals(config.getPlantCode()))
-            {    
-                this.plantsComboBox.setSelectedItem(tempPlant);
-                break;
-            }//if
-        }//for
-        
-        for (TagMask tempTagMask : this.tagMasks.getMasks())
-        {    
-            if (tempTagMask.getExample().equals(config.getTagFormat()))
-            {    
-                this.tagFormatComboBox.setSelectedItem(tempTagMask);
-                break;
-            }//if
-        }//for
-    }//_applyConfig
-   
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -489,11 +355,10 @@ public class FgsVariableTableDataSourceDialog extends DialogWithEvents implement
 
     
     /**
-     * Метод обрабатывает событие выбора нового формата тага в выпадающем списке
-     * и рассылает событие с контекстом выбранного формата тага всем 
-     * подписчикам.
+     * Handles tag mask (format) selection event and triggers appropriate event 
+     * with selected tag mask data.
      * 
-     * @param evt Событие выбора формата тага
+     * @param evt Tag formats combo box selection event object
      */
     private void tagFormatComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tagFormatComboBoxActionPerformed
         
@@ -504,29 +369,27 @@ public class FgsVariableTableDataSourceDialog extends DialogWithEvents implement
 
     
     /**
-     * Метод обрабатывает нажатие кнопки "Save FGS Variable Table data source"
-     * и рассылает всем подписчикам событие с контекстом текущих настроек
-     * панели.
+     * Handles "Save FSG Variable Table data source" button click event and 
+     * triggers appropriate for all subscribers.
      * 
-     * @param evt Событие нажатия кнопки
+     * @param evt Button click event object
      */
     private void addSourceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addSourceButtonActionPerformed
      
-        //Hide dialog:
-        this.setVisible(false);
+        // Hide dialog:
+        _close();
         
-        //Trigger save source event:
+        // Trigger save source event:
         CustomEvent saveSourceEvent = new CustomEvent(new Object());
         this.events.trigger(ViewEvent.SAVE_SOURCE_DATA, saveSourceEvent);
     }//GEN-LAST:event_addSourceButtonActionPerformed
 
     
     /**
-     * Метод обрабатывает событие выбора нового формата тага в выпадающем списке
-     * и рассылает событие с контекстом выбранного формата тага всем 
-     * подписчикам.
+     * Handles plant selection event and triggers appropriate event with 
+     * selected plant data.
      * 
-     * @param evt Cобытие выбора формата тага
+     * @param evt Plants combo box selection event object
      */
     private void plantsComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_plantsComboBoxActionPerformed
 
@@ -537,9 +400,10 @@ public class FgsVariableTableDataSourceDialog extends DialogWithEvents implement
 
     
     /**
-     * Обрабатывает событие выбора нового производственного объекта.
+     * Handles add tag button click event and triggers appropriate event with 
+     * new tag name data.
      * 
-     * @param evt Событие комбобокса
+     * @param evt Button click event object
      */
     private void addTagButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addTagButtonActionPerformed
         
@@ -568,4 +432,4 @@ public class FgsVariableTableDataSourceDialog extends DialogWithEvents implement
     private javax.swing.JComboBox tagFormatComboBox;
     private javax.swing.JLabel tagFormatComboBoxLabel;
     // End of variables declaration//GEN-END:variables
-}//FgsVariableTableSettingsPanel
+}// FgsVariableTableDataSourceDialog
