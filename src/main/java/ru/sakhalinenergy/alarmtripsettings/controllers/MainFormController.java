@@ -118,16 +118,7 @@ public class MainFormController
             aboutDialog.setVersion(Main.VERSION);
             aboutDialog.setDate(Main.LAST_CHANGES_DATE + " " + Main.LAST_CHANGES_TIME);
             aboutDialog.setAuthor(Main.AUTHOR);
-            
-            java.awt.EventQueue.invokeLater(new Runnable()
-            {
-                public void run()
-                {
-                    // Render dialog relative to main form:
-                    aboutDialog.setLocationRelativeTo(Main.mainForm);
-                    aboutDialog.setVisible(true);
-                }// run
-            });// invokeLater
+            aboutDialog.render(Main.mainForm);
         }// customEventOccurred
     }// _OpenVersionDialogRequestHandler
 }// MainFormController

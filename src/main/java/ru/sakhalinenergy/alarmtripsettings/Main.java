@@ -27,9 +27,9 @@ import ru.sakhalinenergy.alarmtripsettings.controllers.MainFormController;
 public class Main 
 {
     //Информация о версии приложения:
-    public static final String VERSION = "2.1.1.8";
+    public static final String VERSION = "2.1.1.9";
     public static final String LAST_CHANGES_DATE = "15.08.2014";
-    public static final String LAST_CHANGES_TIME = "11:41";
+    public static final String LAST_CHANGES_TIME = "15:51";
     public static final String AUTHOR = "Denis Udovenko";
     
     // Application .jar file directory:

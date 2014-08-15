@@ -27,7 +27,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.source.HoneywellScadaDat
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsLogic;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasks;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSource;
-import ru.sakhalinenergy.alarmtripsettings.views.StorageConnectionDialog.StorageConnectionDialog;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.storage.StorageConnectionDialog;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.loop.LoopSplittingDialog;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.IntoolsExportDataSourceDialog;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.automatic.excel.CreateDataSourceFromExcelDialog;
@@ -84,12 +84,11 @@ public class DialogsFactory
                     {
                         // Create storage connection dialog and its controller:
                         StorageConnectionDialog storageConnectionDialog = new StorageConnectionDialog(storageConnectionDialogSettings);
-                        storageConnectionDialog.setLocationRelativeTo(Main.mainForm);
                         StorageConnectionDialogController contrlloer = new StorageConnectionDialogController(storageConnectionDialog);
                         
                         // Show dialog or run reconnection to storage:
                         if (autoconnect) contrlloer.connectAndCreatePlantsTree(storageConnectionDialogSettings);
-                        else storageConnectionDialog.setVisible(true);
+                        else storageConnectionDialog.render(Main.mainForm);
                     }// run
                 });// invokeLater
              }// customEventOccurred

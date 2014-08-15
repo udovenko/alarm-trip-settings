@@ -1,32 +1,35 @@
-package ru.sakhalinenergy.alarmtripsettings.views.StorageConnectionDialog;
+package ru.sakhalinenergy.alarmtripsettings.views.dialog.storage;
 
-import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
-import ru.sakhalinenergy.alarmtripsettings.events.Events;
-import ru.sakhalinenergy.alarmtripsettings.Main;
+import java.awt.Component;
 import java.io.File;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
+import ru.sakhalinenergy.alarmtripsettings.Main;
 import ru.sakhalinenergy.alarmtripsettings.models.config.StorageConnectionDialogSettingsObservable;
-
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.Dialog;
 
 
 /**
- * @author Denis.Udovenko
- * @version 1.0.2
+ * Implements storage connection settings dialog.
+ * 
+ * @author Denis Udovenko
+ * @version 1.0.3
  */
-public class StorageConnectionDialog extends javax.swing.JDialog 
+public class StorageConnectionDialog extends Dialog 
 {
-    public static final Byte CONNECT_TO_STORAGE_EVENT = 1;
+    private final String SQLITE_STORAGE_NAME = "sqlite";
+    private final String MYSQL_STORAGE_NAME = "mysql";
     
-    public Events events = new Events();
     private final StorageConnectionDialogSettingsObservable config;
       
     
     /**
-     * Конструктор формы. Инициализирует все компоненты.
+     * Public constructor. Initializes components and sets configuration object
+     * instance.
      * 
-     * @param config Экземпляр, реализущий интефрейс файла конфигурации диалога настроек подключения к храилищу
+     * @param config Storage connection configuration object
      */
     public StorageConnectionDialog(StorageConnectionDialogSettingsObservable config)
     {
@@ -35,125 +38,145 @@ public class StorageConnectionDialog extends javax.swing.JDialog
         this.setModal(true);
         initComponents();
                
-        //Устанавливаем иконку диалога:
+        // Set dialog icon:
         ImageIcon img = Main.storageConnectionIcon;
         this.setIconImage(img.getImage());
-        
-        //Применяем насройки:
-        _applyConfig();
-    }//SetStorageConnectionForm
+    }// SetStorageConnectionForm
 
     
     /**
-     * Возвращает тип используемого хранилища.
+     * Applies dialog's settings and shows form on the screen.
      * 
-     * @return Тип используемого хранилища
+     * @param parent Parent component, relative to which current dialog will be rendered
      */
-    public String getStorageType()
+    public void render(Component parent)
     {
-        //Получаем тип используемого хранилища: 
-        if (this.useMySqlStorageRadioButton.isSelected()) return "mysql";
-        if (this.useSqliteStorageRadioButton.isSelected()) return "sqlite";
-        
-        return null;
-    }//getStorageType
+        // Apply config:
+        _applyConfig();
+    
+        // Set relative location and show dialog:
+        setLocationRelativeTo(parent);
+        _show();
+    }// render
     
     
     /**
-     * Возвращает хост для подключения к базе данных MySQL.
+     * Sets dialog hiding action to the of EDT queue.
+     */
+    public void close()
+    {
+        _close();
+    }// close
+    
+    
+    /**
+     * Returns selected storage type.
      * 
-     * @return Xост для подключения к базе данных MySQL
+     * @return Selected storage type
+     */
+    public String getStorageType()
+    {
+        if (this.useMySqlStorageRadioButton.isSelected())  return MYSQL_STORAGE_NAME;
+        if (this.useSqliteStorageRadioButton.isSelected()) return SQLITE_STORAGE_NAME;
+        
+        return null;
+    }// getStorageType
+    
+    
+    /**
+     * Returns host name for MySQL database connection.
+     * 
+     * @return MySQL host name
      */
     public String getMySqlStorageHost()
     {
         return mySqlStorageHostTextField.getText();
-    }//getMySqlStorageHost
+    }// getMySqlStorageHost
     
     
     /**
-     * Возвращает порт для подключения к базе данных MySQL.
+     * Returns port number for MySQL database connection.
      * 
-     * @return Порт для подключения к базе данных MySQL
+     * @return MySQL port
      */
     public String getMySqlStoragePort()
     {
         return mySqlStoragePortTextField.getText();
-    }//getMySqlStoragePort
+    }// getMySqlStoragePort
     
     
     /**
-     * Возвращает имя базы данных для подключения к базе данных MySQL.
+     * Returns MySQL database name.
      * 
-     * @return Имя базы данных для подключения к базе данных MySQL
+     * @return MySQL database name
      */
     public String getMySqlStorageDatabaseName()
     {
         return mySqlStorageDatabasenameTextField.getText();
-    }//getMySqlStorageDatabaseName
+    }// getMySqlStorageDatabaseName
     
     
     /**
-     * Возвращает имя пользователя для подключения к базе данных MySQL.
+     * Returns user name for MySQL database connection.
      * 
-     * @return Имя пользователя для подключения к базе данных MySQL
+     * @return MySQL user name
      */
     public String getMySqlStorageUserName()
     {
         return mySqlStorageUserNameTextField.getText();
-    }//getMySqlStorageUserName
+    }// getMySqlStorageUserName
     
     
     /**
-     * Возвращает паролдь для подключения к базе данных MySQL.
+     * Returns password for MySQL database connection.
      * 
-     * @return Пароль для подключения к базе данных MySQL
+     * @return MySQL password
      */
     public String getMySqlStoragePassword()
     {
         return mySqlStoragePasswordTextField.getText();
-    }//getMySqlStoragePassword
+    }// getMySqlStoragePassword
     
     
     /**
-     * Вовзращает путь к базе данных SQLite.
+     * Returns path to SQLite database file.
      * 
-     * @return Путь к базе данных SQLite
+     * @return Path to SQLite database file
      */
     public String getSqliteDatabasePath()
     {
         return sqliteDatabaseFilePathTextField.getText();
-    }//getSqliteDatabasePath
+    }// getSqliteDatabasePath
         
     
     /**
-     * Метод помещает в элементы управления формы полученные настройки
-     * подключения к хранлищу.
+     * Restores storage connection configuration settings into dialog's control
+     * elements.
      */
     private void _applyConfig()
     {
-        //Восстанавливаем тип хранлища:
-        if (config.getStorageType().equals("mysql"))
+        // Restore data source type:
+        if (config.getStorageType().equals(MYSQL_STORAGE_NAME))
         {
             this.useMySqlStorageRadioButton.setSelected(true);
             this.storagesSettingsPanesLayeredPane.moveToFront(this.mySqlStorageSettingsPanel); 
-        }//if
         
-        if (config.getStorageType().equals("sqlite"))
-        {
+        } else if (config.getStorageType().equals(SQLITE_STORAGE_NAME)) {
+            
             this.useSqliteStorageRadioButton.setSelected(true);
             this.storagesSettingsPanesLayeredPane.moveToFront(this.SqliteStorageSettingsPanel);
-        }//if
+        }// else if
         
-        //Восстанавливаем настройки хранилища MySQL:
+        // Restore MySQL connection settings:
         this.mySqlStorageHostTextField.setText(config.getMySqlHost());
         this.mySqlStoragePortTextField.setText(config.getMySqlPort());
         this.mySqlStorageDatabasenameTextField.setText(config.getMySqlDatabase());
         this.mySqlStorageUserNameTextField.setText(config.getMySqlUser());
         this.mySqlStoragePasswordTextField.setText(config.getMySqlPassword());
         
-        //Восстанавливаем настройки хранилища MS Excel:
+        // Restore SQLite storage settings:
         this.sqliteDatabaseFilePathTextField.setText(config.getSqliteDatabasePath());
-    }//restoreStorageSettings
+    }// _applyConfig
     
     
     /**
@@ -392,12 +415,10 @@ public class StorageConnectionDialog extends javax.swing.JDialog
 
     
     /**
-     * Метод обрабатывает событие выбора книги MS Excel в качестве отображаемого
-     * хранилища данных и выводит на передний план панель натроек хранлища 
-     * MS Excel.
+     * Handles selection of SQLite storage radio button and brings SQLite
+     * storage settings to front.
      * 
-     * @param   evt   Событие выбора радио-кнопки с типом хранлища
-     * @return  void
+     * @param evt SQLite storage radio button selection event
      */
     private void useSqliteStorageRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_useSqliteStorageRadioButtonActionPerformed
         
@@ -406,12 +427,10 @@ public class StorageConnectionDialog extends javax.swing.JDialog
 
     
     /**
-     * Метод обрабатывает событие выбора базы данных MySQL в качестве 
-     * отображаемого хранилища данных и выводит на передний план панель натроек 
-     * хранлища MySQL.
+     * Handles selection of MySQL storage radio button and brings MySQL
+     * storage settings to front.
      * 
-     * @param   evt   Событие выбора радио-кнопки с типом хранлища
-     * @return  void
+     * @param evt MySQL storage radio button selection event
      */
     private void useMySqlStorageRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_useMySqlStorageRadioButtonActionPerformed
        
@@ -420,22 +439,21 @@ public class StorageConnectionDialog extends javax.swing.JDialog
 
     
     /**
-     * Метод закрывает текущий диалог по нажатию кнопки "Cancel".
+     * Handles "Cancel" button click event and closes dialog.
      * 
-     * @return  void
+     * @param "Cancel" button click event object
      */
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         
-        this.setVisible(false);
+        _close();
     }//GEN-LAST:event_cancelButtonActionPerformed
 
         
     /**
-     * Метод обрабатывает нажатие кнопки "Connect" и рассылает всем подписчикам
-     * событие подключения к храгнилищу с контентом настроек подключения.
+     * Handles "Connect" button click event and triggers appropriate event for
+     * all subscribers.
      * 
-     * @param   evt   Событие нажатия кнопки
-     * @return  void 
+     * @param evt "Connect" button click event object
      */
     private void connectToStorageButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectToStorageButtonActionPerformed
         
@@ -445,32 +463,30 @@ public class StorageConnectionDialog extends javax.swing.JDialog
 
     
     /**
-     * Метод обрабатывает нажатие кнопки setSqlliteDatabasePathButton и выводит
-     * диалог выбора файла базы данных SQLite.
+     * Handles select path to SQLite database file button click event and shows
+     * file path selection dialog.
      * 
-     * @param   evt  Событие нажатия на кнопку
-     * @return  void
+     * @param evt Button click event object
      */
     private void setSqlliteDatabasePathButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setSqlliteDatabasePathButtonActionPerformed
         
-        //Создаем диалог выбора дирректории:
+        // Create file choser dialog:
         String working_directory = System.getProperty("user.dir");
         JFileChooser fileChooser = new JFileChooser(working_directory);
         FileNameExtensionFilter filter = new FileNameExtensionFilter("SQLite Database", "sqlite");
         fileChooser.setFileFilter(filter);
         
-        //Отображаем диалог, указываем заголовок:
+        // Show dialog with given title:
         int dialog_result = fileChooser.showDialog(this, "Select SQLite database file");
 
-        //Обрабатываем результат вывбора дирректории:
+        // Handle file path selection result:
         if (dialog_result == JFileChooser.APPROVE_OPTION)
         {
-            //Получаем ссылку на дирректорию и ее имя:
             File directory = fileChooser.getSelectedFile();
             String filename = directory.getAbsolutePath();
             
-            //Выводим имя полученной дирректории в инпут на форме:
-            this.sqliteDatabaseFilePathTextField.setText(filename);
+            // Update file path text field:
+            sqliteDatabaseFilePathTextField.setText(filename);
         }//if
     }//GEN-LAST:event_setSqlliteDatabasePathButtonActionPerformed
 
@@ -500,4 +516,4 @@ public class StorageConnectionDialog extends javax.swing.JDialog
     private javax.swing.JRadioButton useMySqlStorageRadioButton;
     private javax.swing.JRadioButton useSqliteStorageRadioButton;
     // End of variables declaration//GEN-END:variables
-}//SetStorageConnectionForm
+}// StorageConnectionDialog

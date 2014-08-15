@@ -1,4 +1,4 @@
-package ru.sakhalinenergy.alarmtripsettings.views.StorageConnectionDialog;
+package ru.sakhalinenergy.alarmtripsettings.views.dialog.storage;
 
 
 /**

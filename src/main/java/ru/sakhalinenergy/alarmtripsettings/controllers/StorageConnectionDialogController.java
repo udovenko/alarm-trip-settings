@@ -12,8 +12,8 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsTree;
 import ru.sakhalinenergy.alarmtripsettings.models.storage.HibernateUtil;
 import ru.sakhalinenergy.alarmtripsettings.views.PlantsTreePanel.PlantsTreePanel;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.progress.ProgressInformationDialog;
-import ru.sakhalinenergy.alarmtripsettings.views.StorageConnectionDialog.ViewEvent;
-import ru.sakhalinenergy.alarmtripsettings.views.StorageConnectionDialog.StorageConnectionDialog;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.storage.ViewEvent;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.storage.StorageConnectionDialog;
 
 
 /**
@@ -35,7 +35,7 @@ public class StorageConnectionDialogController
     public StorageConnectionDialogController(StorageConnectionDialog view)
     {
         this.view = view;
-        this.view.events.on(ViewEvent.CONNECT_TO_STORAGE, new _ConnectToStorageRequestHandler());
+        this.view.on(ViewEvent.CONNECT_TO_STORAGE, new _ConnectToStorageRequestHandler());
     }// StorageConnectionDialogController
     
     
@@ -64,14 +64,7 @@ public class StorageConnectionDialogController
             connectAndCreatePlantsTree(dialogSettings);
             
             // Hide dialog:
-            java.awt.EventQueue.invokeLater(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    StorageConnectionDialogController.this.view.setVisible(false);
-                }// run
-            });// invokeLater
+            view.close();
         }// customEventOccurred
     }// _ConnectToStorageRequestHandler
     
@@ -117,15 +110,8 @@ public class StorageConnectionDialogController
                     public void customEventOccurred(CustomEvent evt)
                     {
                         // Hide progress information dialog and show back storage connection dialog:
-                        SwingUtilities.invokeLater(new Runnable()
-                        {
-                            @Override
-                            public void run()
-                            {
-                                progressInformationDialog.close();
-                                view.setVisible(true);
-                            }// run
-                        });// invokeLater
+                        progressInformationDialog.close();
+                        view.render(Main.mainForm);
                     }// customEventOccurred
                 });// on
                 

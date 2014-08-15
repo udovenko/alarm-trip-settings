@@ -5,7 +5,7 @@ import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
 
 
 /**
- * An interface for dialogs with events support.
+ * Basic interface for application dialog classes.
  *
  * @author Denis Udovenko
  * @version 1.0.3

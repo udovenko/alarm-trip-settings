@@ -87,7 +87,7 @@ public class CreateDataSourceFromExcelDialog extends DataSourceDialog implements
 
     
     /**
-     * Render required objects lists, applies dialog settings and shows form on
+     * Renders required objects lists, applies dialog's settings and shows form on
      * the screen.
      * 
      * @param parent Parent component, relative to which current dialog will be rendered

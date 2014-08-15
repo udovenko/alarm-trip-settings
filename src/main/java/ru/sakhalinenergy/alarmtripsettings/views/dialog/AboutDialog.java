@@ -1,17 +1,20 @@
 package ru.sakhalinenergy.alarmtripsettings.views.dialog;
 
+import java.awt.Component;
 import ru.sakhalinenergy.alarmtripsettings.Main;
 
 
 /**
+ * Implements application's "about" dialog.
+ * 
  * @author Denis Udovenko
- * @version 1.0.1
+ * @version 1.0.2
  */
-public class AboutDialog extends javax.swing.JDialog
+public class AboutDialog extends Dialog
 {
 
     /**
-     * Конструктор диалога.
+     * Pubic constructor.
      */
     public AboutDialog()
     {
@@ -25,41 +28,49 @@ public class AboutDialog extends javax.swing.JDialog
     
     
     /**
-     * Метод устанавливает содержимое метки с нормером версии приложения.
+     * Shows dialog on the screen relative to given parent component.
      * 
-     * @param   version  Строка с номером версии приложения
-     * @return  void
+     * @param parent Parent component, relative to which current dialog will be rendered
+     */
+    public void render(Component parent)
+    {
+        // Set relative location and show dialog:
+        setLocationRelativeTo(parent);
+        _show();
+    }// render
+        
+    
+    /**
+     * Sets application's version label's text.
+     * 
+     * @param version Version label's text
      */
     public void setVersion(String version)
     {
-        this.versionLabel.setText(version);
-    }//setVersion
+        versionLabel.setText(version);
+    }// setVersion
     
     
     /**
-     * Метод устанавливает содержимое метки для указанния даты последних 
-     * итзменений приложения.
+     * Sets application's last changes date label's text.
      * 
-     * @param   date  Строка с датой последних изменений приложения
-     * @return  void
+     * @param date Last changes date label's text
      */
     public void setDate(String date)
     {
-        this.dateLabel.setText(date);
-    }//setDate
+        dateLabel.setText(date);
+    }// setDate
         
 
     /**
-     * Метод устанавливает содержимое метки для указанния имени автора 
-     * приложения.
+     * Sets application's author name label's text.
      * 
-     * @param   author  Строка с именем автора приложения
-     * @return  void
+     * @param author Application's author name label's text
      */
     public void setAuthor(String author)
     {
-        this.authorLabel.setText(author);
-    }//setAuthor        
+        authorLabel.setText(author);
+    }// setAuthor        
     
     
     /**
@@ -157,4 +168,4 @@ public class AboutDialog extends javax.swing.JDialog
     private javax.swing.JLabel versionLabel;
     private javax.swing.JLabel versionLabelCaption;
     // End of variables declaration//GEN-END:variables
-}
+}// AboutDialog
