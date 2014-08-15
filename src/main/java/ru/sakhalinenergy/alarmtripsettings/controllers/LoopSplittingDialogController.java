@@ -6,8 +6,8 @@ import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Tag;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.CollectionEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.LoopsTable;
-import ru.sakhalinenergy.alarmtripsettings.views.LoopSplittingDialog.ViewEvent;
-import ru.sakhalinenergy.alarmtripsettings.views.LoopSplittingDialog.LoopSplittingDialog;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.loop.ViewEvent;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.loop.LoopSplittingDialog;
 
 
 /**

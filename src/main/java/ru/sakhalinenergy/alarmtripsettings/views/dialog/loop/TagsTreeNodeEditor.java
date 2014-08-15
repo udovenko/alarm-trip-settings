@@ -1,4 +1,4 @@
-package ru.sakhalinenergy.alarmtripsettings.views.LoopSplittingDialog;
+package ru.sakhalinenergy.alarmtripsettings.views.dialog.loop;
 
 import java.util.EventObject;
 import java.awt.Component;

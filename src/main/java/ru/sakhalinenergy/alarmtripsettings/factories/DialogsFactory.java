@@ -28,7 +28,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsLogic;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasks;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSource;
 import ru.sakhalinenergy.alarmtripsettings.views.StorageConnectionDialog.StorageConnectionDialog;
-import ru.sakhalinenergy.alarmtripsettings.views.LoopSplittingDialog.LoopSplittingDialog;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.loop.LoopSplittingDialog;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual.IntoolsExportDataSourceDialog;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.automatic.excel.CreateDataSourceFromExcelDialog;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.automatic.yokogawa.CreateDcsVariableTableFromYokogawaBackupDialog;

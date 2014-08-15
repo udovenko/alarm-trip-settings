@@ -1,4 +1,4 @@
-package ru.sakhalinenergy.alarmtripsettings.views.LoopSplittingDialog;
+package ru.sakhalinenergy.alarmtripsettings.views.dialog.loop;
 
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Tag;
 
