@@ -27,11 +27,11 @@ public class ProgressInformationDialog  extends ProgressDialog
         model.on(this.progressEvent, new _ProgressEventHandler());
         
         initComponents();
-    }//ProgressInformationForm
+    }// ProgressInformationForm
        
     
      /**
-     * Internal class - handler for a model progress event.
+     * Inner class - handler for a model progress event.
      * 
      * @author Denis Udovenko
      * @version 1.0.1
@@ -93,4 +93,4 @@ public class ProgressInformationDialog  extends ProgressDialog
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel loadingProgressMessageLabel;
     // End of variables declaration//GEN-END:variables
-}
+}// ProgressInformationDialog

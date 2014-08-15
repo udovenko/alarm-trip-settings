@@ -1,17 +1,18 @@
 package ru.sakhalinenergy.alarmtripsettings.views.dialog.progress;
 
 import java.awt.Component;
-import javax.swing.SwingUtilities;
 import ru.sakhalinenergy.alarmtripsettings.Main;
 import ru.sakhalinenergy.alarmtripsettings.models.ModelObservable;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.Dialog;
 
 
 /**
- *
+ * Abstract parent for progress dialog classes.
+ * 
  * @author Denis Udovenko
- * @version 1.0.1
+ * @version 1.0.2
  */
-public class ProgressDialog extends javax.swing.JDialog
+public abstract class ProgressDialog extends Dialog
 {
     protected final ModelObservable model;
     protected final Enum progressEvent;
@@ -42,16 +43,9 @@ public class ProgressDialog extends javax.swing.JDialog
      */
     public void render(final String title, final Component parent)
     {
-        SwingUtilities.invokeLater(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                setTitle(title);
-                setLocationRelativeTo(parent);
-                setVisible(true);
-            }// run
-        });// invokeLater
+        setTitle(title);
+        setLocationRelativeTo(parent);
+        _show();
     }// render
     
     
@@ -60,13 +54,6 @@ public class ProgressDialog extends javax.swing.JDialog
      */
     public void close()
     {
-        SwingUtilities.invokeLater(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                setVisible(false);
-            }// run
-        });// invokeLater
+        _close();
     }// close
 }// ProgressBarDialog

@@ -2,7 +2,7 @@ package ru.sakhalinenergy.alarmtripsettings.views.dialog.source.automatic.yokoga
 
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
-import ru.sakhalinenergy.alarmtripsettings.views.dialog.DialogWithEventsObservable;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.DialogObservable;
 
 
 /**
@@ -12,7 +12,7 @@ import ru.sakhalinenergy.alarmtripsettings.views.dialog.DialogWithEventsObservab
  * @author Denis Udovenko
  * @version 1.0.3
  */
-public interface AutomaticSourceCreationDialogObservable extends DialogWithEventsObservable
+public interface AutomaticSourceCreationDialogObservable extends DialogObservable
 {
     
     /**

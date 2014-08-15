@@ -9,7 +9,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.ModelObservable;
 /**
  * Implements dialog for process visualization with single progress bar.
  *
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.3
  */
 public class OneProgressBarDialog extends ProgressDialog
@@ -31,7 +31,7 @@ public class OneProgressBarDialog extends ProgressDialog
     
     
     /**
-     * Internal class - handler for a model progress event.
+     * Inner class - handler for a model progress event.
      * 
      * @author Denis Udovenko
      * @version 1.0.1
@@ -105,4 +105,4 @@ public class OneProgressBarDialog extends ProgressDialog
     private javax.swing.JLabel progressBarCaptionLabel;
     private javax.swing.JLabel progressBarPercentageLabel;
     // End of variables declaration//GEN-END:variables
-}
+}// OneProgressBarDialog

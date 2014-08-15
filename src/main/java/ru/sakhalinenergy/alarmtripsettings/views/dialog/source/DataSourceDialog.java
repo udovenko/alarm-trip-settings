@@ -7,7 +7,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObser
 import ru.sakhalinenergy.alarmtripsettings.models.ModelObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
-import ru.sakhalinenergy.alarmtripsettings.views.dialog.DialogWithEvents;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.Dialog;
 
 
 /**
@@ -16,7 +16,7 @@ import ru.sakhalinenergy.alarmtripsettings.views.dialog.DialogWithEvents;
  * @author Denis Udovenko
  * @version 1.0.1
  */
-public abstract class DataSourceDialog extends DialogWithEvents
+public abstract class DataSourceDialog extends Dialog
 {
     protected final ModelObservable model;
     protected final PlantsLogicObservable plants;

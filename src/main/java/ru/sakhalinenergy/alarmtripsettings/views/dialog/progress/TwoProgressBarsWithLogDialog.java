@@ -7,11 +7,11 @@ import ru.sakhalinenergy.alarmtripsettings.models.ModelObservable;
 
 
 /**
- * Класс реализует диалог для отображения статуса выполнения процесса с двумя
- * прогресс-барами и текстовым полем для вывода сообщений нити.
+ * Implements dialog for process visualization with double progress bar and log
+ * text field.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.1
+ * @author Denis Udovenko
+ * @version 1.0.1
  */
 public class TwoProgressBarsWithLogDialog extends ProgressDialog
 {
@@ -19,7 +19,11 @@ public class TwoProgressBarsWithLogDialog extends ProgressDialog
 
     
     /**
-     * Конструктор диалога. Инициализирует все компоненты лога.
+     * Public constructor.
+     * 
+     * @param model Model instance which progress events will be processed
+     * @param progressEvent Model progress event key
+     * @param logEvent Model log event key
      */
     public TwoProgressBarsWithLogDialog(ModelObservable model, Enum progressEvent, Enum logEvent) 
     {
@@ -29,11 +33,11 @@ public class TwoProgressBarsWithLogDialog extends ProgressDialog
         model.on(this.logEvent, new _LogEventHandler());
         
         initComponents();
-    }//TwoLinesProgressBarDialog
+    }// TwoLinesProgressBarDialog
     
     
     /**
-     * Internal class - handler for a model progress event.
+     * Inner class - handler for a model progress event.
      * 
      * @author Denis Udovenko
      * @version 1.0.2
@@ -65,7 +69,7 @@ public class TwoProgressBarsWithLogDialog extends ProgressDialog
     
     
     /**
-     * Internal class - handler for a model progress event.
+     * Inner class - handler for a model progress event.
      * 
      * @author Denis Udovenko
      * @version 1.0.1
@@ -183,4 +187,4 @@ public class TwoProgressBarsWithLogDialog extends ProgressDialog
     private javax.swing.JLabel outerProgressBarCurrentActionLabel;
     private javax.swing.JLabel outerProgressBarPercentageLabel;
     // End of variables declaration//GEN-END:variables
-}
+}// TwoProgressBarsWithLogDialog

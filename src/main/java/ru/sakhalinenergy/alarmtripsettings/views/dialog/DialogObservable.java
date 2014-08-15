@@ -10,7 +10,7 @@ import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
  * @author Denis Udovenko
  * @version 1.0.3
  */
-public interface DialogWithEventsObservable 
+public interface DialogObservable 
 {
     
     /**
