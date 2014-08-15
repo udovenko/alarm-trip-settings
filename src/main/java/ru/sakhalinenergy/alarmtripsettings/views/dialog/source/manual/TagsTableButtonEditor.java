@@ -10,20 +10,19 @@ import javax.swing.DefaultCellEditor;
 
 
 /**
- * Класс реализует редактор ячейки таблицы тагов для кнопки удаления тага.
+ * Implements button cell editor for tags table.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.1
+ * @author Denis Udovenko
+ * @version 1.0.2
  */
 public class TagsTableButtonEditor extends DefaultCellEditor 
 {
     protected JButton button;
     private String label;
-    private boolean isPushed;
-
+    
     
     /**
-     * Конструктор класса.
+     * Public constructor. Sets button style and action listener.
      */
     public TagsTableButtonEditor() 
     {
@@ -37,22 +36,22 @@ public class TagsTableButtonEditor extends DefaultCellEditor
             public void actionPerformed(ActionEvent e) 
             {
                 fireEditingStopped();
-            }//actionPerformed
-        });//addActionListener
-    }//DcsVariableTableTagsTableButtonEditor
+            }// actionPerformed
+        });// addActionListener
+    }// TagsTableButtonEditor
 
     
     /**
-     * Метод перегружает стандартный метод получения компонента редактирования 
-     * ячейки.
+     * Returns the component that should be added to the client's component 
+     * hierarchy. Once installed in the client's hierarchy this component will 
+     * then be able to draw and receive user input.
      * 
-     * @param   table       Ссылка на родительскую таблицу
-     * @param   value       Значение ячейки
-     * @param   isSelected  Флаг "Ячейка выбрана"
-     * @param   hasFocus    Флаг "Установлен фокус"
-     * @param   row         Индекс строки
-     * @param   column      Индекс столлбца
-     * @return  JComponent  Компонент отрисованной ячейки
+     * @param table Table that is asking the editor to edit
+     * @param value Value of the cell to be edited
+     * @param isSelected True if the cell is to be rendered with highlighting
+     * @param row Row index of cell being edited
+     * @param column Column index of cell being edited
+     * @return Component for editing
      */
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value,
@@ -66,59 +65,23 @@ public class TagsTableButtonEditor extends DefaultCellEditor
         
             button.setForeground(table.getForeground());
             button.setBackground(table.getBackground());
-        }//else
+        }// else
         
         label = (value == null) ? "" : value.toString();
         button.setText(label);
-        isPushed = true;
-        
+                
         return button;
-    }//getTableCellEditorComponent
+    }// getTableCellEditorComponent
     
     
     /**
-     * Метод перегружает стандартный метод для получения значения при 
-     * редактировании ячейки.
+     * Returns the value contained in the editor.
      * 
-     * @return  Object
+     * @return Value contained in the editor
      */
     @Override
     public Object getCellEditorValue() 
     {
-        if (isPushed) 
-        {
-             //System.out.println(label + ": Ouch!");
-        }//if
-        
-        isPushed = false;
-        
-        return new String(label);
-    }//getCellEditorValue
-
-    
-    /**
-     * Метод перегружает стандартный метод, возвращающий флаг окончания 
-     * редакторования ячейки.
-     * 
-     * @return  boolean
-     */
-    @Override
-    public boolean stopCellEditing() 
-    {
-        isPushed = false;
-        return super.stopCellEditing();
-    }//stopCellEditing
-
-    
-    /**
-     * Метод перегружает стандартный метод, сообщающий о событии завершения 
-     * редактирования ячейки.
-     * 
-     * @return  void
-     */
-    @Override
-    protected void fireEditingStopped() 
-    {
-        super.fireEditingStopped();
-    }//fireEditingStopped
-}//DcsVariableTableTagsTableButtonEditor
+        return label;
+    }// getCellEditorValue
+}// DcsVariableTableTagsTableButtonEditor

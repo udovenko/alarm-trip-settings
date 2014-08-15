@@ -56,10 +56,10 @@ public class IntoolsExportDataSourceDialogController extends ManualSourceEditing
             dialogSettings.setComment(castedView.getComment());
             dialogSettings.setDataSourceName(castedView.getDataSourceName());
             dialogSettings.setDatabaseName(castedView.getDatabaseName());
-            dialogSettings.setDialogHeight(castedView.getFormHeigt());
-            dialogSettings.setDialogLeft(castedView.getFormX());
-            dialogSettings.setDialogTop(castedView.getFormY());
-            dialogSettings.setDialogWidth(castedView.getFormWidth());
+            dialogSettings.setDialogHeight(castedView.getDialogHeight());
+            dialogSettings.setDialogLeft(castedView.getDialogLeft());
+            dialogSettings.setDialogTop(castedView.getDialogTop());
+            dialogSettings.setDialogWidth(castedView.getDialogWidth());
             dialogSettings.setExportDate(castedView.getExportDateString());
             dialogSettings.setPriority(castedView.getPriority());
             dialogSettings.setTagFormat(castedView.getTagMask().getExample());

@@ -1,17 +1,12 @@
 package ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual;
 
-import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.ViewEvent;
 import java.util.Date;
 import java.util.Collections;
-import javax.swing.table.TableColumn;
 import java.awt.Component;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.text.ParseException;
+import javax.swing.table.TableColumn;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
-import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
-import ru.sakhalinenergy.alarmtripsettings.implemented.SourcesPropertiesTypes;
 import ru.sakhalinenergy.alarmtripsettings.Main;
+import ru.sakhalinenergy.alarmtripsettings.implemented.SourcesPropertiesTypes;
 import ru.sakhalinenergy.alarmtripsettings.models.config.DocumentDataSourceDialogSettingsObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagMask;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
@@ -21,66 +16,52 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSourceObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsLogicObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObservable;
-import ru.sakhalinenergy.alarmtripsettings.views.dialog.DialogWithEvents;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.ViewEvent;
 
 
 /**
- * Класс реализует панель для добавления нового источника данных - документа.
+ * Implements dialog for create/edit document data source.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.7
+ * @author Denis Udovenko
+ * @version 1.0.7
  */
-public class DocumentDataSourceDialog extends DialogWithEvents implements ManualSourceEditingDialogObservable
+public class DocumentDataSourceDialog extends ManualSourceEditingDialog implements ManualSourceEditingDialogObservable
 {
-    
-    private final DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-    private final TagsSourceObservable model;
-    private final PlantsLogicObservable plants;
-    private final TagMasksObservable tagMasks;
-    private final DocumentDataSourceDialogSettingsObservable config;
-    private final boolean editMode;
-    
-        
+       
     /**
-     * Конструктор класса.
+     * Public constructor. Sets up dialog fields and initializes components.
      * 
-     * @param model Экземпляр модели источника данных тагов
-     * @param plants Коллекция производиственных объектов
-     * @param tagMasks Коллекция маск (регулярных выражений) для парсинга имен тагов
-     * @param config Экземпляр модели конфигурации
-     * @param title Заголовок диалога
+     * @param model Tags source wrapper
+     * @param plants Plants list wrapper
+     * @param tagMasks Wrapped masks collection for tag parsing
+     * @param config Configuration instance
+     * @param editMode Create/edit data source mode flag
+     * @param title Dialog title
      */
     public DocumentDataSourceDialog(TagsSourceObservable model, PlantsLogicObservable plants, 
         TagMasksObservable tagMasks, DocumentDataSourceDialogSettingsObservable config, 
         boolean editMode, String title) 
     {
+        // Call superclass constructor:
+        super(model, plants, tagMasks, config, editMode, title);
+        
         initComponents();
         
-        //Устанавливаем поля модели и конфигурации:
-        this.model = model;
-        this.plants = plants;
-        this.tagMasks = tagMasks;
-        this.config = config;
-        this.editMode = editMode;
+        // Subscribe on model's events:
+        model.on(SourceEvent.TAG_SET_UPDATED, _getModelTagSetUpdateHandler(sourceTagsTable));
         
-        //Подписываемся на события модели:
-        this.model.on(SourceEvent.TAG_SET_UPDATED, new ModelTagSetUpdateHandler());
+        // Set dialog icon:
+        setIconImage(Main.documentsIcon.getImage());
         
-        //Устанавливаем иконку диалога:
-        this.setIconImage(Main.documentsIcon.getImage());
+        // Set up calendar date format:
+        documentRevisionDatePicker.setFormats(dateFormat);
         
-        //Устанавливаем заголовок:
-        this.setTitle(title);
-        
-        //Устанавливаем формат даты календаря:
-        this.documentRevisionDatePicker.setFormats(this.dateFormat);
-        
-        //Создаем модель данных таблицы тагов:
-        this.sourceTagsTable.setModel(new TagsTableModel(this.model, this));
-        TagsTableModel tagsTableModel = (TagsTableModel)this.sourceTagsTable.getModel();
+        // Set tags table model:
+        sourceTagsTable.setModel(new TagsTableModel(model, this));
+        TagsTableModel tagsTableModel = (TagsTableModel)sourceTagsTable.getModel();
                         
-        //Назначаем всем колонкам таблицы рендерер текущего набора устройств:
-        for (TableColumn column : Collections.list(this.sourceTagsTable.getColumnModel().getColumns()))
+        // Set cell renderes depending on column name:
+        for (TableColumn column : Collections.list(sourceTagsTable.getColumnModel().getColumns()))
         {
             if (column.getHeaderValue().equals(tagsTableModel.REMOVE_TAG_BUTTON_COLUMN_NAME))
             {
@@ -90,260 +71,174 @@ public class DocumentDataSourceDialog extends DialogWithEvents implements Manual
             } else {   
                 
                 column.setCellRenderer(new TagsTableCellRenderer());
-            }//else
-        }//for
-    }//DocumentSettingsPanel
+            }// else
+        }// for
+    }// DocumentSettingsPanel
     
             
     /**
-     * Отрисовывает списки, применяет настройки диалога и выводит его на экран.
+     * Render required objects lists, applies dialog settings and shows form on
+     * the screen.
      * 
-     * @param parent Родительский фрейм, относитеольно которого будет выведен на экран диалог
+     * @param parent Parent component, dialog will be rendered relative to it
      */
     public void render(Component parent)
     {
-        this.setLocationRelativeTo(parent);
-        
-        //Формируем список форматов тагов:
-        for (TagMask tempMask : tagMasks.getMasks())
-        {
-            tagFormatsComboBox.addItem(tempMask);
-        }//for
-        
-        //Строим список производственных объектов:
-        for (Plant tempPlant : plants.getPlants()) this.plantsComboBox.addItem(tempPlant);
-                        
-        try //Восстанавливаем конфигурацию:
-        {
-            _applyConfig();
-        } catch (Exception exception) {}
-        
-        //Отображаем диалог:
-        this.setVisible(true);
-    }//render
-    
-    
-    /**
-     * Внутренний класс-обработчик события обновления набора тагов модели.
-     * 
-     * @author   Denis.Udovenko
-     * @version  1.0.1
-     */
-    class ModelTagSetUpdateHandler implements CustomEventListener
-    {
-        @Override
-        public void customEventOccurred(CustomEvent evt)
-        {
-            TagsTableModel tagsTableModel = (TagsTableModel)sourceTagsTable.getModel();
-            tagsTableModel.fireTableDataChanged();
-        }//customEventOccurred
-    }//TagNameInputHandler
+        // Build palants list and restore plant selection:
+        for (TagMask tempMask : tagMasks.getMasks()) tagFormatsComboBox.addItem(tempMask);
 
-    
-    /**
-     * Возвращает горизонтальный отступ левого верхнего угла формы от 
-     * начала координат экрана.
-     *
-     * @return Горизонтальный отступ левого верхнего угла формы от начала координат экрана
-     */
-    public String getFormX()
-    {
-        return Integer.toString(this.getX());
-    }//getFormX    
-    
-    
-    /**
-     * Возвращает вертикальный отступ левого верхнего угла формы от 
-     * начала координат экрана.
-     *
-     * @return Вертикальный отступ левого верхнего угла формы от начала координат экрана
-     */
-    public String getFormY()
-    {
-        return Integer.toString(this.getY());
-    }//getFormX
+        // Build tag formats list and restore format selection:
+        for (Plant tempPlant : plants.getPlants()) plantsComboBox.addItem(tempPlant);
+        
+        // Set relative location:
+        setLocationRelativeTo(parent);
+        
+        // Apply config:
+        _applyConfig();
+                
+        // Show dialog:
+        _show();
+    }// render
     
     
     /**
-     * Возвращает ширину формы.
+     * Returns selected plant.
      * 
-     * @return Ширина формы
+     * @return Selected plant
      */
-    public String getFormWidth()
-    {
-        return Integer.toString(this.getWidth());
-    }//getFormWidth
-    
-    
-    /**
-     * Возвращает высоту формы.
-     * 
-     * @return Высота формы
-     */
-    public String getFormHeigt()
-    {
-        return Integer.toString(this.getHeight());
-    }//getFormHeigt
-    
-    
-    /**
-     * Возвращает выбранный производственный объект.
-     * 
-     * @return Выбранный производственный объект
-     */
+    @Override
     public Plant getPlant()
     {
         return (Plant)plantsComboBox.getSelectedItem();
-    }//getPlant
+    }// getPlant
     
     
     /**
-     * Возвращает имя источника данных.
+     * Returns data source name.
      * 
-     * @return Имя источника данных
+     * @return Data source name
      */
     public String getDataSourceName()
     {
-        return this.documentNameTextField.getText();
-    }//getDataSourceName
+        return documentNameTextField.getText();
+    }// getDataSourceName
     
     
     /**
-     * Возвращает ссылку на документ в системе документооборота.
+     * Returns link to a source document.
      * 
-     * @return Cсылку на документ в системе документооборота
+     * @return Link to a source document
      */
     public String getDocumentLink()
     {
-        return this.documentLinkTextField.getText();
-    }//getDocumentLink
+        return documentLinkTextField.getText();
+    }// getDocumentLink
     
     
     /**
-     * Возвращает номер документа.
+     * Returns source document number.
      * 
-     * @return Номер документа
+     * @return Source document number
      */
     public String getDocumemntNumber()
     {
         return this.documentNumberTextField.getText(); 
-    }//getDocumemntNumber
+    }// getDocumemntNumber
     
     
     /**
-     * Возвращвает приоритет источника данных.
+     * Returns data source priority.
      * 
-     * @return Приоритет источника данных
+     * @return Data source priority
      */
     public String getPriority()
     {
         return this.prioritySpinner.getValue().toString();
-    }//getPriority
+    }// getPriority
     
     
     /**
-     * Возвращает текущий формат тага.
+     * Returns selected tag mask.
      * 
-     * @return Текущий формат тага
+     * @return Selected tag mask
      */
+    @Override
     public TagMask getTagMask()
     {
         return (TagMask)tagFormatsComboBox.getSelectedItem();
-    }//getTagFormat
+    }// getTagFormat
     
     
     /**
-     * Возвращает комментарий к источнику данных.
+     * Returns data source comment.
      * 
-     * @return Комментарий к источнику данных
+     * @return Data source comment
      */
     public String getComment()
     {
         return (String)this.commentTextArea.getText();
-    }//getComment
+    }// getComment
     
     
     /**
-     * Метод возвращает дату ревизии документа в виде строки.
+     * Returns source document revision date.
      * 
-     * @return Дата ревизии документа
+     * @return Source document revision date
      */
     public Date getRevisionDate()
     {
         return this.documentRevisionDatePicker.getDate();
-    }//getRevisionDate
+    }// getRevisionDate
     
     
     /**
-     * Метод возвращает дату ревизии документа в виде строки.
+     * Returns source document revision date as string.
      * 
-     * @return Дата ревизии документа
+     * @return Source document revision date as string
      */
     public String getRevisionDateString()
     {
         Date date = this.documentRevisionDatePicker.getDate();
         return this.dateFormat.format(date);
-    }//getRevisionDate
+    }// getRevisionDate
     
     
     /**
-     * Метод восстанавливает настройки панели из полученного экземпляра 
-     * настроек.
-     * 
-     * @throws  ParseException
-     * @param   settings        Экземпляр настроек панели
-     * @return  void
+     * Restores dialog's settings from configuration object.
      */
-    private void _applyConfig() throws ParseException
+    private void _applyConfig()
     {
-        this.setSize(Integer.parseInt(config.getDialogWidth()), Integer.parseInt(config.getDialogHeight()));
-        this.setLocation(Integer.parseInt(config.getDialogLeft()), Integer.parseInt(config.getDialogTop()));
+        // Call superclass configuration method:
+        _applyConfig(plantsComboBox, tagFormatsComboBox, prioritySpinner,
+            documentNameTextField, commentTextArea);
         
-        //Если диалог открыт в режиме редактирования существующего источника данных:
+        // Cast models to concrete classes:
+        DocumentDataSourceDialogSettingsObservable castedConfig 
+            = (DocumentDataSourceDialogSettingsObservable)config;
+        
+        // Apply rest of configuration settings:
         if (editMode)
         {
-            Source source = model.getEntity();
-            documentNameTextField.setText(source.getName());
-            prioritySpinner.setValue(source.getPriority());
+            Source source = ((TagsSourceObservable)model).getEntity();
             documentRevisionDatePicker.setDate(source.getDate());
             
             for (SourceProperty tempProperty : source.getProperties())
             {
-                if (tempProperty.getTypeId() == SourcesPropertiesTypes.COMMENT.ID) commentTextArea.setText(tempProperty.getValue());
                 if (tempProperty.getTypeId() == SourcesPropertiesTypes.DOCUMENT_LINK.ID) documentLinkTextField.setText(tempProperty.getValue());
                 if (tempProperty.getTypeId() == SourcesPropertiesTypes.DOCUMENT_NUMBER.ID) documentNumberTextField.setText(tempProperty.getValue());
-            }//for
+            }// for
        
-        } else { //Если диалог открыт в режиме создания: 
+        } else { // If dialog opens in create mode:
             
-            documentNameTextField.setText(config.getDataSourceName());
-            prioritySpinner.setValue(Integer.parseInt(config.getPriority()));
-            documentLinkTextField.setText(config.getDocumentLink());
-            documentNumberTextField.setText(config.getDocumentNumber());
-            commentTextArea.setText(config.getComment());
-            Date date = this.dateFormat.parse(config.getRevisionDate());
-            documentRevisionDatePicker.setDate(date);
-        }//else
-        
-        //Восстанавливаем выбранный производственный объект:
-        for (Plant tempPlant : plants.getPlants())
-        {    
-            if (tempPlant.getId().equals(config.getPlantCode()))
-            {    
-                this.plantsComboBox.setSelectedItem(tempPlant);
-                break;
-            }//if
-        }//for
-        
-        for (TagMask tempTagMask : this.tagMasks.getMasks())
-        {    
-            if (tempTagMask.getExample().equals(config.getTagFormat()))
-            {    
-                this.tagFormatsComboBox.setSelectedItem(tempTagMask);
-                break;
-            }//if
-        }//for
-    }//restoreSettings
+            documentLinkTextField.setText(castedConfig.getDocumentLink());
+            documentNumberTextField.setText(castedConfig.getDocumentNumber());
+            try
+            {
+                Date date = this.dateFormat.parse(castedConfig.getRevisionDate());
+                documentRevisionDatePicker.setDate(date);
+            } catch (Exception exception){}
+        }// else
+    }// restoreSettings
     
        
     /**
@@ -557,12 +452,10 @@ public class DocumentDataSourceDialog extends DialogWithEvents implements Manual
 
     
     /**
-     * Метод обрабатывает событие выбора нового формата тага в выпадающем списке
-     * и рассылает событие с контекстом выбранного формата тага всем 
-     * подписчикам.
+     * Handles tag mask (format) selection event and triggers appropriate event with 
+     * selected tag mask instance data.
      * 
-     * @param   evt  событие выбора формата тага
-     * @return  void 
+     * @param evt Tag formats combo box selection event object
      */
     private void tagFormatsComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tagFormatsComboBoxActionPerformed
         
@@ -573,11 +466,10 @@ public class DocumentDataSourceDialog extends DialogWithEvents implements Manual
 
     
     /**
-     * Метод обрабатывает нажатие кнопки "Save Document source" и рассылает всем
-     * подписчикам событие с контекстом текущих настроек панели.
+     * Handles "Save document data source" button click event and triggers 
+     * appropriate for all subscribers.
      * 
-     * @param   evt  Событие нажатия кнопки
-     * @return  void
+     * @param evt Button click event object
      */
     private void addDocumentSourceToStorageButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDocumentSourceToStorageButtonActionPerformed
         
@@ -589,10 +481,10 @@ public class DocumentDataSourceDialog extends DialogWithEvents implements Manual
 
     
     /**
-     * Обрабатывает событие нажатия кнопки добавления тага.
+     * Handles add tag button click event and triggers appropriate event with 
+     * new tag name data.
      * 
-     * @param evt Событие нажатия кнопки
-     * @return void
+     * @param evt Button click event object
      */
     private void addTagButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addTagButtonActionPerformed
 
@@ -602,10 +494,10 @@ public class DocumentDataSourceDialog extends DialogWithEvents implements Manual
 
     
     /**
-     * Обрабатывает событие выбора нового производственного объекта.
+     * Handles plant selection event and triggers appropriate event with 
+     * selected plant data.
      * 
-     * @param evt Событие комбобокса
-     * @return void
+     * @param evt Plants combo box selection event object
      */
     private void plantsComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_plantsComboBoxActionPerformed
         
@@ -641,4 +533,4 @@ public class DocumentDataSourceDialog extends DialogWithEvents implements Manual
     private javax.swing.JComboBox tagFormatsComboBox;
     private javax.swing.JLabel tagFormatsComboBoxLabel;
     // End of variables declaration//GEN-END:variables
-}//DocumentSettingsPanel
+}// DocumentDataSourceDialog

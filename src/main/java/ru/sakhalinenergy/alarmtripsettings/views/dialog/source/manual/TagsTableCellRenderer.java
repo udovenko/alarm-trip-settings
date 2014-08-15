@@ -1,57 +1,49 @@
 package ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual;
 
-import ru.sakhalinenergy.alarmtripsettings.Main;
-import javax.swing.JComponent;
 import java.awt.Color;
 import javax.swing.JTable;
+import javax.swing.JComponent;
 import javax.swing.table.DefaultTableCellRenderer;
 
 
 /**
- * Класс наследует отрисовщик ячеек таблицы устройств и перегружает его метод 
- * отрисовки.
+ * Implements alphanumeric cell renderer for tags table.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.1
+ * @author Denis Udovenko
+ * @version 1.0.1
  */
 public class TagsTableCellRenderer extends DefaultTableCellRenderer 
 {
-    
-    
-    
+       
     /**
-     * Конструктор класса.
+     * Public constructor.
      */
     public TagsTableCellRenderer()
     {
-       
         setOpaque(true);
-    }//DevicesTableCellRenderer
+    }// TagsTableCellRenderer
 
     
     /**
-     * Метод возвращает отрендерренный компонент ячейки, перегружая дефолтный рендерер.
+     * Returns configured cell component used for drawing.
      * 
-     * @param   table       Ссылка на родительскую таблицу
-     * @param   value       Значение ячейки
-     * @param   isSelected  Флаг "Ячейка выбрана"
-     * @param   hasFocus    Флаг "Установлен фокус"
-     * @param   row         Индекс строки
-     * @param   column      Индекс столлбца
-     * @return  JComponent  Компонент отрисованной ячейки
+     * @param table Parent table
+     * @param value Value to assign to the cell
+     * @param isSelected True if cell is selected
+     * @param hasFocus True if cell has focus
+     * @param row Row index of the cell to render
+     * @param column Column index of the cell to render
+     * @return Configured cell component used for drawing
      */
     @Override
     public JComponent getTableCellRendererComponent(JTable table, Object value, 
         boolean isSelected, boolean hasFocus, int row, int column)
     {
-        //Вызваем родительский конструктор рендерера ячейки:
+        // Call superclass method:
         JComponent cell = (JComponent)super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         
-        //Получаем модель таблицы:
+        // Get table model:
         TagsTableModel tableModel = (TagsTableModel)table.getModel();
-        
-        //Получем имя выбранной колонки из модели, используя преобразование координат между моделью и вью:
-        String columnName = tableModel.getColumnName(table.convertColumnIndexToModel(column));
         
         if (tableModel.isCellEditable(table.convertRowIndexToModel(row), table.convertColumnIndexToModel(column)))
         {
@@ -59,10 +51,9 @@ public class TagsTableCellRenderer extends DefaultTableCellRenderer
         } else {
         
             cell.setBackground(Color.LIGHT_GRAY);
-        }//if
+        }// else
                
         cell.setForeground(Color.BLACK);
-                
         return cell;
-    }//getTableCellRendererComponent
-}//DevicesTableCellRenderer
+    }// getTableCellRendererComponent
+}// TagsTableCellRenderer

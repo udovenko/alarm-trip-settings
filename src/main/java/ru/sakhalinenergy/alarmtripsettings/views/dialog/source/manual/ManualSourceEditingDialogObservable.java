@@ -7,11 +7,8 @@ import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.automatic.yokogaw
  * Interface for manual editing source dialogs, gives controllers an access to 
  * common events.
  * 
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.3
  */
-public interface ManualSourceEditingDialogObservable extends AutomaticSourceCreationDialogObservable
-{
-
-
-}//DataSourceDialog
+public interface ManualSourceEditingDialogObservable 
+    extends AutomaticSourceCreationDialogObservable{}

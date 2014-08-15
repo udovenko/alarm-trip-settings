@@ -55,10 +55,10 @@ public class DocumentDataSourceDialogController extends ManualSourceEditingDialo
             viewSettings.setPlantCode(castedView.getPlant().getId());
             viewSettings.setComment(castedView.getComment());
             viewSettings.setDataSourceName(castedView.getDataSourceName());
-            viewSettings.setDialogHeight(castedView.getFormHeigt());
-            viewSettings.setDialogLeft(castedView.getFormX());
-            viewSettings.setDialogTop(castedView.getFormY());
-            viewSettings.setDialogWidth(castedView.getFormWidth());
+            viewSettings.setDialogHeight(castedView.getDialogHeight());
+            viewSettings.setDialogLeft(castedView.getDialogLeft());
+            viewSettings.setDialogTop(castedView.getDialogTop());
+            viewSettings.setDialogWidth(castedView.getDialogWidth());
             viewSettings.setDocumentLink(castedView.getDocumentLink());
             viewSettings.setDocumentNumber(castedView.getDocumemntNumber());
             viewSettings.setPriority(castedView.getPriority());

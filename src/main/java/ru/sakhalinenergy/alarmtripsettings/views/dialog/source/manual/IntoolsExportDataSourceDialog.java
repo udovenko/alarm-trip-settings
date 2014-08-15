@@ -1,17 +1,11 @@
 package ru.sakhalinenergy.alarmtripsettings.views.dialog.source.manual;
 
-import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.ViewEvent;
-import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
-import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
-import ru.sakhalinenergy.alarmtripsettings.Main;
-import java.awt.Component;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
+import java.awt.Component;
 import javax.swing.table.TableColumn;
+import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
+import ru.sakhalinenergy.alarmtripsettings.Main;
 import ru.sakhalinenergy.alarmtripsettings.implemented.SourcesPropertiesTypes;
 import ru.sakhalinenergy.alarmtripsettings.models.config.IntoolsExportDataSourceDialogSettingsObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
@@ -22,59 +16,52 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsLogicOb
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.TagMasksObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.SourceEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.source.TagsSourceObservable;
-import ru.sakhalinenergy.alarmtripsettings.views.dialog.DialogWithEvents;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.source.ViewEvent;
 
 
 /**
- * Класс реализует панель для добавления нового источника данных - экспорта из 
- * SPI.
+ * Implements dialog for create/edit SPI export data source.
  * 
- * @author Denis.Udovenko
- * @version 1.0.6
+ * @author Denis Udovenko
+ * @version 1.0.7
  */
-public class IntoolsExportDataSourceDialog extends DialogWithEvents implements ManualSourceEditingDialogObservable
+public class IntoolsExportDataSourceDialog extends ManualSourceEditingDialog implements ManualSourceEditingDialogObservable
 {
-
-    private DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-    private final TagsSourceObservable model;
-    private final PlantsLogicObservable plants;
-    private final TagMasksObservable tagMasks;
-    private final IntoolsExportDataSourceDialogSettingsObservable config;
-    private final boolean editMode;
-    
-    
+   
     /**
-     * Конструктор класса. Инициализирует основные компоненты.
+     * Public constructor. Sets up dialog fields and initializes components.
+     * 
+     * @param model Tags source wrapper
+     * @param plants Plants list wrapper
+     * @param tagMasks Wrapped masks collection for tag parsing
+     * @param config Configuration instance
+     * @param editMode Create/edit data source mode flag
+     * @param title Dialog title
      */
     public IntoolsExportDataSourceDialog(TagsSourceObservable model, PlantsLogicObservable plants, 
         TagMasksObservable tagMasks, IntoolsExportDataSourceDialogSettingsObservable config, 
         boolean editMode, String title)
     {
+        // Call superclass constructor:
+        super(model, plants, tagMasks, config, editMode, title);
+        
         initComponents();
         
-        //Устанавливаем поля модели и конфигурации:
-        this.model = model;
-        this.plants = plants;
-        this.tagMasks = tagMasks;
-        this.config = config;
-        this.editMode = editMode;
+        // Subscribe on model's events:
+        model.on(SourceEvent.TAG_SET_UPDATED, _getModelTagSetUpdateHandler(sourceTagsTable));
         
-        //Подписываемся на события модели:
-        this.model.on(SourceEvent.TAG_SET_UPDATED, new ModelTagSetUpdateHandler());
+        // Set dialog icon:
+        setIconImage(Main.intoolsIcon.getImage());
+               
+        // Set up calendar date format:
+        exportDatePicker.setFormats(dateFormat);
         
-        //Устанавливаем иконку и заголовок диалога:
-        this.setIconImage(Main.intoolsIcon.getImage());
-        this.setTitle(title);
-        
-        //Устанавливаем формат даты календаря:
-        this.exportDatePicker.setFormats(this.dateFormat);
-        
-        //Создаем модель данных таблицы тагов:
-        this.sourceTagsTable.setModel(new TagsTableModel(model, this));
-        TagsTableModel tagsTableModel = (TagsTableModel)this.sourceTagsTable.getModel();
+        // Set tags table model:
+        sourceTagsTable.setModel(new TagsTableModel(model, this));
+        TagsTableModel tagsTableModel = (TagsTableModel)sourceTagsTable.getModel();
                         
-        //Назначаем всем колонкам таблицы рендерер текущего набора устройств:
-        for (TableColumn column : Collections.list(this.sourceTagsTable.getColumnModel().getColumns()))
+        // Set cell renderes depending on column name:
+        for (TableColumn column : Collections.list(sourceTagsTable.getColumnModel().getColumns()))
         {
             if (column.getHeaderValue().equals(tagsTableModel.REMOVE_TAG_BUTTON_COLUMN_NAME))
             {
@@ -84,302 +71,162 @@ public class IntoolsExportDataSourceDialog extends DialogWithEvents implements M
             } else {   
                 
                 column.setCellRenderer(new TagsTableCellRenderer());
-            }//else
-        }//for
-        
-        try //Восстанавливаем конфигурацию:
-        {
-            _applyConfig();
-        } catch (Exception exception) {}
-    }//FgsVariableTableSettingsPanel
+            }// else
+        }// for
+    }// FgsVariableTableSettingsPanel
 
     
     /**
-     * Отрисовывает списки, применяет настройки диалога и выводит его на экран.
+     * Render required objects lists, applies dialog settings and shows form on
+     * the screen.
      * 
-     * @param parent Родительский фрейм, относительно которого будет выведен на экран диалог
+     * @param parent Parent component, dialog will be rendered relative to it
      */
     public void render(Component parent)
     {
-        this.setLocationRelativeTo(parent);
+        // Build palants list and restore plant selection:
+        for (TagMask tempMask : tagMasks.getMasks()) tagFormatComboBox.addItem(tempMask);
+
+        // Build tag formats list and restore format selection:
+        for (Plant tempPlant : plants.getPlants()) plantsComboBox.addItem(tempPlant);
         
-        //Формируем список форматов тагов:
-        for (TagMask tempMask : tagMasks.getMasks())
-        {
-            tagFormatComboBox.addItem(tempMask);
-        }//for
+        // Set relative location:
+        setLocationRelativeTo(parent);
         
-        //Строим список производственных объектов:
-        for (Plant tempPlant : plants.getPlants()) this.plantsComboBox.addItem(tempPlant);
-                        
-        try //Восстанавливаем конфигурацию:
-        {
-            _applyConfig();
-        } catch (Exception exception) {}
-        
-        //Отображаем диалог:
-        this.setVisible(true);
-    }//render
-    
-    
-    /**
-     * Внутренний класс-обработчик события обновления набора тагов модели.
-     * 
-     * @author   Denis.Udovenko
-     * @version  1.0.1
-     */
-    class ModelTagSetUpdateHandler implements CustomEventListener
-    {
-        @Override
-        public void customEventOccurred(CustomEvent evt)
-        {
-            TagsTableModel tagsTableModel = (TagsTableModel)sourceTagsTable.getModel();
-            tagsTableModel.fireTableDataChanged();
-        }//customEventOccurred
-    }//TagNameInputHandler
-    
-    
-    /**
-     * Метод устанавливает список реализованых форматов тагов.
-     * 
-     * @param   formats  Список реализованых форматов тагов
-     * @return  void
-     */
-    public void setTagNumberFormatsList(List<String> formats)
-    {
-        //Очищаем предыдуще перечни форматов:
-        this.tagFormatComboBox.removeAllItems();
+        // Apply config:
+        _applyConfig();
                 
-        //Вносим в комбо-боксы новый список форматов:
-        for (int i=0; i<formats.size(); i++)
-        {
-            this.tagFormatComboBox.addItem(formats.get(i));
-        }//for
-    }//setTagNumberFormatsList
-    
+        // Show dialog:
+        _show();
+    }// render
+         
     
     /**
-     * Возвращает горизонтальный отступ левого верхнего угла формы от 
-     * начала координат экрана.
-     *
-     * @return Горизонтальный отступ левого верхнего угла формы от начала координат экрана
-     */
-    public String getFormX()
-    {
-        return Integer.toString(this.getX());
-    }//getFormX    
-    
-    
-    /**
-     * Возвращает вертикальный отступ левого верхнего угла формы от 
-     * начала координат экрана.
-     *
-     * @return Вертикальный отступ левого верхнего угла формы от начала координат экрана
-     */
-    public String getFormY()
-    {
-        return Integer.toString(this.getY());
-    }//getFormX
-    
-    
-     /**
-     * Возвращает выбранный производственный объект.
+     * Returns selected plant.
      * 
-     * @return Выбранный производственный объект
+     * @return Selected plant
      */
     @Override
     public Plant getPlant()
     {
         return (Plant)plantsComboBox.getSelectedItem();
-    }//getPlant
-    
-    
-    /**
-     * Возвращает ширину формы.
-     * 
-     * @return Ширина формы
-     */
-    public String getFormWidth()
-    {
-        return Integer.toString(this.getWidth());
-    }//getFormWidth
-    
+    }// getPlant
+
     
     /**
-     * Возвращает высоту формы.
+     * Returns data source name.
      * 
-     * @return Высота формы
-     */
-    public String getFormHeigt()
-    {
-        return Integer.toString(this.getHeight());
-    }//getFormHeigt
-    
-    
-    /**
-     * Возвращает имя источника данных.
-     * 
-     * @return Имя источника данных
+     * @return Data source name
      */
     public String getDataSourceName()
     {
         return sourceNameTextField.getText();
-    }//getDataSourceName
+    }// getDataSourceName
            
     
     /**
-     * Возвращвает приоритет источника данных.
+     * Returns data source priority.
      * 
-     * @return Приоритет источника данных
+     * @return Data source priority
      */
     public String getPriority()
     {
         return prioritySpinner.getValue().toString();
-    }//getPriority
+    }// getPriority
     
     
     /**
-     * Возвращает текущий формат тага.
+     * Returns selected tag mask.
      * 
-     * @return Текущий формат тага
+     * @return Selected tag mask
      */
     @Override
     public TagMask getTagMask()
     {
         return (TagMask)tagFormatComboBox.getSelectedItem();
-    }//getTagFormat
+    }// getTagFormat
     
     
     /**
-     * Возвращает комментарий к источнику данных.
+     * Returns data source comment.
      * 
-     * @return Комментарий к источнику данных
+     * @return Data source comment
      */
     public String getComment()
     {
         return (String)commentTextArea.getText();
-    }//getComment
+    }// getComment
     
     
     /**
-     * Возвращает имя базы данных.
+     * Returns source database name for SPI export.
      * 
-     * @return Имя базы данных
+     * @return Source database name
      */
     public String getDatabaseName()
     {
         return databaseNameTextField.getText();
-    }//getDatabaseName
+    }// getDatabaseName
     
     
     /**
-     * Возвращает дату экспорта данных из базы.
+     * Returns a date when SPI export was created.
      * 
-     * @return Дату экспорта
+     * @return Date when SPI export was created
      */
     public Date getExportDate()
     {
         return exportDatePicker.getDate();
-    }//getExportDate
+    }// getExportDate
     
     
     /**
-     * Возвращает дату экспорта данных из базы в виде строки.
+     * Returns string version of date when SPI export was created.
      * 
-     * @return Дату экспорта в виде строки
+     * @return String version of date when SPI export was created
      */
     public String getExportDateString()
     {
         Date date = exportDatePicker.getDate();
         return dateFormat.format(date);
-    }//getExportDate
+    }// getExportDateString
     
    
     /**
-     * Метод восстанавливает настройки панели из полученного экземпляра 
-     * настроек.
-     * 
-     * @throws ParseException
-     * @return void
+     * Restores dialog's settings from configuration object.
      */
-    private void _applyConfig() throws ParseException
+    private void _applyConfig()
     {
-        this.setSize(Integer.parseInt(config.getDialogWidth()), Integer.parseInt(config.getDialogHeight()));
-        this.setLocation(Integer.parseInt(config.getDialogLeft()), Integer.parseInt(config.getDialogTop()));
+        // Call superclass configuration method:
+        _applyConfig(plantsComboBox, tagFormatComboBox, prioritySpinner,
+            sourceNameTextField, commentTextArea);
+
+        // Cast models to concrete classes:
+        IntoolsExportDataSourceDialogSettingsObservable castedConfig 
+            = (IntoolsExportDataSourceDialogSettingsObservable)config;
         
-        //If dialog is in edit mode, properties control elements will display current entity data:
+        // Apply rest of configuration:
         if (editMode)
         {
-            Source source = model.getEntity();
+            Source source = ((TagsSourceObservable)model).getEntity();
             
-            sourceNameTextField.setText(source.getName());
-            prioritySpinner.setValue(source.getPriority());
             exportDatePicker.setDate(source.getDate());
             
             for (SourceProperty tempProperty : source.getProperties())
             {
-                if (tempProperty.getTypeId() == SourcesPropertiesTypes.COMMENT.ID) commentTextArea.setText(tempProperty.getValue());
                 if (tempProperty.getTypeId() == SourcesPropertiesTypes.DATABASE_NAME.ID) databaseNameTextField.setText(tempProperty.getValue());
-            }//for
+            }// for
                         
-        } else { //If dialog is in new source creation mode, properties control elements will display config settings:
+        } else { // If dialog opens in create mode:
         
-            sourceNameTextField.setText(config.getDataSourceName());
-            prioritySpinner.setValue(Integer.parseInt(config.getPriority()));
-            commentTextArea.setText(config.getComment());
-            databaseNameTextField.setText(config.getDatabaseName());
-            Date date = this.dateFormat.parse(config.getExportDate());
-            exportDatePicker.setDate(date);
-        }//else
-        
-        //Restoring selected plant:
-        for (Plant tempPlant : plants.getPlants())
-        {    
-            if (tempPlant.getId().equals(config.getPlantCode()))
+            databaseNameTextField.setText(castedConfig.getDatabaseName());
+            try
             {    
-                this.plantsComboBox.setSelectedItem(tempPlant);
-                break;
-            }//if
-        }//for
-        
-        //Restoring selected tag mask:
-        for (TagMask tempTagMask : this.tagMasks.getMasks())
-        {    
-            if (tempTagMask.getExample().equals(config.getTagFormat()))
-            {    
-                this.tagFormatComboBox.setSelectedItem(tempTagMask);
-                break;
-            }//if
-        }//for      
-    }//_applyConfig
-    
-    
-    /**
-     * Метод устанавливает код текущего ассета для модели таблицы тагов текущего 
-     * диалога и меняет метку с заголовком кода ассета.
-     * 
-     * @param   plantCode  Новый код ассета
-     * @return  void 
-     */
-    /*public void setPlantCode(String plantCode)
-    {
-        IntoolsExportTagsTableModel tagsTableModel = (IntoolsExportTagsTableModel)this.sourceTagsTable.getModel();
-        tagsTableModel.setPlantCode(plantCode);
-        this.plantCodeLabel.setText(plantCode);
-    }//setPlantCode*/
-    
-    
-    /**
-     * Метод устанавливает класс, описывающий таг модели данных таблицы тагов.
-     * 
-     * @param   TagClass  Класс тага, который будет описывать добавляемые таги таблицы
-     * @return  void
-     */
-    /*public void setTableModelTagClass(Class<? extends SourceTag> TagClass)
-    {
-        IntoolsExportTagsTableModel tagsTableModel = (IntoolsExportTagsTableModel)this.sourceTagsTable.getModel();
-        tagsTableModel.setTagClass(TagClass);
-    }//setTableModelTagFormat*/
+                Date date = this.dateFormat.parse(castedConfig.getExportDate());
+                exportDatePicker.setDate(date);
+            } catch (Exception exception){}
+        }// else
+    }// _applyConfig
     
     
     /**
@@ -564,12 +411,10 @@ public class IntoolsExportDataSourceDialog extends DialogWithEvents implements M
 
     
     /**
-     * Метод обрабатывает событие выбора нового формата тага в выпадающем списке
-     * и рассылает событие с контекстом выбранного формата тага всем 
-     * подписчикам.
+     * Handles tag mask (format) selection event and triggers appropriate event with 
+     * selected tag mask instance data.
      * 
-     * @param   evt  событие выбора формата тага
-     * @return  void 
+     * @param evt Tag formats combo box selection event object
      */
     private void tagFormatComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tagFormatComboBoxActionPerformed
         
@@ -580,11 +425,10 @@ public class IntoolsExportDataSourceDialog extends DialogWithEvents implements M
 
     
     /**
-     * Метод обрабатывает нажатие кнопки "Save FGS Variable Table data source"
-     * и рассылает всем подписчикам событие с контекстом текущих настроек
-     * панели.
+     * Handles "Save SPI export data source" button click event and triggers 
+     * appropriate for all subscribers.
      * 
-     * @param evt Событие нажатия кнопки
+     * @param evt Button click event object
      */
     private void addSourceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addSourceButtonActionPerformed
         
@@ -596,10 +440,10 @@ public class IntoolsExportDataSourceDialog extends DialogWithEvents implements M
 
     
     /**
-     * Метод обрабатывает событие выбора производственного объекта и рассылает 
-     * всем подписчикам событие с контекстом сущности объекта.
+     * Handles plant selection event and triggers appropriate event with 
+     * selected plant data.
      * 
-     * @param evt Событие нажатия кнопки
+     * @param evt Plants combo box selection event object
      */
     private void plantsComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_plantsComboBoxActionPerformed
         
@@ -610,10 +454,10 @@ public class IntoolsExportDataSourceDialog extends DialogWithEvents implements M
 
     
     /**
-     * Обрабатывает событие нажатия кнопки добавления тага.
+     * Handles add tag button click event and triggers appropriate event with 
+     * new tag name data.
      * 
-     * @param evt Событие нажатия кнопки
-     * @return void
+     * @param evt Button click event object
      */      
     private void addTagButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addTagButtonActionPerformed
        
@@ -644,4 +488,4 @@ public class IntoolsExportDataSourceDialog extends DialogWithEvents implements M
     private javax.swing.JComboBox tagFormatComboBox;
     private javax.swing.JLabel tagFormatComboBoxLabel;
     // End of variables declaration//GEN-END:variables
-}//FgsVariableTableSettingsPanel
+}// IntoolsExportDataSourceDialog
