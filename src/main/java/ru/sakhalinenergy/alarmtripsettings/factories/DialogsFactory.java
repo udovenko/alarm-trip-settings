@@ -391,7 +391,6 @@ public class DialogsFactory
         loopSplittingDialog.setLocationRelativeTo(Main.mainForm);
         new LoopSplittingDialogController(loopsTable, loopSplittingDialog);
         loopSplittingDialog.render();
-        loopSplittingDialog.setVisible(true);
      }// produceSplitSelectedLoopDialog
      
      

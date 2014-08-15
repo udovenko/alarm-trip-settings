@@ -1,8 +1,5 @@
 package ru.sakhalinenergy.alarmtripsettings.views.dialog.loop;
 
-import ru.sakhalinenergy.alarmtripsettings.models.entity.Source;
-import ru.sakhalinenergy.alarmtripsettings.implemented.SourcesTypes;
-import ru.sakhalinenergy.alarmtripsettings.Main;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Component;
@@ -13,36 +10,27 @@ import javax.swing.JTree;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultMutableTreeNode;
+import ru.sakhalinenergy.alarmtripsettings.Main;
+import ru.sakhalinenergy.alarmtripsettings.implemented.SourcesTypes;
+import ru.sakhalinenergy.alarmtripsettings.models.entity.Source;
 
 
 /**
- * Класс реализует отрисовщик ячейки дарева тагов. 
+ * Implements tags and sources tree cell renderer.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.3
+ * @author Denis Udovenko
+ * @version 1.0.3
  */
 public class TagsTreeNodeRenderer implements TreeCellRenderer
 {
-    private JCheckBox leafRenderer = new JCheckBox();
-    private DefaultTreeCellRenderer nonLeafRenderer = new DefaultTreeCellRenderer();
+    private final JCheckBox leafRenderer = new JCheckBox();
+    private final DefaultTreeCellRenderer nonLeafRenderer = new DefaultTreeCellRenderer();
 
-    Color selectionBorderColor, selectionForeground, selectionBackground,
-        textForeground, textBackground;
-
-    
-    /**
-     * Метод возвращает отрисовщик ветви дерева.
-     * 
-     * @return  JCheckBox
-     */
-    protected JCheckBox getLeafRenderer()
-    {
-        return leafRenderer;
-    }//getLeafRenderer
+    private final Color textForeground, textBackground;
 
     
     /**
-     * Контруктор класса. Настраивает стили ячеек.
+     * Public constructor. Configures tree nodes initial style.
      */
     public TagsTreeNodeRenderer() 
     {
@@ -52,32 +40,38 @@ public class TagsTreeNodeRenderer implements TreeCellRenderer
         if (fontValue != null) 
         {
             leafRenderer.setFont(fontValue);
-        }//if
+        }// if
         
         Boolean booleanValue = (Boolean) UIManager.get("Tree.drawsFocusBorderAroundIcon");
         leafRenderer.setFocusPainted((booleanValue != null) && (booleanValue.booleanValue()));
 
-        selectionBorderColor = UIManager.getColor("Tree.selectionBorderColor");
-        selectionForeground = UIManager.getColor("Tree.selectionForeground");
-        selectionBackground = UIManager.getColor("Tree.selectionBackground");
         textForeground = UIManager.getColor("Tree.textForeground");
         textBackground = UIManager.getColor("Tree.textBackground");
-    }//TagsTreeNodeRenderer
+    }// TagsTreeNodeRenderer
 
     
     /**
-     * Метод возвращает отрисовщик ячейки дерева тагов в зависимости от того, 
-     * является ли ячейка конечной ветвю дерева или нет. Для конечных ветвей
-     * отображаются ячейки с чекбоксами.
+     * Returns leaf renderer (JCheckBox) instance.
      * 
-     * @param   tree       Экземпляр дерева тагов
-     * @param   value      Значение текущей ячейки
-     * @param   selected   Флаг того, что ячейка выбрана
-     * @param   vexpanded  Флаг того, что узел развернут
-     * @param   leaf       Флаг того, что ячейка предстваляет собой конечную ветвь
-     * @param   row        Индекс строки в дереве
-     * @param   hasFocus   Флаг наличия фокуса
-     * @return  Component
+     * @return Leaf renderer instance
+     */
+    protected JCheckBox getLeafRenderer()
+    {
+        return leafRenderer;
+    }// getLeafRenderer
+    
+    
+    /**
+     * Returns component that the renderer uses to draw the value.
+     * 
+     * @param tree JTree the receiver is being configured for
+     * @param value Value of the current tree cell to be set
+     * @param selected Specifies that cell will be drawn as selected
+     * @param expanded Specifies that node will be drawn in expended state
+     * @param leaf Specifies that node represents a leaf 
+     * @param row Row index in tree
+     * @param hasFocus Specifies that node currently has focus
+     * @return Component that the renderer uses to draw the value
      */
     @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value,
@@ -107,8 +101,8 @@ public class TagsTreeNodeRenderer implements TreeCellRenderer
                     leafRenderer.setText(node.getTag().toString());
                     leafRenderer.setSelected(node.isSelected());
                     
-                }//if
-            }//if
+                }// if
+            }// if
             
             returnValue = leafRenderer;
     
@@ -120,7 +114,7 @@ public class TagsTreeNodeRenderer implements TreeCellRenderer
             nonLeafRenderer.setBackground(textBackground);
             returnValue = nonLeafRenderer.getTreeCellRendererComponent(tree, value, false, expanded, leaf, row, false);
                         
-            //Если узел - источник данных:
+            // If node if data source:
             if (userObject.getClass() == Source.class)
             {
                 tempSource  = (Source)userObject;
@@ -129,11 +123,11 @@ public class TagsTreeNodeRenderer implements TreeCellRenderer
                 if (tempSource.getTypeId() == SourcesTypes.DCS_VARIABLE_TABLE.ID) icon = Main.dcsIcon;
                 if (tempSource.getTypeId() == SourcesTypes.ESD_VARIABLE_TABLE.ID) icon = Main.esdIcon;
                 if (tempSource.getTypeId() == SourcesTypes.FGS_VARIABLE_TABLE.ID) icon = Main.fgsIcon;
-            }//if
+            }// if
              
             nonLeafRenderer.setIcon(icon);
-        }//else
+        }// else
         
         return returnValue;
-    }//getTreeCellRendererComponent
-}//TagsTreeNodeRenderer
+    }// getTreeCellRendererComponent
+}// TagsTreeNodeRenderer

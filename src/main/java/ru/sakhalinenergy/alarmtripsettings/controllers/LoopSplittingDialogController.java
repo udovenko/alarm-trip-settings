@@ -35,7 +35,7 @@ public class LoopSplittingDialogController extends Controller
         this.model = model;
         this.view = view;
         
-        view.events.on(ViewEvent.RUN_SPLITTING_BUTTON_CLICK, new _SplitLoopButtonHandler());
+        view.on(ViewEvent.RUN_SPLITTING_BUTTON_CLICK, new _SplitLoopButtonHandler());
     }// LoopSplittingDialogController
     
     

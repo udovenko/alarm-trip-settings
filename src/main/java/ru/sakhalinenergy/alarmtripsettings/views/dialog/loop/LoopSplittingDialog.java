@@ -3,61 +3,56 @@ package ru.sakhalinenergy.alarmtripsettings.views.dialog.loop;
 import java.util.List;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
-import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
-import ru.sakhalinenergy.alarmtripsettings.events.Events;
-import ru.sakhalinenergy.alarmtripsettings.Main;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.DefaultMutableTreeNode;
+import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
+import ru.sakhalinenergy.alarmtripsettings.Main;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Loop;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Tag;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.Dialog;
 
 
 /**
- * Класс реализует дилог для разделения петли на два набора тагов.
+ * Implements dialog for splitting selected loop into two separate tag sets.
  * 
- * @author Denis.Udovenko
+ * @author Denis Udovenko
  * @version 1.0.2 
  */
-public class LoopSplittingDialog extends javax.swing.JDialog 
+public class LoopSplittingDialog extends Dialog 
 {
-    public Events events = new Events();
     private final Loop model;
         
     
     /**
-     * Конструктор диалога. Инициализирует все основные компоненты.
+     * Public constructor. Sets loop entity instance and initializes components.
+     *
+     * @param model Loop to be split instance 
      */
     public LoopSplittingDialog(Loop model) 
     {
         this.model = model;
         
         initComponents();
+        setModal(true);
         
-        //Делаем диалог модальным:
-        this.setModal(true);
-        
-        //Устанавливаем иконку диалога:
+        // Set dialog icon:
         ImageIcon img = Main.splitLoopIcon;
         this.setIconImage(img.getImage());
-    }//LoopSplitingDialog
+    }// LoopSplitingDialog
     
     
     /**
-     * Метод устанавливает модель (экземпляр петли) текущего диалога и 
-     * отрисовывает соответвующие списки тагов.
-     * 
-     * @param   loop  Экземпляр петли
-     * @return  void
+     * Renders data sources and tags tree and shows dialog.
      */
     public void render()
     {
         this.loopNameBeingSplittingLabel.setText(model.toString());
         this.tagsTree.setCellRenderer(new TagsTreeNodeRenderer());
-        this.tagsTree.setCellEditor(new TagsTreeNodeEditor(this.tagsTree));
+        this.tagsTree.setCellEditor(new TagsTreeNodeEditor(tagsTree));
         this.tagsTree.setEditable(true);
         
-        //Получаем модель дерева и корневой узел:
-        DefaultTreeModel treeModel = (DefaultTreeModel)this.tagsTree.getModel();
+        // Get tree model and root node:
+        DefaultTreeModel treeModel = (DefaultTreeModel)tagsTree.getModel();
         DefaultMutableTreeNode root = (DefaultMutableTreeNode)treeModel.getRoot();
         
         // Build tree:
@@ -66,19 +61,18 @@ public class LoopSplittingDialog extends javax.swing.JDialog
         // Reload tree:
         treeModel.reload(root);
         
-        //Раскрываем все узлы дерева:
-        for (int i = 0; i < this.tagsTree.getRowCount(); i++)
-        {
-            this.tagsTree.expandRow(i);
-        }//for
-    }//setLoop
+        // Expand all nodes:
+        for (int i = 0; i < tagsTree.getRowCount(); i++) tagsTree.expandRow(i);
+        
+        // Show dialog:
+        _show();
+    }// render
 
     
     /**
-     * Метод возвращает список выбранных в дереве тагов, которые необходимо
-     * вынести в отдельную копию петли.
+     * Returns list of tags, selected to be split into separate loop copy.
      * 
-     * @return 
+     * @return Tags to be split list
      */
     private List<Tag> _getSelectedTags()
     {
@@ -89,7 +83,7 @@ public class LoopSplittingDialog extends javax.swing.JDialog
         Object tagNodeUserObject;
         TagNodeModel checkboxTagNode;
                 
-        //Получаем модель дерева и корневой узел:
+        // Get tree model and root node:
         DefaultTreeModel treeModel = (DefaultTreeModel)tagsTree.getModel();
         DefaultMutableTreeNode root = (DefaultMutableTreeNode)treeModel.getRoot();
         
@@ -111,7 +105,7 @@ public class LoopSplittingDialog extends javax.swing.JDialog
         }// for
         
         return result;
-    }//getSelectedTags
+    }// _getSelectedTags
     
     
     /**
@@ -197,16 +191,15 @@ public class LoopSplittingDialog extends javax.swing.JDialog
 
     
     /**
-     * Метод обрабатывает нажатие кнопки "Split" запуска процесса разделения
-     * петли на два набора тагов и рассылает все подписчикам событие нажатия
-     * кнопки.
+     * Handles split button click event and triggers appropriate event with 
+     * selected tags list data.
      * 
-     * @param evt Событие нажатия кнопки
+     * @param evt Button click event object
      */
     private void runSplittingButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runSplittingButtonActionPerformed
         
         CustomEvent runSplittingButtonClickEvent = new CustomEvent(_getSelectedTags());
-        this.events.trigger(ViewEvent.RUN_SPLITTING_BUTTON_CLICK, runSplittingButtonClickEvent);    
+        trigger(ViewEvent.RUN_SPLITTING_BUTTON_CLICK, runSplittingButtonClickEvent);    
     }//GEN-LAST:event_runSplittingButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -217,4 +210,4 @@ public class LoopSplittingDialog extends javax.swing.JDialog
     private javax.swing.JTree tagsTree;
     private javax.swing.JLabel tagsTreeLabel;
     // End of variables declaration//GEN-END:variables
-}//LoopSplitingDialog
+}// LoopSplitingDialog
