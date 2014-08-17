@@ -8,8 +8,8 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelecto
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Loop;
 import ru.sakhalinenergy.alarmtripsettings.models.config.LoopsTablePanelSettings;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.LoopsTable;
-import ru.sakhalinenergy.alarmtripsettings.views.LoopsTablePanel.ViewEvent;
-import ru.sakhalinenergy.alarmtripsettings.views.LoopsTablePanel.LoopsTablePanel;
+import ru.sakhalinenergy.alarmtripsettings.views.panel.loops.ViewEvent;
+import ru.sakhalinenergy.alarmtripsettings.views.panel.loops.LoopsTablePanel;
 import ru.sakhalinenergy.alarmtripsettings.views.TagsTreePanel.TagsTreePanel;
 
 

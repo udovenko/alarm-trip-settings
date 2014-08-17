@@ -1,4 +1,4 @@
-package ru.sakhalinenergy.alarmtripsettings.views.LoopsTablePanel;
+package ru.sakhalinenergy.alarmtripsettings.views.panel.loops;
 
 
 /**
