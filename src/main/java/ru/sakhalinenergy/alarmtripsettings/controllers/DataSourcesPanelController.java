@@ -21,8 +21,8 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.source.HoneywellScadaDat
 import ru.sakhalinenergy.alarmtripsettings.models.config.StorageConnectionDialogSettings;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.progress.OneProgressBarDialog;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.progress.ProgressInformationDialog;
-import ru.sakhalinenergy.alarmtripsettings.views.DataSourcesPanel.ViewEvent;
-import ru.sakhalinenergy.alarmtripsettings.views.DataSourcesPanel.DataSourcesPanel;
+import ru.sakhalinenergy.alarmtripsettings.views.panel.sources.ViewEvent;
+import ru.sakhalinenergy.alarmtripsettings.views.panel.sources.DataSourcesPanel;
 
 
 /**
@@ -46,19 +46,19 @@ public class DataSourcesPanelController extends Controller
     {
         this.view = view;
         
-        this.view.events.on(ViewEvent.COPY_NODE_NAME_TO_CLIPBOARD_MENU_ITEM_CLICK, new _CopyNodeNameToClipboardMenuItemClickHandler());
-        this.view.events.on(ViewEvent.OPEN_LINKED_DOCUMENT_MENU_ITEM_CLICK, new _OpenLinkedDocumentMenuItemClickHandler());
-        this.view.events.on(ViewEvent.CREATE_INTOOLS_EXPORT_MANUALLY_MENU_ITEM_CLICK, new _CreateIntoolsExportMannualyMenuItemClickHandler());
-        this.view.events.on(ViewEvent.CREATE_DOCUMENT_MANUALLY_MENU_ITEM_CLICK, new _CreateDocumentMannualyMenuItemClickHandler());
-        this.view.events.on(ViewEvent.CREATE_DCS_VARIABLE_TABLE_MANUALLY_MENU_ITEM_CLICK, new _CreateDcsVariableTableMannualyMenuItemClickHandler());
-        this.view.events.on(ViewEvent.CREATE_ESD_VARIABLE_TABLE_MANUALLY_MENU_ITEM_CLICK, new _CreateEsdVariableTableMannualyMenuItemClickHandler());
-        this.view.events.on(ViewEvent.CREATE_FGS_VARIABLE_TABLE_MANUALLY_MENU_ITEM_CLICK, new _CreateFgsVariableTableMannualyMenuItemClickHandler());
-        this.view.events.on(ViewEvent.CREATE_DATA_SOURCE_FROM_MS_EXCEL_LIST_MENU_ITEM_CLICK, new _CreateDataSourceFromMsExcelSheetMenuItemClickHandler());
-        this.view.events.on(ViewEvent.CREATE_DATA_SOURCE_FROM_YOKOGAWA_DCS_BACKUP_MENU_ITEM_CLICK, new _CreateDataSourceYokogawaDcsBackupMenuItemClickHandler());
-        this.view.events.on(ViewEvent.CREATE_DATA_SOURCE_FROM_HONEYWELL_DCS_EXPORT_MENU_ITEM_CLICK, new _CreateDcsVariableTableFromHoneywellDcsExportMenuItemClickHandler());
-        this.view.events.on(ViewEvent.CREATE_DATA_SOURCE_FROM_HONEYWELL_SCADA_EXPORT_MENU_ITEM_CLICK, new _CreateDcsVariableTableFromHoneywellScadaDatabaseMenuItemClickHandler());
-        this.view.events.on(ViewEvent.EDIT_SELECTED_SOURCE_DATA_MENU_ITEM_CLICK, new _EditSelectedDataSourceMenuItemClickHandler());
-        this.view.events.on(ViewEvent.REMOVE_SELECTED_SOURCE_DATA_MENU_ITEM_CLICK, new _RemoveSelectedDataSourceMenuItemClickHandler());
+        view.on(ViewEvent.COPY_NODE_NAME_TO_CLIPBOARD_MENU_ITEM_CLICK, new _CopyNodeNameToClipboardMenuItemClickHandler());
+        view.on(ViewEvent.OPEN_LINKED_DOCUMENT_MENU_ITEM_CLICK, new _OpenLinkedDocumentMenuItemClickHandler());
+        view.on(ViewEvent.CREATE_INTOOLS_EXPORT_MANUALLY_MENU_ITEM_CLICK, new _CreateIntoolsExportMannualyMenuItemClickHandler());
+        view.on(ViewEvent.CREATE_DOCUMENT_MANUALLY_MENU_ITEM_CLICK, new _CreateDocumentMannualyMenuItemClickHandler());
+        view.on(ViewEvent.CREATE_DCS_VARIABLE_TABLE_MANUALLY_MENU_ITEM_CLICK, new _CreateDcsVariableTableMannualyMenuItemClickHandler());
+        view.on(ViewEvent.CREATE_ESD_VARIABLE_TABLE_MANUALLY_MENU_ITEM_CLICK, new _CreateEsdVariableTableMannualyMenuItemClickHandler());
+        view.on(ViewEvent.CREATE_FGS_VARIABLE_TABLE_MANUALLY_MENU_ITEM_CLICK, new _CreateFgsVariableTableMannualyMenuItemClickHandler());
+        view.on(ViewEvent.CREATE_DATA_SOURCE_FROM_MS_EXCEL_LIST_MENU_ITEM_CLICK, new _CreateDataSourceFromMsExcelSheetMenuItemClickHandler());
+        view.on(ViewEvent.CREATE_DATA_SOURCE_FROM_YOKOGAWA_DCS_BACKUP_MENU_ITEM_CLICK, new _CreateDataSourceYokogawaDcsBackupMenuItemClickHandler());
+        view.on(ViewEvent.CREATE_DATA_SOURCE_FROM_HONEYWELL_DCS_EXPORT_MENU_ITEM_CLICK, new _CreateDcsVariableTableFromHoneywellDcsExportMenuItemClickHandler());
+        view.on(ViewEvent.CREATE_DATA_SOURCE_FROM_HONEYWELL_SCADA_EXPORT_MENU_ITEM_CLICK, new _CreateDcsVariableTableFromHoneywellScadaDatabaseMenuItemClickHandler());
+        view.on(ViewEvent.EDIT_SELECTED_SOURCE_DATA_MENU_ITEM_CLICK, new _EditSelectedDataSourceMenuItemClickHandler());
+        view.on(ViewEvent.REMOVE_SELECTED_SOURCE_DATA_MENU_ITEM_CLICK, new _RemoveSelectedDataSourceMenuItemClickHandler());
     }// DataSourcesPanelController
     
     

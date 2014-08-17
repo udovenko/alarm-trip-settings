@@ -1,69 +1,75 @@
-package ru.sakhalinenergy.alarmtripsettings.views.DataSourcesPanel;
+package ru.sakhalinenergy.alarmtripsettings.views.panel.sources;
 
-import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
-import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
 import java.util.List;
 import java.util.Collections;
 import java.util.Comparator;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseAdapter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.JTree;
-import ru.sakhalinenergy.alarmtripsettings.events.Events;
-import ru.sakhalinenergy.alarmtripsettings.implemented.SourcesPropertiesTypes;
 import ru.sakhalinenergy.alarmtripsettings.Main;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import ru.sakhalinenergy.alarmtripsettings.implemented.SourcesPropertiesTypes;
+import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
+import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.CollectionEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.LoopsTableObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Source;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.SourceProperty;
+import ru.sakhalinenergy.alarmtripsettings.views.panel.Panel;
 
 
 /**
- * Класс описывает панень для отображения дерева документов/источников данных,
- * из которых получены таги текущего выбранного объекта.
+ * Implements panel with data sources to which selected PAU object's tags
+ * belong.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.5
+ * @author Denis Udovenko
+ * @version 1.0.5
  */
-public class DataSourcesPanel extends javax.swing.JPanel 
+public class DataSourcesPanel extends Panel 
 {
    
-    public Events events = new Events();
     private final LoopsTableObservable model;    
      
     
     /**
-     * Конструктор панели. Вызывает инициализацию всех элементов.
+     * Public constructor. Sets model instance and initializes components.
+     *
+     * @param model Loops table instance
      */
     public DataSourcesPanel(LoopsTableObservable model) 
     {
-        initComponents();
-        this.SourcesTree.addMouseListener(new SourcesTreeMouseAdapter());
         this.model = model;
-        this.copyNodeNameToClipboardMenuItem.setIcon(Main.copyIcon);
-        this.openLinkedDocumentMenuItem.setIcon(Main.linkIcon);
-        this.createDataSourcesManuallyMenu.setIcon(Main.addSourceIcon);
-        this.createIntoolsExportDataSourceManuallyMenuItem.setIcon(Main.intoolsIcon);
-        this.createDocumentManuallyMenuItem.setIcon(Main.documentsIcon);
-        this.createDataSourceFromMsExcelListMenuItem.setIcon(Main.excelIcon);
-        this.createDcsVariableTableManuallyMenuItem.setIcon(Main.dcsIcon);
-        this.createEsdVariableTableManuallyMenuItem.setIcon(Main.esdIcon);
-        this.createFgsVariableTableManuallyMenuItem.setIcon(Main.fgsIcon);
-        this.createDataSourceFromYokogawaDcsBackupMenuItem.setIcon(Main.yokogawaIcon);
-        this.createDataSourceFromHoneywellDcsBackupMenuItem.setIcon(Main.honeywellIcon);
-        this.createDataSourceFromHoneywellScadaExportMenuItem.setIcon(Main.honeywellIcon);
-        this.editSelectedSourceMenuItem.setIcon(Main.editIcon);
-        this.removeAllRelatedToSourceMenuItem.setIcon(Main.removeIcon);
         
-        //Подписываеся на события модели:
-        this.model.on(CollectionEvent.LOOPS_READ, new _ModelUpdatedEventHandler());
-    }//DataSourcesPanel
+        initComponents();
+        
+        // Set sources tree mouse listener:
+        sourcesTree.addMouseListener(new _SourcesTreeMouseAdapter());
+        
+        // Set context menu items icons:
+        copyNodeNameToClipboardMenuItem.setIcon(Main.copyIcon);
+        openLinkedDocumentMenuItem.setIcon(Main.linkIcon);
+        createDataSourcesManuallyMenu.setIcon(Main.addSourceIcon);
+        createIntoolsExportDataSourceManuallyMenuItem.setIcon(Main.intoolsIcon);
+        createDocumentManuallyMenuItem.setIcon(Main.documentsIcon);
+        createDataSourceFromMsExcelListMenuItem.setIcon(Main.excelIcon);
+        createDcsVariableTableManuallyMenuItem.setIcon(Main.dcsIcon);
+        createEsdVariableTableManuallyMenuItem.setIcon(Main.esdIcon);
+        createFgsVariableTableManuallyMenuItem.setIcon(Main.fgsIcon);
+        createDataSourceFromYokogawaDcsBackupMenuItem.setIcon(Main.yokogawaIcon);
+        createDataSourceFromHoneywellDcsBackupMenuItem.setIcon(Main.honeywellIcon);
+        createDataSourceFromHoneywellScadaExportMenuItem.setIcon(Main.honeywellIcon);
+        editSelectedSourceMenuItem.setIcon(Main.editIcon);
+        removeAllRelatedToSourceMenuItem.setIcon(Main.removeIcon);
+        
+        // Subscribe on model's events:
+        model.on(CollectionEvent.LOOPS_READ, new _ModelUpdatedEventHandler());
+    }// DataSourcesPanel
        
         
     /**
-     * Внутренний класс - обработчик события обновления модели. 
+     * Inner class - handler for model's update event.
      * 
      * @author Denis Udovenko
      * @version 1.0.1
@@ -73,16 +79,16 @@ public class DataSourcesPanel extends javax.swing.JPanel
         @Override
         public void customEventOccurred(CustomEvent event)
         {
-            SourcesTree.setCellRenderer(new DataSourcesTreeCellRenderer());
+            sourcesTree.setCellRenderer(new DataSourcesTreeCellRenderer());
                 
-            //Получаем модель дерева и корневой узел:
-            DefaultTreeModel treeModel = (DefaultTreeModel)SourcesTree.getModel();
+            // Get tree model and root node:
+            DefaultTreeModel treeModel = (DefaultTreeModel)sourcesTree.getModel();
             DefaultMutableTreeNode root = (DefaultMutableTreeNode)treeModel.getRoot();
         
             root.removeAllChildren();
             List<Source> sortedSources = model.getSources();
 
-            //Сортируем коллекуию по типу источника и по приоритету:
+            // Sort collection by source type and priority:
             Collections.sort(sortedSources, new Comparator<Source>()
             {
                 @Override
@@ -91,53 +97,58 @@ public class DataSourcesPanel extends javax.swing.JPanel
                     if (source1.getTypeId() != source2.getTypeId()) return source1.getTypeId() - source2.getTypeId();
                     if (source1.getTypeId() == source2.getTypeId()) return source2.getPriority() - source1.getPriority();
                     return 0;
-                }//compare
-            });//sort
+                }// compare
+            });// sort
         
-            //Добавляем узлы источников:
+            // Add data source nodes to root:
             for (Source source : sortedSources)
             {
                 DefaultMutableTreeNode sourceNode = new DefaultMutableTreeNode(source);
                        
-                //Добавляем в текущий узел источника все узлы его свойств:
+                // Add properties nodes to data source node:
                 for (SourceProperty sourceProperty : source.getProperties())
                 {
                     DefaultMutableTreeNode sourcePropertyNode = new DefaultMutableTreeNode(sourceProperty);
                     sourceNode.add(sourcePropertyNode);
-                }//for
+                }// for
             
                 root.add(sourceNode);
-            }//for
+            }// for
         
-            //Перегружаем дерево:   
+            // Reload tree:   
             treeModel.reload(root);
-        }//customEventOccurred
-    }//_ModelUpdatedEventHandler
+        }// customEventOccurred
+    }// _ModelUpdatedEventHandler
      
         
     /**
-     * Внутренний класс, описывающий адаптер мыши дерева истосников данных 
-     * текущего выбранного объекта.
+     * Inner class implements mouse adapter for data sources panel.
      * 
-     * @author   Denis.Udovenko
-     * @version  1.0.2
+     * @author Denis Udovenko
+     * @version 1.0.2
      */
-    private class SourcesTreeMouseAdapter extends MouseAdapter
+    private class _SourcesTreeMouseAdapter extends MouseAdapter
     {
+        
         /**
-         * Метод - обработчик событий мыши для дерева источников данных. 
-         * Вызывает контектсное меню только для узлов заголовков источников
-         * данных.
+         * Handles mouse right click on sources panel and configures popup
+         * menu's content depending on click context.
          * 
-         * @param e Событие мыши
+         * @param event Mouse event object
          */
-        private void showSourcesTreePopupMenu(MouseEvent e)
+        private void showSourcesTreePopupMenu(MouseEvent event)
         {
-            int x = e.getX();
-            int y = e.getY();
-            JTree tree = (JTree)e.getSource();
+            int x = event.getX();
+            int y = event.getY();
+            JTree tree = (JTree)event.getSource();
             TreePath path = tree.getPathForLocation(x, y);
             
+            // Set context dependent items disabled by default:
+            removeAllRelatedToSourceMenuItem.setEnabled(false);
+            editSelectedSourceMenuItem.setEnabled(false);
+            openLinkedDocumentMenuItem.setEnabled(false);
+            
+            // If one of nodes was clicked:
             if (path != null)
             {    
                 tree.setSelectionPath(path);
@@ -156,53 +167,38 @@ public class DataSourcesPanel extends javax.swing.JPanel
                         { 
                             openLinkedDocumentMenuItem.setEnabled(true);
                             break;
-                        }//if
-                    }//for
-                } else {
-            
-                    removeAllRelatedToSourceMenuItem.setEnabled(false);
-                    editSelectedSourceMenuItem.setEnabled(false);
-                    openLinkedDocumentMenuItem.setEnabled(false);
-                }//else
-                
-            } else {
-
-                removeAllRelatedToSourceMenuItem.setEnabled(false);
-                editSelectedSourceMenuItem.setEnabled(false);
-                openLinkedDocumentMenuItem.setEnabled(false);
-            }//else
-            
-            
+                        }// if
+                    }// for
+                }// if
+            }// if
+                        
             DataSourcesPanel.this.dataSourcesListPopupMenu.show(tree, x, y);
-        }//myPopupEvent
+        }// showSourcesTreePopupMenu
         
         
         /**
-         * Метод перегружает дефолтный обработчик адаптера нажатия клавиши мыши.
+         * Overrides default mouse pressed event handler.
          * 
-         * @param   e     Событие нажатия клавиши мыши
-         * @return  void
+         * @param event Mouse pressed event object
          */
         @Override
-        public void mousePressed(MouseEvent e)
+        public void mousePressed(MouseEvent event)
         {
-            if (e.isPopupTrigger()) showSourcesTreePopupMenu(e);
-	}//mousePressed
+            if (event.isPopupTrigger()) showSourcesTreePopupMenu(event);
+	}// mousePressed
 	
         
         /**
-         * Метод перегружает дефолтный обработчик адаптера отпускания клавиши 
-         * мыши.
+         * Overrides default mouse released event handler.
          * 
-         * @param   e     Событие нажатия клавиши мыши
-         * @return  void
+         * @param event Mouse released event object
          */
         @Override
-        public void mouseReleased(MouseEvent e) 
+        public void mouseReleased(MouseEvent event) 
         {
-            if (e.isPopupTrigger()) showSourcesTreePopupMenu(e);
-	}//mouseReleased
-    }//SourcesTreeMouseAdapter
+            if (event.isPopupTrigger()) showSourcesTreePopupMenu(event);
+	}// mouseReleased
+    }// SourcesTreeMouseAdapter
     
     
     /**
@@ -230,7 +226,7 @@ public class DataSourcesPanel extends javax.swing.JPanel
         editSelectedSourceMenuItem = new javax.swing.JMenuItem();
         removeAllRelatedToSourceMenuItem = new javax.swing.JMenuItem();
         sourcesTreeScrollPane = new javax.swing.JScrollPane();
-        SourcesTree = new javax.swing.JTree();
+        sourcesTree = new javax.swing.JTree();
 
         copyNodeNameToClipboardMenuItem.setText("Copy node name");
         copyNodeNameToClipboardMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -343,12 +339,12 @@ public class DataSourcesPanel extends javax.swing.JPanel
         sourcesTreeScrollPane.setBorder(null);
 
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
-        SourcesTree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
-        SourcesTree.setRootVisible(false);
-        SourcesTree.setShowsRootHandles(true);
-        SourcesTree.setVerifyInputWhenFocusTarget(false);
-        SourcesTree.setVisibleRowCount(1);
-        sourcesTreeScrollPane.setViewportView(SourcesTree);
+        sourcesTree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
+        sourcesTree.setRootVisible(false);
+        sourcesTree.setShowsRootHandles(true);
+        sourcesTree.setVerifyInputWhenFocusTarget(false);
+        sourcesTree.setVisibleRowCount(1);
+        sourcesTreeScrollPane.setViewportView(sourcesTree);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -364,200 +360,184 @@ public class DataSourcesPanel extends javax.swing.JPanel
 
     
     /**
-     * Метод рассылает всем подписчикам событие клика по пункту контектсного 
-     * меню удаления всех данных, связанных с текущим источником данных и 
-     * выбранным объектом. В контексте события передается экземпляр выбранного
-     * источника данных.
-     *
-     * @param evt События клика по пункту контекстного меню
+     * Handles "Remove all related to source" menu item click event and triggers 
+     * appropriate event with selected source reference data.
+     * 
+     * @param evt Popup menu item click event object
      */
     private void removeAllRelatedToSourceMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeAllRelatedToSourceMenuItemActionPerformed
         
-        TreePath path = this.SourcesTree.getSelectionPath();
+        TreePath path = sourcesTree.getSelectionPath();
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
         CustomEvent clickRemoveSelectedSourceDataMenuItemEvent = new CustomEvent(node.getUserObject());
-        this.events.trigger(ViewEvent.REMOVE_SELECTED_SOURCE_DATA_MENU_ITEM_CLICK, clickRemoveSelectedSourceDataMenuItemEvent);
+        trigger(ViewEvent.REMOVE_SELECTED_SOURCE_DATA_MENU_ITEM_CLICK, clickRemoveSelectedSourceDataMenuItemEvent);
     }//GEN-LAST:event_removeAllRelatedToSourceMenuItemActionPerformed
 
     
     /**
-     * Метод рассылает всем подписчикам событие клика по пункту контекстного 
-     * меню перехода к связанному документу.
+     * Handles "Open linked document" menu item click event and triggers 
+     * appropriate event with selected source reference data.
      * 
-     * @param   evt    События клика по пункту контекстного меню
-     * @return  void
+     * @param evt Popup menu item click event object
      */
     private void openLinkedDocumentMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openLinkedDocumentMenuItemActionPerformed
         
-        TreePath path = this.SourcesTree.getSelectionPath();
+        TreePath path = sourcesTree.getSelectionPath();
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
         CustomEvent clickOpenLinkedDocumentEvent = new CustomEvent(node.getUserObject());
-        this.events.trigger(ViewEvent.OPEN_LINKED_DOCUMENT_MENU_ITEM_CLICK, clickOpenLinkedDocumentEvent);
+        trigger(ViewEvent.OPEN_LINKED_DOCUMENT_MENU_ITEM_CLICK, clickOpenLinkedDocumentEvent);
     }//GEN-LAST:event_openLinkedDocumentMenuItemActionPerformed
 
     
     /**
-     * Метод рассылает всем подписчикам событие клика по пункту контекстного 
-     * меню копирования имени выбранного узла в буфер обмена.
+     * Handles "Copy selected node name to buffer" menu item click event and 
+     * triggers appropriate event with selected node user object's reference
+     * data.
      * 
-     * @param   evt    События клика по пункту контекстного меню
-     * @return  void
+     * @param evt Popup menu item click event object
      */
     private void copyNodeNameToClipboardMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyNodeNameToClipboardMenuItemActionPerformed
         
-        TreePath path = this.SourcesTree.getSelectionPath();
+        TreePath path = sourcesTree.getSelectionPath();
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
         CustomEvent copyNodeNameToClipboardEvent = new CustomEvent(node.getUserObject());
-        this.events.trigger(ViewEvent.COPY_NODE_NAME_TO_CLIPBOARD_MENU_ITEM_CLICK, copyNodeNameToClipboardEvent);
+        trigger(ViewEvent.COPY_NODE_NAME_TO_CLIPBOARD_MENU_ITEM_CLICK, copyNodeNameToClipboardEvent);
     }//GEN-LAST:event_copyNodeNameToClipboardMenuItemActionPerformed
 
         
     /**
-     * Метод рассылает всем подписчикам событие клика по пункту контекстного 
-     * меню для создания источника данных - таблицы переменных DCS из бэкапа
-     * DCS Yokogawa.
+     * Handles "Create data source from Yokogawa DCS backup" menu item click 
+     * event and triggers appropriate event for all subscribers.
      * 
-     * @param   evt    События клика по пункту контекстного меню
-     * @return  void
+     * @param evt Popup menu item click event object
      */
     private void createDataSourceFromYokogawaDcsBackupMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createDataSourceFromYokogawaDcsBackupMenuItemActionPerformed
         
-        CustomEvent clickCreateDataSourceFromYokogawaDcsBackupMenuItemEvent = new CustomEvent(this);
-        this.events.trigger(ViewEvent.CREATE_DATA_SOURCE_FROM_YOKOGAWA_DCS_BACKUP_MENU_ITEM_CLICK, clickCreateDataSourceFromYokogawaDcsBackupMenuItemEvent);
+        CustomEvent clickCreateDataSourceFromYokogawaDcsBackupMenuItemEvent = new CustomEvent(new Object());
+        trigger(ViewEvent.CREATE_DATA_SOURCE_FROM_YOKOGAWA_DCS_BACKUP_MENU_ITEM_CLICK, clickCreateDataSourceFromYokogawaDcsBackupMenuItemEvent);
     }//GEN-LAST:event_createDataSourceFromYokogawaDcsBackupMenuItemActionPerformed
 
     
     /**
-     * Метод рассылает всем подписчикам событие клика по пункту контекстного 
-     * меню для создания источника данных - таблицы переменных DCS вручную.
+     * Handles "Create DCS variable table manually" menu item click event and 
+     * triggers appropriate event for all subscribers.
      * 
-     * @param   evt    События клика по пункту контекстного меню
-     * @return  void
-     */
+     * @param evt Popup menu item click event object
+     */    
     private void createDcsVariableTableManuallyMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createDcsVariableTableManuallyMenuItemActionPerformed
         
-        CustomEvent clickCreateDcsVariableTableManuallyMenuItemEvent = new CustomEvent(this);
-        this.events.trigger(ViewEvent.CREATE_DCS_VARIABLE_TABLE_MANUALLY_MENU_ITEM_CLICK, clickCreateDcsVariableTableManuallyMenuItemEvent);
+        CustomEvent clickCreateDcsVariableTableManuallyMenuItemEvent = new CustomEvent(new Object());
+        trigger(ViewEvent.CREATE_DCS_VARIABLE_TABLE_MANUALLY_MENU_ITEM_CLICK, clickCreateDcsVariableTableManuallyMenuItemEvent);
     }//GEN-LAST:event_createDcsVariableTableManuallyMenuItemActionPerformed
 
     
     /**
-     * Метод рассылает всем подписчикам событие клика по пункту контекстного 
-     * меню для создания источника данных - документа вручную.
+     * Handles "Create document source manually" menu item click event and 
+     * triggers appropriate event for all subscribers.
      * 
-     * @param   evt    События клика по пункту контекстного меню
-     * @return  void
-     */
+     * @param evt Popup menu item click event object
+     */    
     private void createDocumentManuallyMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createDocumentManuallyMenuItemActionPerformed
         
-        CustomEvent clickCreateDocumentManuallyMenuItemEvent = new CustomEvent(this);
-        this.events.trigger(ViewEvent.CREATE_DOCUMENT_MANUALLY_MENU_ITEM_CLICK, clickCreateDocumentManuallyMenuItemEvent);
+        CustomEvent clickCreateDocumentManuallyMenuItemEvent = new CustomEvent(new Object());
+        trigger(ViewEvent.CREATE_DOCUMENT_MANUALLY_MENU_ITEM_CLICK, clickCreateDocumentManuallyMenuItemEvent);
     }//GEN-LAST:event_createDocumentManuallyMenuItemActionPerformed
 
     
     /**
-     * Метод рассылает всем подписчикам событие клика по пункту контекстного 
-     * меню для создания источника данных - таблицы переменных ESD вручную.
+     * Handles "Create ESD variable table manually" menu item click event and 
+     * triggers appropriate event for all subscribers.
      * 
-     * @param   evt    События клика по пункту контекстного меню
-     * @return  void
+     * @param evt Popup menu item click event object
      */
     private void createEsdVariableTableManuallyMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createEsdVariableTableManuallyMenuItemActionPerformed
         
-        CustomEvent clickCreateEsdVariableTableManuallyMenuItemEvent = new CustomEvent(this);
-        this.events.trigger(ViewEvent.CREATE_ESD_VARIABLE_TABLE_MANUALLY_MENU_ITEM_CLICK, clickCreateEsdVariableTableManuallyMenuItemEvent);
+        CustomEvent clickCreateEsdVariableTableManuallyMenuItemEvent = new CustomEvent(new Object());
+        trigger(ViewEvent.CREATE_ESD_VARIABLE_TABLE_MANUALLY_MENU_ITEM_CLICK, clickCreateEsdVariableTableManuallyMenuItemEvent);
     }//GEN-LAST:event_createEsdVariableTableManuallyMenuItemActionPerformed
 
     
     /**
-     * Метод рассылает всем подписчикам событие клика по пункту контекстного 
-     * меню для создания источника данных - таблицы переменных FGS вручную.
+     * Handles "Create FGS variable table manually" menu item click event and 
+     * triggers appropriate event for all subscribers.
      * 
-     * @param   evt    События клика по пункту контекстного меню
-     * @return  void
+     * @param evt Popup menu item click event object
      */
     private void createFgsVariableTableManuallyMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createFgsVariableTableManuallyMenuItemActionPerformed
         
-        CustomEvent clickCreateFgsVariableTableManuallyMenuItemEvent = new CustomEvent(this);
-        this.events.trigger(ViewEvent.CREATE_FGS_VARIABLE_TABLE_MANUALLY_MENU_ITEM_CLICK, clickCreateFgsVariableTableManuallyMenuItemEvent);
+        CustomEvent clickCreateFgsVariableTableManuallyMenuItemEvent = new CustomEvent(new Object());
+        trigger(ViewEvent.CREATE_FGS_VARIABLE_TABLE_MANUALLY_MENU_ITEM_CLICK, clickCreateFgsVariableTableManuallyMenuItemEvent);
     }//GEN-LAST:event_createFgsVariableTableManuallyMenuItemActionPerformed
 
     
     /**
-     * Метод рассылает всем подписчикам событие клика по пункту контекстного 
-     * меню для создания источника данных - экспорта из SPI вручную.
+     * Handles "Create SPI export data source manually" menu item click event 
+     * and triggers appropriate event for all subscribers.
      * 
-     * @param   evt    События клика по пункту контекстного меню
-     * @return  void
-     */
+     * @param evt Popup menu item click event object
+     */    
     private void createIntoolsExportDataSourceManuallyMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createIntoolsExportDataSourceManuallyMenuItemActionPerformed
         
-        CustomEvent clickCreateIntoolsExportManuallyMenuItemEvent = new CustomEvent(this);
-        this.events.trigger(ViewEvent.CREATE_INTOOLS_EXPORT_MANUALLY_MENU_ITEM_CLICK, clickCreateIntoolsExportManuallyMenuItemEvent);
+        CustomEvent clickCreateIntoolsExportManuallyMenuItemEvent = new CustomEvent(new Object());
+        trigger(ViewEvent.CREATE_INTOOLS_EXPORT_MANUALLY_MENU_ITEM_CLICK, clickCreateIntoolsExportManuallyMenuItemEvent);
     }//GEN-LAST:event_createIntoolsExportDataSourceManuallyMenuItemActionPerformed
 
     
     /**
-     * Метод рассылает всем подписчикам событие клика по пункту контекстного 
-     * меню для создания источника данных из файла экспорта DCS Honeywell.
+     * Handles "Create data source from Honeywell DCS backup" menu item click 
+     * event and triggers appropriate event for all subscribers.
      * 
-     * @param evt События клика по пункту контекстного меню
-     * @return void
-     */    
+     * @param evt Popup menu item click event object
+     */
     private void createDataSourceFromHoneywellDcsBackupMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createDataSourceFromHoneywellDcsBackupMenuItemActionPerformed
         
-        CustomEvent clickCreateDataSourceFromHoneywellDcsExportMenuItemEvent = new CustomEvent(this);
-        this.events.trigger(ViewEvent.CREATE_DATA_SOURCE_FROM_HONEYWELL_DCS_EXPORT_MENU_ITEM_CLICK, clickCreateDataSourceFromHoneywellDcsExportMenuItemEvent);  
+        CustomEvent clickCreateDataSourceFromHoneywellDcsExportMenuItemEvent = new CustomEvent(new Object());
+        trigger(ViewEvent.CREATE_DATA_SOURCE_FROM_HONEYWELL_DCS_EXPORT_MENU_ITEM_CLICK, clickCreateDataSourceFromHoneywellDcsExportMenuItemEvent);  
     }//GEN-LAST:event_createDataSourceFromHoneywellDcsBackupMenuItemActionPerformed
 
     
     /**
-     * Метод рассылает всем подписчикам событие клика по пункту контекстного 
-     * меню для создания источника данных из файла экспорта Honeywell SCADA.
+     * Handles "Create data source from Honeywell SCADA database" menu item 
+     * click event and triggers appropriate event for all subscribers.
      * 
-     * @param evt События клика по пункту контекстного меню
-     * @return void
-     */   
+     * @param evt Popup menu item click event object
+     */       
     private void createDataSourceFromHoneywellScadaExportMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createDataSourceFromHoneywellScadaExportMenuItemActionPerformed
         
-        CustomEvent clickCreateDataSourceFromHoneywellScadaExportMenuItemEvent = new CustomEvent(this);
-        this.events.trigger(ViewEvent.CREATE_DATA_SOURCE_FROM_HONEYWELL_SCADA_EXPORT_MENU_ITEM_CLICK, clickCreateDataSourceFromHoneywellScadaExportMenuItemEvent);
+        CustomEvent clickCreateDataSourceFromHoneywellScadaExportMenuItemEvent = new CustomEvent(new Object());
+        trigger(ViewEvent.CREATE_DATA_SOURCE_FROM_HONEYWELL_SCADA_EXPORT_MENU_ITEM_CLICK, clickCreateDataSourceFromHoneywellScadaExportMenuItemEvent);
     }//GEN-LAST:event_createDataSourceFromHoneywellScadaExportMenuItemActionPerformed
 
     
     /**
-     * Метод рассылает всем подписчикам событие клика по пункту контекстного 
-     * меню для создания источника данных из листа книги MS Excel.
+     * Handles "Create data source from MS Excel book" menu item click event and
+     * triggers appropriate event for all subscribers.
      * 
-     * @param evt События клика по пункту контекстного меню
-     * @return void
-     */   
+     * @param evt Popup menu item click event object
+     */
     private void createDataSourceFromMsExcelListMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createDataSourceFromMsExcelListMenuItemActionPerformed
         
-        CustomEvent clickCreateDataSourceFromMsExcelListMenuItemEvent = new CustomEvent(this);
-        this.events.trigger(ViewEvent.CREATE_DATA_SOURCE_FROM_MS_EXCEL_LIST_MENU_ITEM_CLICK, clickCreateDataSourceFromMsExcelListMenuItemEvent);
+        CustomEvent clickCreateDataSourceFromMsExcelListMenuItemEvent = new CustomEvent(new Object());
+        trigger(ViewEvent.CREATE_DATA_SOURCE_FROM_MS_EXCEL_LIST_MENU_ITEM_CLICK, clickCreateDataSourceFromMsExcelListMenuItemEvent);
     }//GEN-LAST:event_createDataSourceFromMsExcelListMenuItemActionPerformed
 
     
     /**
-     * Метод рассылает всем подписчикам событие клика по пункту контекстного 
-     * меню для редактировагния выбранного источника данных, содержащее ссылку
-     * на выбранный источник данных.
+     * Handles edit selected data source menu item click event and triggers 
+     * appropriate event with selected source reference data.
      * 
-     * @param evt События клика по пункту контекстного меню
-     * @return void
-     */   
+     * @param evt Popup menu item click event object
+     */    
     private void editSelectedSourceMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editSelectedSourceMenuItemActionPerformed
     
-        TreePath path = this.SourcesTree.getSelectionPath();
+        TreePath path = sourcesTree.getSelectionPath();
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
         CustomEvent clickEditSelectedSourceDataMenuItemEvent = new CustomEvent(node.getUserObject());
-        this.events.trigger(ViewEvent.EDIT_SELECTED_SOURCE_DATA_MENU_ITEM_CLICK, clickEditSelectedSourceDataMenuItemEvent);
+        trigger(ViewEvent.EDIT_SELECTED_SOURCE_DATA_MENU_ITEM_CLICK, clickEditSelectedSourceDataMenuItemEvent);
     }//GEN-LAST:event_editSelectedSourceMenuItemActionPerformed
 
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTree SourcesTree;
     private javax.swing.JMenuItem copyNodeNameToClipboardMenuItem;
     private javax.swing.JMenuItem createDataSourceFromHoneywellDcsBackupMenuItem;
     private javax.swing.JMenuItem createDataSourceFromHoneywellScadaExportMenuItem;
@@ -573,6 +553,7 @@ public class DataSourcesPanel extends javax.swing.JPanel
     private javax.swing.JMenuItem editSelectedSourceMenuItem;
     private javax.swing.JMenuItem openLinkedDocumentMenuItem;
     private javax.swing.JMenuItem removeAllRelatedToSourceMenuItem;
+    private javax.swing.JTree sourcesTree;
     private javax.swing.JScrollPane sourcesTreeScrollPane;
     // End of variables declaration//GEN-END:variables
-}//DataSourcesPanel
+}// DataSourcesPanel

@@ -1,4 +1,4 @@
-package ru.sakhalinenergy.alarmtripsettings.views.DataSourcesPanel;
+package ru.sakhalinenergy.alarmtripsettings.views.panel.sources;
 
 
 /**

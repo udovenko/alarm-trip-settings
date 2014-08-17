@@ -1,19 +1,18 @@
-package ru.sakhalinenergy.alarmtripsettings.views.dialog;
+package ru.sakhalinenergy.alarmtripsettings.views.panel;
 
-import javax.swing.JDialog;
-import javax.swing.SwingUtilities;
-import ru.sakhalinenergy.alarmtripsettings.events.Events;
+import javax.swing.JPanel;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
+import ru.sakhalinenergy.alarmtripsettings.events.Events;
 
 
 /**
- * Abstract parent for all application dialogs.
- *
+ * Abstract parent for all application panels.
+ * 
  * @author Denis Udovenko
  * @version 1.0.1
  */
-public abstract class Dialog extends JDialog implements DialogObservable
+public class Panel extends JPanel
 {
     
     protected Events events = new Events();
@@ -52,36 +51,4 @@ public abstract class Dialog extends JDialog implements DialogObservable
     {
         events.trigger(eventType, event);
     }//trigger
-    
-    
-    /**
-     * Puts dialog showing task to the end of EDT queue.
-     */
-    protected void _show()
-    {
-        SwingUtilities.invokeLater(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                setVisible(true);
-            }// run
-        });// invokeLater
-    }// _show
-    
-    
-    /**
-     * Puts dialog hiding task to the end of EDT queue.
-     */
-    protected void _close()
-    {
-        SwingUtilities.invokeLater(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                setVisible(false);
-            }// run
-        });// invokeLater
-    }// _close
-}// Dialog
+}// Panel
