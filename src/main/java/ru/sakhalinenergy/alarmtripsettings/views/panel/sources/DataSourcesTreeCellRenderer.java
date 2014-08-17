@@ -36,6 +36,9 @@ public class DataSourcesTreeCellRenderer extends DefaultTreeCellRenderer
     public Component getTreeCellRendererComponent(JTree tree, Object value,
         boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus)
     {
+        // Call superclass constructor:
+        super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+        
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
         
         ImageIcon icon = null;
