@@ -1,4 +1,4 @@
-package ru.sakhalinenergy.alarmtripsettings.views.PlantsTreePanel;
+package ru.sakhalinenergy.alarmtripsettings.views.panel.plants;
 
 
 /**
