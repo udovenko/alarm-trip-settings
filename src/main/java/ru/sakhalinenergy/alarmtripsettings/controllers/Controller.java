@@ -36,15 +36,15 @@ public abstract class Controller
     protected String _extractPlantCode(Object plantsTreeObject)
     {
         // Choose model constructor depending on given node object class:
-        if (plantsTreeObject.getClass().equals(TreePlant.class))
+        if (plantsTreeObject instanceof TreePlant)
         {
             TreePlant plant = (TreePlant)plantsTreeObject;
             return plant.getId();
-        } else if (plantsTreeObject.getClass().equals(TreeArea.class)) {
+        } else if (plantsTreeObject instanceof TreeArea) {
             
             TreeArea area = (TreeArea)plantsTreeObject;
             return area.getPlant();
-        } else if (plantsTreeObject.getClass().equals(TreeUnit.class)) {
+        } else if (plantsTreeObject instanceof TreeUnit) {
                 
             TreeUnit unit = (TreeUnit)plantsTreeObject;
             return unit.getPlant();

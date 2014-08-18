@@ -75,7 +75,7 @@ public class TagsTreeCellRenderer extends DefaultTreeCellRenderer
         Source tempSource;
                
         //Если узел - источник списка тагов SPI:
-        if (nodeObject.getClass() == Source.class)
+        if (nodeObject instanceof Source)
         {
             tempSource = (Source)nodeObject;
             if (tempSource.getTypeId() == SourcesTypes.INTOOLS_EXPORT_DOCUMENT.ID) icon = Main.intoolsIcon;
@@ -86,10 +86,10 @@ public class TagsTreeCellRenderer extends DefaultTreeCellRenderer
         }//if
         
         //Если узел - заголовк тага:
-        if (nodeObject.getClass() == Tag.class) icon = Main.tagIcon;
+        if (nodeObject instanceof Tag) icon = Main.tagIcon;
         
         //Если узел - значение параметра тага:
-        if (nodeObject.getClass() == TagSetting.class)
+        if (nodeObject instanceof TagSetting)
         {    
             icon = Main.settingIcon;
             TagSetting setting = (TagSetting)nodeObject;

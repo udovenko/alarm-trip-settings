@@ -96,7 +96,7 @@ public class LoopSplittingDialog extends Dialog
                 tagNode = (DefaultMutableTreeNode)sourceNode.getChildAt(checkboxNodeIndex);
                 tagNodeUserObject = tagNode.getUserObject();
                 
-                if (tagNodeUserObject.getClass() == TagNodeModel.class)
+                if (tagNodeUserObject instanceof TagNodeModel)
                 {
                     checkboxTagNode = (TagNodeModel)tagNodeUserObject;
                     if (checkboxTagNode.selected) result.add(checkboxTagNode.getTag());

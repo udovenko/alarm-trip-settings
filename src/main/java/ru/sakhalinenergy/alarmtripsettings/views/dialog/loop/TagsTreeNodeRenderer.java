@@ -115,7 +115,7 @@ public class TagsTreeNodeRenderer implements TreeCellRenderer
             returnValue = nonLeafRenderer.getTreeCellRendererComponent(tree, value, false, expanded, leaf, row, false);
                         
             // If node if data source:
-            if (userObject.getClass() == Source.class)
+            if (userObject instanceof Source)
             {
                 tempSource  = (Source)userObject;
                 if (tempSource.getTypeId() == SourcesTypes.INTOOLS_EXPORT_DOCUMENT.ID) icon =  Main.intoolsIcon;

@@ -1,63 +1,64 @@
 package ru.sakhalinenergy.alarmtripsettings.views.panel.plants;
 
-import javax.swing.tree.TreePath;
-import javax.swing.tree.DefaultMutableTreeNode;
-import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
-import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
-import ru.sakhalinenergy.alarmtripsettings.events.Events;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 import javax.swing.tree.DefaultTreeModel;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.classes.plantstree.TreeArea;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.classes.plantstree.TreeUnit;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.DefaultMutableTreeNode;
+import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
+import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Plant;
 import ru.sakhalinenergy.alarmtripsettings.models.config.PlantsTreePanelSettingsObservable;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.classes.plantstree.TreeArea;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.classes.plantstree.TreeUnit;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.CollectionEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.PlantsTreeObservable;
+import ru.sakhalinenergy.alarmtripsettings.views.panel.Panel;
 
 
 /**
- * Класс реализует панель для отобюражения дерева ассетов.
+ * Implements panel for rendering plants (PAU objects) tree.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.3
+ * @author Denis Udovenko
+ * @version 1.0.4
  */
-public class PlantsTreePanel extends javax.swing.JPanel 
+public class PlantsTreePanel extends Panel 
 {
-    public static final Byte PLANTS_TREE_NODE_SELECTION_EVENT = 1;
-    public static final Byte PLANTS_TREE_EXPANSION_STATE_CHANGE_EVENT = 2;
-    
-    public Events events = new Events();
     
     private static final String PLANTS_TREE_EXPANDED_OBJECTS_CODES_SEPARATOR = ",";
-    private static final String AREAS_AND_UNITS_ID_SEPARATOR = "_";
+    private static final String PAU_OBJECTS_ID_SEPARATOR                     = "_";
+    
     private static final String PLANT_NODE_TYPE_NAME = "plant";
-    private static final String AREA_NODE_TYPE_NAME = "area";
-    private static final String UNIT_NODE_TYPE_NAME = "unit";
+    private static final String AREA_NODE_TYPE_NAME  = "area";
+    private static final String UNIT_NODE_TYPE_NAME  = "unit";
 
     private final PlantsTreeObservable model;
     private final PlantsTreePanelSettingsObservable config;
    
     
     /**
-     * Конструктор вью.
+     * Public constructor. Sets plants tree and panel configuration models and 
+     * initializes components.
+     * 
+     * @param model Plants tree model instance
+     * @param config Panel configuration object
      */
     public PlantsTreePanel(PlantsTreeObservable model, PlantsTreePanelSettingsObservable config) 
     {
-        initComponents();
         this.model = model;
         this.config = config;
+                
+        initComponents();
         
-        //Подписываеся на события модели:
-        this.model.on(CollectionEvent.TREE_READ, new _PlantsTreeUpdatesHandler());
-    }//PlantsTreePanel
+        // Subscribe on model's events:
+        model.on(CollectionEvent.TREE_READ, new _PlantsTreeUpdatesHandler());
+    }// PlantsTreePanel
     
     
     /**
-     * Внутренний класс - обработчик события модели установки соединения с 
-     * книгой MS Excel.
+     * Inner class - handler for model's tree updated event.
      * 
      * @author Denis Udovenko
      * @version 1.0.2
@@ -69,63 +70,61 @@ public class PlantsTreePanel extends javax.swing.JPanel
         {
             plantsTree.setCellRenderer(new PlantsTreeCellRenderer());
                 
-            //Получаем модель дерева и корневой узел:
+            // Get tree model and root:
             DefaultTreeModel treeModel = (DefaultTreeModel)plantsTree.getModel();
             DefaultMutableTreeNode root = (DefaultMutableTreeNode)treeModel.getRoot();
         
-            //Очищаем модель дерева ассетов:
+            // Clear tree:
             root.removeAllChildren();
         
-            //Добавляем узлы ассетов:
+            // Add plant nodes:
             for (Plant plant : model.getPlants())
             {
                 DefaultMutableTreeNode plantNode = new DefaultMutableTreeNode(plant);
                         
-                //Добавляем в текущий узел ассета все узлы зон:
+                // Add area nodes to current plant node:
                 for (TreeArea area : plant.getAreas())
                 {
                     DefaultMutableTreeNode areaNode = new DefaultMutableTreeNode(area);
                 
-                    //Добавляем в текущий узел зоны все узлы юнитов:
+                    // Add unit nodes to current area node:
                     for (TreeUnit unit : area.getUnits())
                     {
                         DefaultMutableTreeNode unitNode = new DefaultMutableTreeNode(unit);
                         areaNode.add(unitNode);
-                    }//for
+                    }// for
                                 
                     plantNode.add(areaNode);
-                }//for
+                }// for
             
                 root.add(plantNode);
-            }//for
+            }// for
             
-            //Перегружаем дерево:   
+            // Reload tree:
             treeModel.reload(root);
         
-            //Применяем настройки конфигурации:
+            // Restore panel configuration:
             _applyConfig();
-        }//setPlantsTree
-    };//_PlantsTreeUpdatesHandler
+        }// setPlantsTree
+    }// _PlantsTreeUpdatesHandler
         
     
     /**
-     * Метод получает массивы путей раскрытых узлов дерева ассетов и возвращает
-     * их в виде экземпляра настроек путей раскрытых узлов дерева ассетов.
+     * Gets expanded tree nodes list and returns them as two elements array of 
+     * expansion paths where first element is expanded plants token plants and
+     * second - expanded areas token.
      * 
-     * @return Массив из двух строк со списками раскрытых узлов ассетов и зон
+     * @return Two elements array of expansion paths for plants and areas
      */
     public String[] getTreeExpansionState()
     {
         String[] result = new String[2];
         
-        List plantsId = new ArrayList();
-        List areasId = new ArrayList();
+        List plantsId = new ArrayList(), areasId = new ArrayList();
+        String plantsIdString, areasIdString;
         
-        String plantsIdString = "";
-        String areasIdString = "";
-        
-        Object root = this.plantsTree.getModel().getRoot();
-        Enumeration enumeration = this.plantsTree.getExpandedDescendants(new TreePath(root));   
+        Object root = plantsTree.getModel().getRoot();
+        Enumeration enumeration = plantsTree.getExpandedDescendants(new TreePath(root));   
         
         if (enumeration != null) 
         {
@@ -139,96 +138,92 @@ public class PlantsTreePanel extends javax.swing.JPanel
                     DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode)node;
                     Object nodeObject = treeNode.getUserObject();
                     
-                    if (nodeObject.getClass() == Plant.class)
+                    if (nodeObject instanceof Plant)
                     {
                         Plant tempPlant = (Plant)nodeObject;
                         if (!plantsId.contains(tempPlant.getId())) plantsId.add(tempPlant.getId());
-                    }//if
+                    }// if
                     
-                    if (nodeObject.getClass() == TreeArea.class)
+                    if (nodeObject instanceof TreeArea)
                     {
                         TreeArea tempArea = (TreeArea)nodeObject;
-                        areasId.add(tempArea.getPlant() + AREAS_AND_UNITS_ID_SEPARATOR + tempArea.getName());
-                    }//if
-                }//for
-            }//while
-        }//if
+                        areasId.add(tempArea.getPlant() + PAU_OBJECTS_ID_SEPARATOR + tempArea.getName());
+                    }// if
+                }// for
+            }// while
+        }// if
         
-        //Преобразуем массивы id открытых объектов в строки (знаю, что криво, лень писать регэкспы):
+        // Convert expanded nodes identifiers arrays to string tokens:
         plantsIdString = plantsId.toString();
         areasIdString = areasId.toString();
-        plantsIdString = plantsIdString.replace("[", "");
-        plantsIdString = plantsIdString.replace("]", "");
-        plantsIdString = plantsIdString.replace(" ", "");
-        areasIdString = areasIdString.replace("[", "");
-        areasIdString = areasIdString.replace("]", "");
-        areasIdString = areasIdString.replace(" ", "");
+        plantsIdString = plantsIdString.replaceAll("[\\[\\]\\s]", "");
+        areasIdString = areasIdString.replace("[", "").replace("]", "").replace(" ", "");
         
+        // Return tokens as array of two elements:
         result[0] = plantsIdString;
         result[1] = areasIdString;
                 
         return result;
-    }//getTreeExpansionState
+    }// getTreeExpansionState
        
     
     /**
-     * Метод получает информацию о текущем выбранном узле дерева ассетов для
-     * сохранения в конфиг.
+     * Returns PAU tree selection state as array of two elements. First one
+     * is type of selected object, second - object's identifier.
      * 
-     * @return Массив из двух строк. Первый элемент содержит тип выбранного узла, второй - его идентификатор
+     * @return String array of two elements - object's type and object's identifier
      */
     public String[] getTreeSelectionState()
     {
         String[] result = new String[2];
         
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)this.plantsTree.getLastSelectedPathComponent();
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)plantsTree.getLastSelectedPathComponent();
         
         Object nodeObject = node.getUserObject();
                     
-        //Формируем экземпляр настроек выбранного зла дерева ассетов в зависимости от типа узла:
-        if (nodeObject.getClass().equals(Plant.class))
+        // Combine tree selection state array depending on selected object type:
+        if (nodeObject instanceof Plant)
         {
             Plant plant = (Plant)nodeObject;
             result[0] = PLANT_NODE_TYPE_NAME;
             result[1] = plant.getId();
             
-        } else if (nodeObject.getClass().equals(TreeArea.class)){
+        } else if (nodeObject instanceof TreeArea) {
             
             TreeArea area = (TreeArea)nodeObject;
             result[0] = AREA_NODE_TYPE_NAME;
-            result[1] = area.getPlant() + AREAS_AND_UNITS_ID_SEPARATOR + area.getName();
+            result[1] = area.getPlant() + PAU_OBJECTS_ID_SEPARATOR + area.getName();
                     
-        } else if (nodeObject.getClass().equals(TreeUnit.class)){
+        } else if (nodeObject instanceof TreeUnit) {
                 
             TreeUnit unit = (TreeUnit)nodeObject;
             result[0] = UNIT_NODE_TYPE_NAME;
-            result[1] = unit.getPlant() + AREAS_AND_UNITS_ID_SEPARATOR + unit.getArea() + AREAS_AND_UNITS_ID_SEPARATOR + unit.getName();
-            
-        }//else if
+            result[1] = unit.getPlant() + PAU_OBJECTS_ID_SEPARATOR + unit.getArea() + PAU_OBJECTS_ID_SEPARATOR + unit.getName();
+        }// else if
         
         return result;
-    }//getTreeSelectionState
+    }// getTreeSelectionState
     
     
     /**
-     * Применяет настройки конфигурации.
+     * Restores panel settings from configuration object.
      */
     public void _applyConfig()
     {
         _setTreeExpansionState(config.getExpandedPlants(), config.getExpandedAreas());
         _setTreeSelectionState(config.getSelectedNodeType(), config.getSelectedNodeId());
-    }//_applyConfig
+    }// _applyConfig
     
     
     /**
-     * Метод применяет настройки раскрытых путей дерева ассетов.
-     * 
-     * @param expandedPlants Строка со списком развернутых узлов ассетов
-     * @param expandedAreas Строка со списком развернутых узлов зон
+     * Applies PAU tree nodes expansion state settings.
+     *
+     * @param expandedPlants Expanded plant nodes identifiers token string
+     * @param expandedAreas Expanded area nodes identifiers token string
      */
     private void _setTreeExpansionState(String expandedPlants, String expandedAreas)
     {
-        //Раскрываем узлы ассетов:        
+        // Extract expanded plants identifiers from token:
         StringTokenizer plantsId = new StringTokenizer(expandedPlants, PLANTS_TREE_EXPANDED_OBJECTS_CODES_SEPARATOR);
         String tempPlantId; 
         Plant tempPlant;
@@ -237,55 +232,54 @@ public class PlantsTreePanel extends javax.swing.JPanel
         {
             tempPlantId = plantsId.nextToken();
             
-            for (int i = 0; i < this.plantsTree.getRowCount(); i++)
+            for (int i = 0; i < plantsTree.getRowCount(); i++)
             {
-                TreePath path = this.plantsTree.getPathForRow(i);
+                TreePath path = plantsTree.getPathForRow(i);
                 DefaultMutableTreeNode plantNode = (DefaultMutableTreeNode)path.getLastPathComponent();
                 
-                if (plantNode.getUserObject().getClass() == Plant.class)
+                if (plantNode.getUserObject() instanceof Plant)
                 {
                     tempPlant = (Plant)plantNode.getUserObject();
                     
-                    if (tempPlant.getId().equals(tempPlantId)) this.plantsTree.expandRow(i);
-                }//if
-            }//for
-        }//while
+                    if (tempPlant.getId().equals(tempPlantId)) plantsTree.expandRow(i);
+                }// if
+            }// for
+        }// while
         
-        //Раскрываем узлы зон:
+        // Extract expanded areas identifiers from token:
         StringTokenizer areasId = new StringTokenizer(expandedAreas, PLANTS_TREE_EXPANDED_OBJECTS_CODES_SEPARATOR);
-        String tempAreaId;
-        String tempAreaName;
+        String tempAreaId, tempAreaName;
         TreeArea tempArea;
         
         while (areasId.hasMoreTokens())
         {
             tempAreaId = areasId.nextToken();
-            String[] areaIdComponents = tempAreaId.split(AREAS_AND_UNITS_ID_SEPARATOR);
+            String[] areaIdComponents = tempAreaId.split(PAU_OBJECTS_ID_SEPARATOR);
             tempPlantId = areaIdComponents[0];
             tempAreaName = areaIdComponents[1];
             
-            for (int i = 0; i < this.plantsTree.getRowCount(); i++)
+            for (int i = 0; i < plantsTree.getRowCount(); i++)
             {
-                TreePath path = this.plantsTree.getPathForRow(i);
+                TreePath path = plantsTree.getPathForRow(i);
                 DefaultMutableTreeNode areaNode = (DefaultMutableTreeNode)path.getLastPathComponent();
                 
-                if (areaNode.getUserObject().getClass() == TreeArea.class)
+                if (areaNode.getUserObject() instanceof TreeArea)
                 {
                     tempArea = (TreeArea)areaNode.getUserObject();
                     
-                    if (tempArea.getPlant().equals(tempPlantId) && tempArea.getName().equals(tempAreaName)) this.plantsTree.expandRow(i);
-                }//if
-            }//for
-        }//while
-    }//setTreeExpansionState
+                    if (tempArea.getPlant().equals(tempPlantId)
+                        && tempArea.getName().equals(tempAreaName)) plantsTree.expandRow(i);
+                }// if
+            }// for
+        }// while
+    }// _setTreeExpansionState
     
     
     /**
-     * Метод восстанавливает выбранный узел дерева асскетов на основании 
-     * полученного экземплряра настроек выбранноного узла.
+     * Restores PAU tree nodes selection state settings.
      * 
-     * @param selectedNodeType Тип выбранного узла
-     * @param selectedNodeId Идентификатор выбранного узла
+     * @param selectedNodeType Selected node type
+     * @param selectedNodeId Selected node identifier
      */
     private void _setTreeSelectionState(String selectedNodeType, String selectedNodeId)
     {
@@ -296,42 +290,44 @@ public class PlantsTreePanel extends javax.swing.JPanel
         String tempAreaName;
         String tempUnitName;
         
-        for (int i = 0; i < this.plantsTree.getRowCount(); i++)
+        for (int i = 0; i < plantsTree.getRowCount(); i++)
         {
-            tempPath = this.plantsTree.getPathForRow(i);
+            tempPath = plantsTree.getPathForRow(i);
             tempNode = (DefaultMutableTreeNode)tempPath.getLastPathComponent();
             tempNodeObject = tempNode.getUserObject();
             
-            if (tempNodeObject.getClass() == Plant.class 
+            if (tempNodeObject instanceof Plant 
                 && selectedNodeType.equals(PLANT_NODE_TYPE_NAME))
             {
                 Plant plant = (Plant)tempNodeObject;
                 
                 if (selectedNodeId.equals(plant.getId()))
                 {
-                     this.plantsTree.setSelectionRow(i);
+                     plantsTree.setSelectionRow(i);
                      break;
-                }//if
+                }// if
             
-            } else if (tempNodeObject.getClass() == TreeArea.class && selectedNodeType.equals(AREA_NODE_TYPE_NAME)) {
+            } else if (tempNodeObject instanceof TreeArea
+                && selectedNodeType.equals(AREA_NODE_TYPE_NAME)) {
             
                 TreeArea area = (TreeArea)tempNodeObject;
                 
-                String[] areaIdComponents = selectedNodeId.split(AREAS_AND_UNITS_ID_SEPARATOR);
+                String[] areaIdComponents = selectedNodeId.split(PAU_OBJECTS_ID_SEPARATOR);
                 tempPlantId = areaIdComponents[0];
                 tempAreaName = areaIdComponents[1];
                 
                 if (tempPlantId.equals(area.getPlant()) && tempAreaName.equals(area.getName()))
                 {
-                    this.plantsTree.setSelectionRow(i);
+                    plantsTree.setSelectionRow(i);
                     break;
-                }//if
+                }// if
                     
-            } else if (tempNodeObject.getClass() == TreeUnit.class && selectedNodeType.equals(UNIT_NODE_TYPE_NAME)){
+            } else if (tempNodeObject instanceof TreeUnit
+                && selectedNodeType.equals(UNIT_NODE_TYPE_NAME)) {
                 
                 TreeUnit unit = (TreeUnit)tempNodeObject;
                 
-                String[] unitIdComponents = selectedNodeId.split(AREAS_AND_UNITS_ID_SEPARATOR);
+                String[] unitIdComponents = selectedNodeId.split(PAU_OBJECTS_ID_SEPARATOR);
                 tempPlantId = unitIdComponents[0];
                 tempAreaName = unitIdComponents[1];
                 tempUnitName = unitIdComponents[2];
@@ -340,12 +336,12 @@ public class PlantsTreePanel extends javax.swing.JPanel
                     && tempAreaName.equals(unit.getArea())
                     && tempUnitName.equals(unit.getName()))
                 {
-                    this.plantsTree.setSelectionRow(i);
+                    plantsTree.setSelectionRow(i);
                     break;
-                }//if
-            }//else if
-        }//for
-    }//setTreeSelectionState
+                }// if
+            }// else if
+        }// for
+    }// _setTreeSelectionState
     
     
     /**
@@ -401,45 +397,41 @@ public class PlantsTreePanel extends javax.swing.JPanel
 
     
     /**
-     * Метод обрабатывает событие выбора узла дерева ассетов и рассылает его
-     * всем подписчикам с контекстом объекта, отображаемого выбранным узлом.
+     * Handles PAU tree node selection event and triggers appropriate event with
+     * selected node user object data.
      * 
-     * @param   evt  Событие выбора узла дерева
-     * @return  void
+     * @param evt Tree event object
      */
     private void plantsTreeValueChanged(javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_plantsTreeValueChanged
 
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)this.plantsTree.getLastSelectedPathComponent();
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)plantsTree.getLastSelectedPathComponent();
 
-        //Если узел выбран:
         if (node != null)
         {
-            CustomEvent myEvent = new CustomEvent(node.getUserObject());
-            this.events.trigger(ViewEvent.PLANTS_TREE_NODE_SELECTION, myEvent);
-        }//if
+            CustomEvent plantsTreeChangeSelectionEvent = new CustomEvent(node.getUserObject());
+            trigger(ViewEvent.PLANTS_TREE_NODE_SELECTION, plantsTreeChangeSelectionEvent);
+        }// if
     }//GEN-LAST:event_plantsTreeValueChanged
 
     
     /**
-     * Метод обрабатывает событие сворачивания узла дерева ассетов и рассылет
-     * его всем подписчикам с контекстом развернутых путей дерева.
+     * Handles PAU tree node collapsed event and triggers appropriate event with
+     * expansion state tokens data.
      * 
-     * @param   evt  Событие сворачивания узла
-     * @return  void
+     * @param evt Tree event object
      */
     private void plantsTreeTreeCollapsed(javax.swing.event.TreeExpansionEvent evt) {//GEN-FIRST:event_plantsTreeTreeCollapsed
         
-         CustomEvent myEvent = new CustomEvent(getTreeExpansionState());
-         this.events.trigger(ViewEvent.PLANTS_TREE_EXPANSION_STATE_CHANGE, myEvent);
+         CustomEvent plantsTreeChangeExpansionEvent = new CustomEvent(getTreeExpansionState());
+         trigger(ViewEvent.PLANTS_TREE_EXPANSION_STATE_CHANGE, plantsTreeChangeExpansionEvent);
     }//GEN-LAST:event_plantsTreeTreeCollapsed
 
     
     /**
-     * Метод обрабатывает событие раскрытия узла дерева ассетов и рассылает
-     * его всем подписчикам с контекстом развернутых путей дерева.
+     * Handles PAU tree node expanded event and triggers appropriate event with
+     * expansion state tokens data.
      * 
-     * @param   evt  Событие раскрытия узла
-     * @return  void
+     * @param evt Tree event object
      */
     private void plantsTreeTreeExpanded(javax.swing.event.TreeExpansionEvent evt) {//GEN-FIRST:event_plantsTreeTreeExpanded
         
@@ -451,4 +443,4 @@ public class PlantsTreePanel extends javax.swing.JPanel
     private javax.swing.JTree plantsTree;
     private javax.swing.JScrollPane treeScrollPane;
     // End of variables declaration//GEN-END:variables
-}
+}// PlantsTreePanel

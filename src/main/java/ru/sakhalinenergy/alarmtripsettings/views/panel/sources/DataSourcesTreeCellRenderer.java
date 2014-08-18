@@ -43,7 +43,7 @@ public class DataSourcesTreeCellRenderer extends DefaultTreeCellRenderer
         
         ImageIcon icon = null;
               
-        if (node.getUserObject().getClass() == Source.class)
+        if (node.getUserObject() instanceof Source)
         {
             Source nodeObject = (Source)node.getUserObject();
                               
@@ -63,7 +63,7 @@ public class DataSourcesTreeCellRenderer extends DefaultTreeCellRenderer
             if (nodeObject.getTypeId() == SourcesTypes.FGS_VARIABLE_TABLE.ID) icon = Main.fgsIcon;
             
         // If node is source property:
-        } else if (node.getUserObject().getClass() == SourceProperty.class) {
+        } else if (node.getUserObject() instanceof SourceProperty) {
         
             icon = Main.settingIcon;
         }// if

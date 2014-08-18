@@ -45,8 +45,9 @@ public class PlantsTreePanelController
     {
         this.model = model;
         this.view = view;
-        this.view.events.on(ViewEvent.PLANTS_TREE_NODE_SELECTION, new _GetLoopsForSelectedNodeRequestListener());
-        this.view.events.on(ViewEvent.PLANTS_TREE_EXPANSION_STATE_CHANGE, new _PlantsTreeExpansionStateChangeHandler()); 
+        
+        view.on(ViewEvent.PLANTS_TREE_NODE_SELECTION, new _GetLoopsForSelectedNodeRequestListener());
+        view.on(ViewEvent.PLANTS_TREE_EXPANSION_STATE_CHANGE, new _PlantsTreeExpansionStateChangeHandler()); 
     }// PlantsTreePanelController
     
     
@@ -54,29 +55,36 @@ public class PlantsTreePanelController
      * Inner class - handler for plants tree node selection event.
      * 
      * @author Denis Udovenko
-     * @version 1.0.3
+     * @version 1.0.4
      */
     private class _GetLoopsForSelectedNodeRequestListener implements CustomEventListener
     {
         @Override
         public void customEventOccurred(CustomEvent evt)
         {
+            PlantsTreePanelSettings panelSettings = PlantsTreePanelSettings.getInstance();
+
+            // Retrieve tree nodes selection state:
+            String[] treeSelectionState = view.getTreeSelectionState();
+            panelSettings.setSelectedNodeType(treeSelectionState[0]);
+            panelSettings.setSelectedNodeId(treeSelectionState[1]);
+
             // Save tree view config:
-            _savePlantsTreeConfig();
+            panelSettings.save();
             
             Object nodeObject = (Object)evt.getSource();
             String[] filters = null;
             
             // Get loop table filter depending on selected node class:
-            if (nodeObject.getClass() == Plant.class)
+            if (nodeObject instanceof Plant)
             {    
                 Plant plantNode = (Plant)nodeObject;
                 filters = new String[]{plantNode.getId()};
-            } else if (nodeObject.getClass() == TreeArea.class) {    
+            } else if (nodeObject instanceof TreeArea) {    
                 
                 TreeArea areaNode = (TreeArea)nodeObject;
                 filters = new String[]{areaNode.getPlant(), areaNode.getName()};
-            } else if (nodeObject.getClass() == TreeUnit.class) {  
+            } else if (nodeObject instanceof TreeUnit) {  
                 
                 TreeUnit unitNode = (TreeUnit)nodeObject;
                 filters = new String[]{unitNode.getPlant(), unitNode.getArea(), unitNode.getName()};
@@ -144,29 +152,22 @@ public class PlantsTreePanelController
      * Inner class - handler for plants tree expansion state change event.
      * 
      * @author Denis Udovenko
-     * @version 1.0.1
+     * @version 1.0.2
      */
     private class _PlantsTreeExpansionStateChangeHandler implements CustomEventListener
     {
         @Override
         public void customEventOccurred(CustomEvent evt)
         {
+            PlantsTreePanelSettings panelSettings = PlantsTreePanelSettings.getInstance();
+
+            // Retrieve tree nodes expansion state:
+            String[] treeExpansionState = view.getTreeExpansionState();
+            panelSettings.setExpandedPlants(treeExpansionState[0]);
+            panelSettings.setExpandedAreas(treeExpansionState[1]);
+
             // Save plants tree config:
-            _savePlantsTreeConfig();
+            panelSettings.save();
         }// customEventOccurred
     }// _PlantsTreeExpansionStateChangeHandler
-    
-    
-    /**
-     * Retrieves plants tree view config into config singleton object and saves
-     * it.
-     */
-    private void _savePlantsTreeConfig()
-    {
-        PlantsTreePanelSettings panelSettings = PlantsTreePanelSettings.getInstance();
-        String[] treeExppansionState = view.getTreeExpansionState();
-        panelSettings.setExpandedPlants(treeExppansionState[0]);
-        panelSettings.setExpandedAreas(treeExppansionState[1]);
-        panelSettings.save();
-    }// _savePlantsTreeConfig
 }// PlantsTree

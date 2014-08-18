@@ -136,7 +136,7 @@ public class CreateDcsVariableTableFromYokogawaBackupDialog extends DataSourceDi
             stationNode = (DefaultMutableTreeNode)root.getChildAt(i);
             stationNodeUserObject = stationNode.getUserObject(); 
 
-            if (stationNodeUserObject.getClass() == CheckboxNode.class)
+            if (stationNodeUserObject instanceof CheckboxNode)
             {
                 // If checkbox is selected - add station to result:
                 CheckboxNode checkboxTagNode = (CheckboxNode)stationNodeUserObject;
@@ -365,4 +365,4 @@ public class CreateDcsVariableTableFromYokogawaBackupDialog extends DataSourceDi
     private javax.swing.JComboBox tagMaskComboBox;
     private javax.swing.JLabel tagMaskComboBoxLabel;
     // End of variables declaration//GEN-END:variables
-}
+}// CreateDcsVariableTableFromYokogawaBackupDialog

@@ -154,7 +154,7 @@ public class DataSourcesPanel extends Panel
                 tree.setSelectionPath(path);
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
 
-                if (node.getUserObject().getClass() == Source.class)
+                if (node.getUserObject() instanceof Source)
                 {
                     removeAllRelatedToSourceMenuItem.setEnabled(true);
                     editSelectedSourceMenuItem.setEnabled(true);
