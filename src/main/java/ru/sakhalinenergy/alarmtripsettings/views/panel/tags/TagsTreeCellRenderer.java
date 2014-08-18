@@ -1,4 +1,4 @@
-package ru.sakhalinenergy.alarmtripsettings.views.TagsTreePanel;
+package ru.sakhalinenergy.alarmtripsettings.views.panel.tags;
 
 import java.awt.Color;
 import java.awt.Component;
