@@ -36,11 +36,11 @@ public class LoopsTablePanelController
         this.view = view;
         this.model = model;
         
-        this.view.events.on(ViewEvent.CHANGE_LOOPS_TABLE_SELECTION,    new _LoopsTableChageSelectionHandler());
-        this.view.events.on(ViewEvent.CHANGE_LOOPS_SEARCH_STRING,      new _LoopsSearchHandler());
-        this.view.events.on(ViewEvent.SPLIT_LOOP_MENU_ITEM_CLICK,      new _SplitLoopMenuItemClickHandler());
-        this.view.events.on(ViewEvent.MERGE_LOOP_MENU_ITEM_CLICK,      new _MergeLoopMenuItemClickHandler());
-        this.view.events.on(ViewEvent.MERGE_ALL_LOOPS_MENU_ITEM_CLICK, new _MergeAllSplitLoopsMenuItemClickHandler());
+        view.on(ViewEvent.CHANGE_LOOPS_TABLE_SELECTION,    new _LoopsTableChageSelectionHandler());
+        view.on(ViewEvent.CHANGE_LOOPS_SEARCH_STRING,      new _LoopsSearchHandler());
+        view.on(ViewEvent.SPLIT_LOOP_MENU_ITEM_CLICK,      new _SplitLoopMenuItemClickHandler());
+        view.on(ViewEvent.MERGE_LOOP_MENU_ITEM_CLICK,      new _MergeLoopMenuItemClickHandler());
+        view.on(ViewEvent.MERGE_ALL_LOOPS_MENU_ITEM_CLICK, new _MergeAllSplitLoopsMenuItemClickHandler());
     }// LoopsTablePanelController
     
     
@@ -90,7 +90,7 @@ public class LoopsTablePanelController
                 @Override
                 public void run()
                 {
-                    LoopsTablePanelController.this.view.setSearchDevicesFilter(finalSearchString);
+                    LoopsTablePanelController.this.view.setSearchLoopsFilter(finalSearchString);
                 }// run
             });// invokeLater
         }// customEventOccurred

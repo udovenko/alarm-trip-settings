@@ -1,103 +1,94 @@
 package ru.sakhalinenergy.alarmtripsettings.views.panel.loops;
 
-import ru.sakhalinenergy.alarmtripsettings.Main;
 import java.awt.Color;
 import java.awt.Component;
-import javax.swing.ImageIcon;
-import javax.swing.UIManager;
 import javax.swing.JComponent;
-import javax.swing.border.MatteBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.Border;
 import javax.swing.JTable;
 import javax.swing.JLabel;
+import javax.swing.border.MatteBorder;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
+import ru.sakhalinenergy.alarmtripsettings.Main;
 
 
 /**
- * Класс наследует отрисовщик ячеек таблицы устройств и перегружает его метод 
- * отрисовки для заголовков таблицы устройств.
+ * Implements cell renderer for loops table header.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.1
+ * @author Denis Udovenko
+ * @version 1.0.2
  */
 public class LoopsTableColumnHeaderRenderer extends DefaultTableCellRenderer 
 {
       
     /**
-     * Метод возвращает отрендерренный компонент ячейки, перегружая дефолтный рендерер.
+     * Returns the table header cell renderer depending on header column type.
      * 
-     * @param   table       Ссылка на родительскую таблицу
-     * @param   value       Значение ячейки
-     * @param   isSelected  Флаг "Ячейка выбрана"
-     * @param   hasFocus    Флаг "Установлен фокус"
-     * @param   row         Индекс строки
-     * @param   column      Индекс столлбца
-     * @return  JComponent  Компонент отрисованной ячейки
+     * @param table Parent table
+     * @param value Value to assign to the cell at [row, column]
+     * @param isSelected True if cell is selected
+     * @param hasFocus True if cell has focus
+     * @param row Row index of the cell to render
+     * @param column Column index of the cell to render
+     * @return JComponent Header cell renderer depending on header column type
      */
     @Override
     public JComponent getTableCellRendererComponent(JTable table, Object value, 
         boolean isSelected, boolean hasFocus, int row, int column)
     {
-        TableCellRenderer tcr = table.getTableHeader ().getDefaultRenderer ();
+        // Get default header renderer:
+        TableCellRenderer defaultHeaderRenderer = table.getTableHeader().getDefaultRenderer();
 
-        // Extract the component used to render the column header.
-        Component c = tcr.getTableCellRendererComponent (table, value,
-                                                       isSelected,
-                                                       hasFocus,
-                                                       row, column);
+        // Extract the component used to render column header:
+        Component defaultRendererComponent = defaultHeaderRenderer.getTableCellRendererComponent(table, value,
+            isSelected, hasFocus, row, column);
           
-      
-        //Получаем модель таблицы:
+        // Get table model:
         LoopsTableModel tableModel = (LoopsTableModel)table.getModel();
         
-        //Получем имя выбранной колонки из модели, используя преобразование координат между моделью и вью:
+        // Get column name from table model using index conversion:
         String columnName = tableModel.getColumnName(table.convertColumnIndexToModel(column));
         
         JLabel label = new JLabel();
         
-        //Если колонка - заголовок названия контуров, устанавливаем соответвующую иконку:
-        if (columnName.equals(tableModel.LOOP_COLUMN_NAME))
-        {
-            label = new JLabel (Main.loopIcon);
-        }//if
-        
-        //Подсвечиваем ячейки колонки с нижними трипами из SPI:
+        // If cell is loop names column header:
+        if (columnName.equals(tableModel.LOOP_COLUMN_NAME)) label = new JLabel (Main.loopIcon);
+                
+        // If cell is SPI alarm columns header:
         if (columnName.equals(tableModel.SPI_LOW_LOW_COLUMN_NAME) || columnName.equals(tableModel.SPI_LOW_COLUMN_NAME)
             || columnName.equals(tableModel.SPI_HIGH_COLUMN_NAME) || columnName.equals(tableModel.SPI_HIGH_HIGH_COLUMN_NAME))
         {
             label = new JLabel (Main.intoolsIcon);
-        }//if
+        }// if
             
-        //Подсвечиваем ячейки колонки с нижними трипами из SPI:
+        // If cell is documents alarm columns header:
         if (columnName.equals(tableModel.DOCUMENTS_LOW_LOW_COLUMN_NAME) || columnName.equals(tableModel.DOCUMENTS_LOW_COLUMN_NAME)
             || columnName.equals(tableModel.DOCUMENTS_HIGH_COLUMN_NAME) || columnName.equals(tableModel.DOCUMENTS_HIGH_HIGH_COLUMN_NAME))
         {
             label = new JLabel (Main.documentsIcon);
-        }//if
+        }// if
         
-        //Подсвечиваем ячейки колонки с нижними трипами из SPI:
+        // If cell is systems alarm columns header:
         if (columnName.equals(tableModel.SYSTEMS_LOW_LOW_COLUMN_NAME) || columnName.equals(tableModel.SYSTEMS_LOW_COLUMN_NAME)
             || columnName.equals(tableModel.SYSTEMS_HIGH_COLUMN_NAME) || columnName.equals(tableModel.SYSTEMS_HIGH_HIGH_COLUMN_NAME))
         {
             label = new JLabel (Main.systemsIcon);
-        }//if
+        }// if
                
-        Border border = new MatteBorder(0,0,1,1, Color.LIGHT_GRAY);
-        Border margin = ((JComponent) c).getBorder ();
+        Border border = new MatteBorder(0, 0, 1, 1, Color.LIGHT_GRAY);
+        Border margin = ((JComponent)defaultRendererComponent).getBorder();
         label.setBorder(new CompoundBorder(border, margin));
         label.setOpaque(true);
     
-        label.setFont (c.getFont ());
-        label.setForeground (c.getForeground ());
+        label.setFont (defaultRendererComponent.getFont());
+        label.setForeground (defaultRendererComponent.getForeground());
     
         label.setBackground(new Color(250, 253, 255));
      
-        label.setText ((String) value);
+        label.setText((String)value);
         label.setHorizontalAlignment(JLabel.LEFT);
         
         return label;
-    }//getTableCellRendererComponent
-}//DevicesTableColumnHeaderRenderer
+    }// getTableCellRendererComponent
+}// LoopsTableColumnHeaderRenderer

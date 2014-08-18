@@ -1,42 +1,39 @@
 package ru.sakhalinenergy.alarmtripsettings.views.panel.loops;
 
-import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelector;
-import ru.sakhalinenergy.alarmtripsettings.Main;
-import javax.swing.JComponent;
 import java.awt.Color;
 import java.awt.Font;
-import java.util.List;
-import javax.swing.JLabel;
+import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.border.MatteBorder;
 import javax.swing.table.DefaultTableCellRenderer;
+import ru.sakhalinenergy.alarmtripsettings.models.entity.TagSetting;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelector;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.LoopsTableObservable;
 
 
 /**
- * Класс наследует отрисовщик ячеек таблицы устройств и перегружает его метод 
- * отрисовки.
+ * Implements cell renderer for loops table.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.5
+ * @author Denis Udovenko
+ * @version 1.0.6
  */
 public class LoopsTableCellRenderer extends DefaultTableCellRenderer 
 {
     private final LoopsTableObservable loopsTable;    
     
-    private final Color LOOP_TO_BE_SPLIT_NAME_FONT_COLOR = Color.RED;     //Цвет имени петли, требующей разделения
-    private final Color HALF_SPLIT_LOOP_NAME_FONT_COLOR = Color.MAGENTA;  //Цвет имени тага частично разделенной петли
-    private final Color SPLIT_LOOP_NAME_FONT_COLOR = Color.BLUE;          //Цвет имени тага полностью разделенной петли
+    private static final Color LOOP_TO_BE_SPLIT_NAME_FONT_COLOR = Color.RED;     // Color for name of loop which needs to be splitted
+    private static final Color HALF_SPLIT_LOOP_NAME_FONT_COLOR = Color.MAGENTA;  // Color for name of partially split loop
+    private static final Color SPLIT_LOOP_NAME_FONT_COLOR = Color.BLUE;          // Color for name of completely split loop
     
-    //Цвета ячеек для групп алармов:
-    private final Color ALARM_LOW_LOW_GROUP_COLOR = new Color(245, 240, 255);
-    private final Color ALARM_LOW_GROUP_COLOR = new Color(223, 253, 255);
-    private final Color ALARM_HIGH_GROUP_COLOR = new Color(209, 255, 214);
-    private final Color ALARM_HIGH_HIGH_GROUP_COLOR = new Color(250, 255, 222);
+    // Background colors for alarm goups cells:
+    private static final Color ALARM_LOW_LOW_GROUP_COLOR = new Color(245, 240, 255);
+    private static final Color ALARM_LOW_GROUP_COLOR = new Color(223, 253, 255);
+    private static final Color ALARM_HIGH_GROUP_COLOR = new Color(209, 255, 214);
+    private static final Color ALARM_HIGH_HIGH_GROUP_COLOR = new Color(250, 255, 222);
     
     
     /**
-     * Public constructor.
+     * Public constructor. Sets loops table instance.
      * 
      * @param loopsTable Loops table instance
      */
@@ -44,170 +41,162 @@ public class LoopsTableCellRenderer extends DefaultTableCellRenderer
     {
         this.loopsTable = loopsTable;
         setOpaque(true);
-    }//DevicesTableCellRenderer
+    }// LoopsTableCellRenderer
 
     
     /**
-     * Метод возвращает отрендерренный компонент ячейки, перегружая дефолтный рендерер.
+     * Returns the table cell renderer depending on cell type and alarm group.
      * 
-     * @param   table       Ссылка на родительскую таблицу
-     * @param   value       Значение ячейки
-     * @param   isSelected  Флаг "Ячейка выбрана"
-     * @param   hasFocus    Флаг "Установлен фокус"
-     * @param   row         Индекс строки
-     * @param   column      Индекс столлбца
-     * @return  JComponent  Компонент отрисованной ячейки
+     * @param table Parent table
+     * @param value Value to assign to the cell at [row, column]
+     * @param isSelected True if cell is selected
+     * @param hasFocus True if cell has focus
+     * @param row Row index of the cell to render
+     * @param column Column index of the cell to render
+     * @return JComponent Cell renderer depending on cell type and alarm group
      */
     @Override
     public JComponent getTableCellRendererComponent(JTable table, Object value, 
         boolean isSelected, boolean hasFocus, int row, int column)
     {
-        //Вызваем родительский конструктор рендерера ячейки:
+        // Get superclass renderer component:
         JComponent cell = (JComponent)super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         
-        //Получаем модель таблицы:
+        // Get table model:
         LoopsTableModel tableModel = (LoopsTableModel)table.getModel();
                         
-        //Получаем устройство:
+        // Get loop wrapped into settings selection logic:
         SettingsSelector wrapedLoop = loopsTable.getWrappedLoops().get(table.convertRowIndexToModel(row));
         
-        //Получем имя выбранной колонки из модели, используя преобразование координат между моделью и вью:
+        // Get column name from table model using index conversion:
         String columnName = tableModel.getColumnName(table.convertColumnIndexToModel(column));
         
-        //Изменяем цвет шрифта для невыбранных разделенных петель:
+        // Set default font color:
         cell.setForeground(Color.BLACK);
-        //if (columnName.equals(tableModel.LOOP_COLUMN_NAME) && loop.getSplit() && !loop.hasDuplicatedAlarms()) cell.setForeground(this.SPLIT_LOOP_NAME_FONT_COLOR);
-        //if (columnName.equals(tableModel.LOOP_COLUMN_NAME) && loop.getSplit() && loop.hasDuplicatedAlarms()) cell.setForeground(this.HALF_SPLIT_LOOP_NAME_FONT_COLOR);
-        //if (columnName.equals(tableModel.LOOP_COLUMN_NAME) && !loop.getSplit() && loop.hasDuplicatedAlarms()) cell.setForeground(this.LOOP_TO_BE_SPLIT_NAME_FONT_COLOR);
         
-        //Подсвечиваем ячейки колонки с нижними трипами из SPI:
+        // Set SPI LL alarm cells background color:
         if (columnName.equals(tableModel.SPI_LOW_LOW_COLUMN_NAME))
         {
-            Double intensity = wrapedLoop.getChosenIntoolsAlarmLL() != null ? wrapedLoop.getIntoolsAlarmLLConformity() * 2.55 : 255.0;
-            Color background = new Color(255, intensity.intValue(), intensity.intValue());
-            cell.setBackground(background);
-            if (intensity.intValue() > 250) cell.setBackground(this.ALARM_LOW_LOW_GROUP_COLOR);
-        }//if
+            _setAlarmCellBackgroundColor(cell, wrapedLoop.getChosenIntoolsAlarmLL(),
+                wrapedLoop.getIntoolsAlarmLLConformity(), ALARM_LOW_LOW_GROUP_COLOR);
+        }// if
         
-        //Подсвечиваем ячейки колонки с нижними трипами из документов:
+        // Set documents LL alarm cells background color:
         if (columnName.equals(tableModel.DOCUMENTS_LOW_LOW_COLUMN_NAME))
         {
-            Double intensity = wrapedLoop.getChosenDocumentsAlarmLL() != null ? wrapedLoop.getDocumentsAlarmLLConformity() * 2.55 : 255.0;
-            Color background = new Color(255, intensity.intValue(), intensity.intValue());
-            cell.setBackground(background);
-            if (intensity.intValue() > 250) cell.setBackground(this.ALARM_LOW_LOW_GROUP_COLOR);
-        }//if
+             _setAlarmCellBackgroundColor(cell, wrapedLoop.getChosenDocumentsAlarmLL(),
+                wrapedLoop.getDocumentsAlarmLLConformity(), ALARM_LOW_LOW_GROUP_COLOR);
+        }// if
         
-        //Подсвечиваем ячейки колонки с нижними трипами из документов:
+        // Set systems LL alarm cells background color:
         if (columnName.equals(tableModel.SYSTEMS_LOW_LOW_COLUMN_NAME))
         {
-            Double intensity = wrapedLoop.getChosenSystemsAlarmLL() != null ? wrapedLoop.getSystemsAlarmLLConformity() * 2.55 : 255.0;
-            Color background = new Color(255, intensity.intValue(), intensity.intValue());
-            cell.setBackground(background);
-            if (intensity.intValue() > 250) cell.setBackground(this.ALARM_LOW_LOW_GROUP_COLOR);
-        }//if
+            _setAlarmCellBackgroundColor(cell, wrapedLoop.getChosenSystemsAlarmLL(),
+                wrapedLoop.getSystemsAlarmLLConformity(), ALARM_LOW_LOW_GROUP_COLOR);
+        }// if
         
-        //Подсвечиваем ячейки колонки с нижними трипами из SPI:
+        // Set SPI L alarm cells background color:
         if (columnName.equals(tableModel.SPI_LOW_COLUMN_NAME))
         {
-            Double intensity = wrapedLoop.getChosenIntoolsAlarmL() != null ? wrapedLoop.getIntoolsAlarmLConformity() * 2.55 : 255.0;
-            Color background = new Color(255, intensity.intValue(), intensity.intValue());
-            cell.setBackground(background);
-            if (intensity.intValue() > 250) cell.setBackground(this.ALARM_LOW_GROUP_COLOR);
-        }//if
+            _setAlarmCellBackgroundColor(cell, wrapedLoop.getChosenIntoolsAlarmL(),
+                wrapedLoop.getIntoolsAlarmLConformity(), ALARM_LOW_GROUP_COLOR);
+        }// if
         
-        //Подсвечиваем ячейки колонки с нижними трипами из документов:
+        // Set documents L alarm cells background color:
         if (columnName.equals(tableModel.DOCUMENTS_LOW_COLUMN_NAME))
         {
-            Double intensity = wrapedLoop.getChosenDocumentsAlarmL() != null ? wrapedLoop.getDocumentsAlarmLConformity() * 2.55 : 255.0;
-            Color background = new Color(255, intensity.intValue(), intensity.intValue());
-            cell.setBackground(background);
-            if (intensity.intValue() > 250) cell.setBackground(this.ALARM_LOW_GROUP_COLOR);
-        }//if
+            _setAlarmCellBackgroundColor(cell, wrapedLoop.getChosenDocumentsAlarmL(),
+                wrapedLoop.getDocumentsAlarmLConformity(), ALARM_LOW_GROUP_COLOR);
+        }// if
         
-        //Подсвечиваем ячейки колонки с нижними трипами из документов:
+        // Set systems L alarm cells background color:
         if (columnName.equals(tableModel.SYSTEMS_LOW_COLUMN_NAME))
         {
-            Double intensity = wrapedLoop.getChosenSystemsAlarmL() != null ? wrapedLoop.getSystemsAlarmLConformity() * 2.55 : 255.0;
-            Color background = new Color(255, intensity.intValue(), intensity.intValue());
-            cell.setBackground(background);
-            if (intensity.intValue() > 250) cell.setBackground(this.ALARM_LOW_GROUP_COLOR);
-        }//if     
+            _setAlarmCellBackgroundColor(cell, wrapedLoop.getChosenSystemsAlarmL(),
+                wrapedLoop.getSystemsAlarmLConformity(), ALARM_LOW_GROUP_COLOR);
+        }// if     
         
-        //Подсвечиваем ячейки колонки с нижними трипами из SPI:
+        // Set SPI H alarm cells background color:
         if (columnName.equals(tableModel.SPI_HIGH_COLUMN_NAME))
         {
-            Double intensity = wrapedLoop.getChosenIntoolsAlarmH() != null ? wrapedLoop.getIntoolsAlarmHConformity() * 2.55 : 255.0;
-            Color background = new Color(255, intensity.intValue(), intensity.intValue());
-            cell.setBackground(background);
-            if (intensity.intValue() > 250) cell.setBackground(this.ALARM_HIGH_GROUP_COLOR);
-        }//if
+            _setAlarmCellBackgroundColor(cell, wrapedLoop.getChosenIntoolsAlarmH(),
+                wrapedLoop.getIntoolsAlarmHConformity(), ALARM_HIGH_GROUP_COLOR);
+        }// if
         
-        //Подсвечиваем ячейки колонки с нижними трипами из документов:
+        // Set documents H alarm cells background color:
         if (columnName.equals(tableModel.DOCUMENTS_HIGH_COLUMN_NAME))
         {
-            Double intensity = wrapedLoop.getChosenDocumentsAlarmH() != null ? wrapedLoop.getDocumentsAlarmHConformity() * 2.55 : 255.0;
-            Color background = new Color(255, intensity.intValue(), intensity.intValue());
-            cell.setBackground(background);
-            if (intensity.intValue() > 250) cell.setBackground(this.ALARM_HIGH_GROUP_COLOR);
-        }//if
+            _setAlarmCellBackgroundColor(cell, wrapedLoop.getChosenDocumentsAlarmH(),
+                wrapedLoop.getDocumentsAlarmHConformity(), ALARM_HIGH_GROUP_COLOR);
+        }// if
         
-        //Подсвечиваем ячейки колонки с нижними трипами из документов:
+        // Set systems H alarm cells background color:
         if (columnName.equals(tableModel.SYSTEMS_HIGH_COLUMN_NAME))
         {
-            Double intensity = wrapedLoop.getChosenSystemsAlarmH() != null ? wrapedLoop.getSystemsAlarmHConformity() * 2.55 : 255.0;
-            Color background = new Color(255, intensity.intValue(), intensity.intValue());
-            cell.setBackground(background);
-            if (intensity.intValue() > 250) cell.setBackground(this.ALARM_HIGH_GROUP_COLOR);
-        }//if
+            _setAlarmCellBackgroundColor(cell, wrapedLoop.getChosenSystemsAlarmH(),
+                wrapedLoop.getSystemsAlarmHConformity(), ALARM_HIGH_GROUP_COLOR);
+        }// if
         
-        //Подсвечиваем ячейки колонки с нижними трипами из SPI:
+        // Set SPI HH alarm cells background color:
         if (columnName.equals(tableModel.SPI_HIGH_HIGH_COLUMN_NAME))
         {
-            Double intensity = wrapedLoop.getChosenIntoolsAlarmHH() != null ? wrapedLoop.getIntoolsAlarmHHConformity() * 2.55 : 255.0;
-            Color background = new Color(255, intensity.intValue(), intensity.intValue());
-            cell.setBackground(background);
-            if (intensity.intValue() > 250) cell.setBackground(this.ALARM_HIGH_HIGH_GROUP_COLOR);
-        }//if
+            _setAlarmCellBackgroundColor(cell, wrapedLoop.getChosenIntoolsAlarmHH(),
+                wrapedLoop.getIntoolsAlarmHHConformity(), ALARM_HIGH_HIGH_GROUP_COLOR);
+        }// if
         
-        //Подсвечиваем ячейки колонки с нижними трипами из документов:
+        // Set documents HH alarm cells background color:
         if (columnName.equals(tableModel.DOCUMENTS_HIGH_HIGH_COLUMN_NAME))
         {
-            Double intensity = wrapedLoop.getChosenDocumentsAlarmHH() != null ? wrapedLoop.getDocumentsAlarmHHConformity() * 2.55 : 255.0;
-            Color background = new Color(255, intensity.intValue(), intensity.intValue());
-            cell.setBackground(background);
-            if (intensity.intValue() > 250) cell.setBackground(this.ALARM_HIGH_HIGH_GROUP_COLOR);
-        }//if
+            _setAlarmCellBackgroundColor(cell, wrapedLoop.getChosenDocumentsAlarmHH(),
+                wrapedLoop.getDocumentsAlarmHHConformity(), ALARM_HIGH_HIGH_GROUP_COLOR);
+        }// if
         
-        //Подсвечиваем ячейки колонки с нижними трипами из документов:
+        // Set systems HH alarm cells background color:
         if (columnName.equals(tableModel.SYSTEMS_HIGH_HIGH_COLUMN_NAME))
         {
-            Double intensity = wrapedLoop.getChosenSystemsAlarmHH() != null ? wrapedLoop.getSystemsAlarmHHConformity() * 2.55 : 255.0;
-            Color background = new Color(255, intensity.intValue(), intensity.intValue());
-            cell.setBackground(background);
-            if (intensity.intValue() > 250) cell.setBackground(this.ALARM_HIGH_HIGH_GROUP_COLOR);
-        }//if
+            _setAlarmCellBackgroundColor(cell, wrapedLoop.getChosenSystemsAlarmHH(),
+                wrapedLoop.getSystemsAlarmHHConformity(), ALARM_HIGH_HIGH_GROUP_COLOR);
+        }// if
         
-        //Обрабатываем выделенную строку:
+        // Set style for selected row cells:
         if (isSelected)
         {
             cell.setFont(new Font("Arial", Font.BOLD, 12));
             cell.setForeground(Color.BLACK);
             cell.setBorder(new MatteBorder(1, 0, 1, 0, Color.BLACK));
-        }//if
+        }// if
              
-        //Убираем подсветку ячейки с маской прибора и подсвечиваем разделенные петли:
+        // Remove loop number cell background and set font color for loops with splitting fetures: 
         if (columnName.equals(tableModel.LOOP_COLUMN_NAME)) 
         {
             boolean loopIsSplit = loopsTable.isLoopSplit(wrapedLoop.getEntity());
             boolean loopHasDuplicatedAlarms = wrapedLoop.getEntity().hasDuplicatedAlarms(); 
 
             cell.setBackground(Color.WHITE);
-            if (loopIsSplit && !loopHasDuplicatedAlarms) cell.setForeground(this.SPLIT_LOOP_NAME_FONT_COLOR);
-            if (loopIsSplit && loopHasDuplicatedAlarms) cell.setForeground(this.HALF_SPLIT_LOOP_NAME_FONT_COLOR);
-            if (!loopIsSplit && loopHasDuplicatedAlarms) cell.setForeground(this.LOOP_TO_BE_SPLIT_NAME_FONT_COLOR);
-        }//if
+            if (loopIsSplit && !loopHasDuplicatedAlarms) cell.setForeground(SPLIT_LOOP_NAME_FONT_COLOR);
+            if (loopIsSplit && loopHasDuplicatedAlarms) cell.setForeground(HALF_SPLIT_LOOP_NAME_FONT_COLOR);
+            if (!loopIsSplit && loopHasDuplicatedAlarms) cell.setForeground(LOOP_TO_BE_SPLIT_NAME_FONT_COLOR);
+        }// if
 
         return cell;
-    }//getTableCellRendererComponent
-}//DevicesTableCellRenderer
+    }// getTableCellRendererComponent
+    
+    
+    /**
+     * Sets alarm cell background color depending on calculated alarm setting
+     * conformity.
+     * 
+     * @param cell Cell component which background will be set
+     * @param alarmSetting Tag's alarm setting instance or null
+     * @param alarmSettingConformity Calculated alarm setting conformity
+     * @param emptyCellColor Alarm group cells background color for empty cell
+     */
+    private void _setAlarmCellBackgroundColor(JComponent cell, TagSetting alarmSetting, 
+        float alarmSettingConformity, Color emptyCellColor)
+    {
+        Double intensity = alarmSetting != null ? alarmSettingConformity * 2.55 : 255.0;
+        Color background = new Color(255, intensity.intValue(), intensity.intValue());
+        cell.setBackground(background);
+        if (intensity.intValue() > 250) cell.setBackground(emptyCellColor);
+    }// _setAlarmCellBackgroundColor
+}// LoopsTableCellRenderer

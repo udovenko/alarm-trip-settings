@@ -1,71 +1,74 @@
 package ru.sakhalinenergy.alarmtripsettings.views.panel.loops;
 
+import java.util.Collections;
 import java.awt.Rectangle;
 import java.awt.Point;
-import java.util.Collections;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.JTable;
+import javax.swing.JViewport;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.RowSorterEvent;
 import javax.swing.event.RowSorterListener;
-import javax.swing.JTable;
-import javax.swing.JViewport;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import ru.sakhalinenergy.alarmtripsettings.Main;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
-import ru.sakhalinenergy.alarmtripsettings.events.Events;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelector;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Loop;
-import ru.sakhalinenergy.alarmtripsettings.Main;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.config.LoopsTablePanelSettingsObservable;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelector;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.CollectionEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.LoopsTableObservable;
+import ru.sakhalinenergy.alarmtripsettings.views.panel.Panel;
 
 
 /**
- * Класс реализует панель для отображения таблицы петель для выбранного объекта 
- * иерархии в дереве ассетов.
+ * Implements panel for rendering loops table for selected PAU object with 
+ * selected settings highlight.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.2
+ * @author Denis Udovenko
+ * @version 1.0.2
  */
-public class LoopsTablePanel extends javax.swing.JPanel 
+public class LoopsTablePanel extends Panel 
 {
-    public Events events = new Events();
     
     private final LoopsTableObservable model;
     private final LoopsTablePanelSettingsObservable config;
         
     
     /**
-     * Конструктор вью. Инициализирует все необходимые компоненты.
+     * Public constructor. Sets loops table and configuration models and 
+     * initializes components.
+     * 
+     * @param model Loops table model instance
+     * @param config Panel configuration object
      */
     public LoopsTablePanel(LoopsTableObservable model, LoopsTablePanelSettingsObservable config) 
     {
-        //Получаем коллекцию и инициализируем компоненты:
+        // Set loops table and configuration models:
         this.model = model;
         this.config = config;
         
-        //Подписываеся на события модели:
-        this.model.on(CollectionEvent.LOOPS_READ, new _ModelUpdatedEventHandler());
+        // Subscribe on model's events:
+        model.on(CollectionEvent.LOOPS_READ, new _ModelUpdatedEventHandler());
                         
         initComponents();
         
-        //Устанавливаем иконки пунктов контентестного меню:
-        this.splitLoopMenuItem.setIcon(Main.splitLoopIcon);
-        this.mergeLoopMenuItem.setIcon(Main.mergeLoopIcon);
-        this.mergeAllLoopsMenuItem.setIcon(Main.mergeAllLoopsIcon);
-    }//DevicesTableAndTaskbarPanel
+        // Set popup menu items icons:
+        splitLoopMenuItem.setIcon(Main.splitLoopIcon);
+        mergeLoopMenuItem.setIcon(Main.mergeLoopIcon);
+        mergeAllLoopsMenuItem.setIcon(Main.mergeAllLoopsIcon);
+    }// LoopsTablePanel
     
     
     /**
-     * Внутренний класс - обработчик события обновления модели. 
+     * Inner class - handler for model's update event.
      * 
      * @author Denis Udovenko
      * @version 1.0.1
@@ -75,125 +78,114 @@ public class LoopsTablePanel extends javax.swing.JPanel
         @Override
         public void customEventOccurred(CustomEvent event)
         {
-            //Удаляем старый подписчик на события выбора строки таблицы::
-            ListSelectionModel cellSelectionModel = loopsTable.getSelectionModel();
+            // Set table column model:
             loopsTable.setColumnModel(new DefaultTableColumnModel());
                 
-            //Создаем экземпляр модели таблицы:
+            // Set table model:
             LoopsTableModel tableModel = new LoopsTableModel(model.getWrappedLoops());
             loopsTable.setModel(tableModel);
                
-            //Назначаем всем колонкам таблицы рендерер текущего набора устройств:
+            // Set header and cell renderers for all table columns:
             for (TableColumn column : Collections.list(loopsTable.getColumnModel().getColumns()))
             {
                 column.setHeaderRenderer(new LoopsTableColumnHeaderRenderer());
                 column.setCellRenderer(new LoopsTableCellRenderer(model));
             }//for
         
-            //Создаем сортировщик:
+            // Set table sorter:
             TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(tableModel);
             sorter.addRowSorterListener(new LoopsTablePanel.LoopsTableSotringListener());
             loopsTable.setRowSorter(sorter);
             loopsTable.setUpdateSelectionOnSort(false);              
      
-            //Создаем подписчик на событие смены выбранной строки таблицы устройств заново:
+            // Set selection mode and selection event listener:
+            ListSelectionModel cellSelectionModel = loopsTable.getSelectionModel();
             cellSelectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             cellSelectionModel.addListSelectionListener(new LoopsTablePanel.LoopsTableSelectionListener());
         
             loopsTable.addMouseListener(new LoopsTableMouseAdapter());
         
-            //Применяем конфигурацию:
+            // Restore panel configuration:
             _applyConfig();
-        }//customEventOccurred
-    }//_PlantCodeSetEventHandler
+        }// customEventOccurred
+    }// _ModelUpdatedEventHandler
     
     
     /**
-     * Возвращает идентификатор выбранного контура в таблице.
+     * Returns selected loop identifier.
      * 
-     * @return Идентификатор выбранного контура
+     * @return Selected loop identifier
      */
     public String getSelectedLoop()
     {
-        int selectedRow = this.loopsTable.getSelectedRow();
-        Loop selectedDevice = model.getLoops().get(this.loopsTable.convertRowIndexToModel(selectedRow));
+        int selectedRow = loopsTable.getSelectedRow();
+        Loop selectedDevice = model.getLoops().get(loopsTable.convertRowIndexToModel(selectedRow));
         
         return Integer.toString(selectedDevice.getId());
-    }//getSelectedLoop
+    }// getSelectedLoop
     
     
     /**
-     * Метод восстанавливает выбраннрую строку таблицы устройств и прокручивает
-     * таблицы к выбранной строке.
-     * 
-     * @return  void
+     * Restores loops table panel configuration from configuration object.
      */
     private void _applyConfig()
     {
-        for (int i=0; i < this.loopsTable.getRowCount(); i++)
+        // Restore loop row selection:
+        for (int i = 0; i < loopsTable.getRowCount(); i++)
         {
-            Loop device = model.getLoops().get(this.loopsTable.convertRowIndexToModel(i));
+            Loop device = model.getLoops().get(loopsTable.convertRowIndexToModel(i));
             
             if (device.getId() == Integer.parseInt(config.getSelectedLoop()))
             {
-                this.loopsTable.setRowSelectionInterval(i, i);
-                this._scrollTableToSelectedCell(i, 0);
+                loopsTable.setRowSelectionInterval(i, i);
+                _scrollTableToSelectedCell(i, 0);
                 break;
-            }//if
-        }//for
-    }//_applyConfig
+            }// if
+        }// for
+    }// _applyConfig
        
     
     /**
-     * Метод прокручивает таблицу устрорйств к выбранной ячейке.
+     * Scrolls table to selected cell.
      * 
-     * @param   rowIndex   Индекс строки
-     * @param   vColIndex  Индекс столбца
-     * @return  void 
+     * @param rowIndex Selected row index
+     * @param columnIndex Selected column index
      */
-    private void _scrollTableToSelectedCell(int rowIndex, int vColIndex)
+    private void _scrollTableToSelectedCell(int rowIndex, int columnIndex)
     {
-        if (!(this.loopsTable.getParent() instanceof JViewport)) return;
+        if (!(loopsTable.getParent() instanceof JViewport)) return;
         
-        JViewport viewport = (JViewport)this.loopsTable.getParent();
-        Rectangle rect = this.loopsTable.getCellRect(rowIndex, vColIndex, true);
-        Point pt = viewport.getViewPosition();
-        rect.setLocation(rect.x - pt.x, rect.y - pt.y);
+        JViewport viewport = (JViewport)loopsTable.getParent();
+        Rectangle rect = loopsTable.getCellRect(rowIndex, columnIndex, true);
+        Point point = viewport.getViewPosition();
+        rect.setLocation(rect.x - point.x, rect.y - point.y);
 
-        this.loopsTable.scrollRectToVisible(rect);
-    }//scrollTableToSelectedCell
+        loopsTable.scrollRectToVisible(rect);
+    }// _scrollTableToSelectedCell
     
     
     /**
-     * Метод устанавливает фильтр списка устройств по заданной подстроке поиска.
-     * Найденными окажутся все устройства, маска которых содержит такую 
-     * подстроку.
+     * Applies loops filter by given search substring. Leaves only loops with 
+     * names contain given substring.
      * 
-     * @param   searchString  Подстрока поиска
-     * @return  void
+     * @param searchString Loops search substring
      */
-    public void setSearchDevicesFilter(String searchString)
+    public void setSearchLoopsFilter(String searchString)
     {
-        RowFilter rowFilter = null;
-        
-        //Пробуем применить фильтр к сортировщику таблицы, если она существует:
-        try 
+        try // Try to apply filter to current table sorter:
         {
-            rowFilter = RowFilter.regexFilter(searchString, 0);
-            TableRowSorter<TableModel> rowSorter = (TableRowSorter<TableModel>)this.loopsTable.getRowSorter();
+            RowFilter rowFilter = RowFilter.regexFilter(searchString, 0);
+            TableRowSorter<TableModel> rowSorter = (TableRowSorter<TableModel>)loopsTable.getRowSorter();
             rowSorter.setRowFilter(rowFilter);
-        } catch (Exception exception) {
-            
-            return;
-        }//catch
-    }//setSearchDevicesFilter
+        } catch (Exception exception){}
+    }// setSearchLoopsFilter
     
     
     /**
-     * Внутренний класс-обработчик события выбора устройства в таблице.
+     * Inner class - handler for change loops table selection event.
      * 
-     * @author   Denis.Udovenko
-     * @version  1.0.1
+     * @author Denis Udovenko
+     * @version 1.0.1
      */
     private class LoopsTableSelectionListener implements ListSelectionListener
     {
@@ -203,16 +195,16 @@ public class LoopsTablePanel extends javax.swing.JPanel
             int selectedRow = loopsTable.getSelectedRow();
             SettingsSelector selectedLoopWraper = model.getWrappedLoops().get(loopsTable.convertRowIndexToModel(selectedRow));
             CustomEvent loopSelectionEvent = new CustomEvent(selectedLoopWraper);
-            LoopsTablePanel.this.events.trigger(ViewEvent.CHANGE_LOOPS_TABLE_SELECTION, loopSelectionEvent);
-        }//valueChanged
-    };//addListSelectionListener
+            trigger(ViewEvent.CHANGE_LOOPS_TABLE_SELECTION, loopSelectionEvent);
+        }// valueChanged
+    };// LoopsTableSelectionListener
   
     
     /**
-     * Внутренний класс-обработчик события сортировки таблицы устройств.
+     * Inner class - handler for loops table sorting event.
      * 
-     * @author   Denis.Udovenko
-     * @version  1.0.1
+     * @author Denis Udovenko
+     * @version 1.0.1
      */
     private class LoopsTableSotringListener implements RowSorterListener
     {
@@ -221,81 +213,75 @@ public class LoopsTablePanel extends javax.swing.JPanel
         {
             if (rowsorterevent.getType() == RowSorterEvent.Type.SORTED)
             {
-                if (LoopsTablePanel.this.loopsTable.getRowCount() > 0)
+                if (loopsTable.getRowCount() > 0)
                 {
-                    LoopsTablePanel.this.loopsTable.setRowSelectionInterval(0, 0);
-                }//if
-            }//if
-        }//sorterChanged
-    };//RowSorterListener
+                    loopsTable.setRowSelectionInterval(0, 0);
+                }// if
+            }// if
+        }// sorterChanged
+    };// LoopsTableSotringListener
     
     
     /**
-     * Внутренний класс, описывающий адаптер мыши таблицы контуров для текущего
-     * выбранного объекта.
+     * Inner class implements loops table mouse adapter.
      * 
-     * @author   Denis.Udovenko
-     * @version  1.0.0
+     * @author Denis Udovenko
+     * @version 1.0.2
      */
     private class LoopsTableMouseAdapter extends MouseAdapter
     {
         
         /**
-         * Метод - обработчик событий мыши для таблицы контуров. Вызывает 
-         * контектсное меню для выбранной строки таблицы.
+         * Handles right mouse click on loops table and shows popup menu.
          * 
-         * @param   e  Событие мыши
-         * @return  void
+         * @param event Mouse event object
          */
-        private void showLoopsTablePopupMenu(MouseEvent e)
+        private void showLoopsTablePopupMenu(MouseEvent event)
         {
-            int x = e.getX();
-            int y = e.getY();
-            JTable loopsTable = (JTable)e.getSource();
-            int rowIndex = loopsTable.rowAtPoint(e.getPoint());
+            int x = event.getX();
+            int y = event.getY();
+            JTable loopsTable = (JTable)event.getSource();
+            int rowIndex = loopsTable.rowAtPoint(event.getPoint());
             
-            //Выбираем строку, по которой сделан клик:
+            // Get clicked table row:
             loopsTable.setRowSelectionInterval(rowIndex, rowIndex);
           
-            //Получаем экземпляр выбранной петли:
+            // Get selected loop instance:
             int selectedLoopIndex = loopsTable.convertRowIndexToModel(rowIndex);
             Loop selectedLoop = model.getLoops().get(selectedLoopIndex);
             
-            //Блокируем или разрешаем пукт меню для объединения петли в зависимости от того, разделена она или нет: 
-            //if (selectedLoop.getSplit()) LoopsTablePanel.this.mergeLoopMenuItem.setEnabled(true);
-            //else LoopsTablePanel.this.mergeLoopMenuItem.setEnabled(false);
+            // Enable/disable loop merge menu item depending on loop split state: 
+            if (model.isLoopSplit(selectedLoop)) mergeLoopMenuItem.setEnabled(true);
+            else mergeLoopMenuItem.setEnabled(false);
              
-            //Отображаем контекстное меню:
-            LoopsTablePanel.this.loopsTablePopupMenu.show(loopsTable, x, y);
-        }//myPopupEvent
+            // Show popup menu:
+            loopsTablePopupMenu.show(loopsTable, x, y);
+        }// showLoopsTablePopupMenu
         
         
         /**
-         * Метод перегружает дефолтный обработчик адаптера нажатия клавиши мыши.
+         * Handles mouse pressed event.
          * 
-         * @param   e     Событие нажатия клавиши мыши
-         * @return  void
+         * @param event Mouse pressed event object
          */
         @Override
-        public void mousePressed(MouseEvent e)
+        public void mousePressed(MouseEvent event)
         {
-            if (e.isPopupTrigger()) showLoopsTablePopupMenu(e);
-	}//mousePressed
+            if (event.isPopupTrigger()) showLoopsTablePopupMenu(event);
+	}// mousePressed
 	
         
         /**
-         * Метод перегружает дефолтный обработчик адаптера отпускания клавиши 
-         * мыши.
+         * Handles mouse released event.
          * 
-         * @param   e     Событие нажатия клавиши мыши
-         * @return  void
+         * @param event Mouse released event object
          */
         @Override
-        public void mouseReleased(MouseEvent e) 
+        public void mouseReleased(MouseEvent event) 
         {
-            if (e.isPopupTrigger()) showLoopsTablePopupMenu(e);
-	}//mouseReleased
-    }//SourcesTreeMouseAdapter
+            if (event.isPopupTrigger()) showLoopsTablePopupMenu(event);
+	}// mouseReleased
+    }// LoopsTableMouseAdapter
     
 
     /**
@@ -402,73 +388,71 @@ public class LoopsTablePanel extends javax.swing.JPanel
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    
-    
+        
     /**
+     * Handles loops search field text changed event and triggers an event with
+     * selected new search substring text.
      * 
-     * 
+     * @param evt Loops search text field event object
      */
     private void devicesSearchTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_devicesSearchTextFieldKeyReleased
 
-        CustomEvent selectionEvent = new CustomEvent(this.devicesSearchTextField.getText());
-        this.events.trigger(ViewEvent.CHANGE_LOOPS_SEARCH_STRING, selectionEvent);
+        CustomEvent selectionEvent = new CustomEvent(devicesSearchTextField.getText());
+        trigger(ViewEvent.CHANGE_LOOPS_SEARCH_STRING, selectionEvent);
     }//GEN-LAST:event_devicesSearchTextFieldKeyReleased
 
     
     /**
-     * Метод обрабатывает клик по пункту контекстного меню "Split loop..." и 
-     * рассылает всем подписчикам событие с контекстом информации о выбранных
-     * объектах таблицы.
+     * Handles "Split loop" popup menu item click event and triggers appropriate
+     * event with selected selected loop instance data.
      * 
-     * @param   evt   Событие клика по пункту контекстного меню
-     * @return  void 
+     * @param evt Popup menu item click event object
      */
     private void splitLoopMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_splitLoopMenuItemActionPerformed
         
-        //Получаем индекс петли в коллекции:
+        // Get selected loop index:
         int selectedRow = loopsTable.getSelectedRow();
         int selectedLoopIndex = loopsTable.convertRowIndexToModel(selectedRow);
         
         // Get selected loop instance:
         Loop selectedLoop = model.getLoops().get(selectedLoopIndex);
         
-        //Создаем и рассылаем событие:
+        // Trigger an event with loop instance data:
         CustomEvent splitLoopMenuItemClickEvent = new CustomEvent(selectedLoop);
-        this.events.trigger(ViewEvent.SPLIT_LOOP_MENU_ITEM_CLICK, splitLoopMenuItemClickEvent);
+        trigger(ViewEvent.SPLIT_LOOP_MENU_ITEM_CLICK, splitLoopMenuItemClickEvent);
     }//GEN-LAST:event_splitLoopMenuItemActionPerformed
 
     
     /**
-     * Метод обрабатывает клик по пункту контекстного меню "Merge loop..." и 
-     * рассылает всем подписчикам событие с контекстом информации о выбранных
-     * объектах таблицы.
+     * Handles "Merge loop" popup menu item click event and triggers appropriate
+     * event with selected selected loop instance data.
      * 
-     * @param   evt   Событие клика по пункту контекстного меню
-     * @return  void 
+     * @param evt Popup menu item click event object
      */
     private void mergeLoopMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mergeLoopMenuItemActionPerformed
         
-        //Получаем индекс петли в коллекции:
-        int selectedRow = this.loopsTable.getSelectedRow();
-        int selectedLoopIndex = this.loopsTable.convertRowIndexToModel(selectedRow);
+        // Get selected loop index:
+        int selectedRow = loopsTable.getSelectedRow();
+        int selectedLoopIndex = loopsTable.convertRowIndexToModel(selectedRow);
         
-        //Создаем и рассылаем событие:
-        CustomEvent mergeLoopMenuItemclickEvent = new CustomEvent(selectedLoopIndex);
+        // Get selected loop instance:
+        Loop selectedLoop = model.getLoops().get(selectedLoopIndex);
+        
+        // Trigger an event with loop instance data:
+        CustomEvent mergeLoopMenuItemclickEvent = new CustomEvent(selectedLoop);
         this.events.trigger(ViewEvent.MERGE_LOOP_MENU_ITEM_CLICK, mergeLoopMenuItemclickEvent);
     }//GEN-LAST:event_mergeLoopMenuItemActionPerformed
 
     
     /**
-     * Метод обрабатывает клик по пункту контекстного меню "Merge all loops..." и 
-     * рассылает всем подписчикам событие с контекстом информации о выбранных
-     * объектах таблицы.
+     * Handles "Merge all loops" popup menu item click event and triggers 
+     * appropriate event for all subscribers.
      * 
-     * @param   evt   Событие клика по пункту контекстного меню
-     * @return  void 
+     * @param evt Popup menu item click event object
      */
     private void mergeAllLoopsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mergeAllLoopsMenuItemActionPerformed
         
-        CustomEvent mergeAllLoopsMenuItemclickEvent = new CustomEvent(this);
+        CustomEvent mergeAllLoopsMenuItemclickEvent = new CustomEvent(new Object());
         this.events.trigger(ViewEvent.MERGE_ALL_LOOPS_MENU_ITEM_CLICK, mergeAllLoopsMenuItemclickEvent);
     }//GEN-LAST:event_mergeAllLoopsMenuItemActionPerformed
    
@@ -483,4 +467,4 @@ public class LoopsTablePanel extends javax.swing.JPanel
     private javax.swing.JMenuItem mergeLoopMenuItem;
     private javax.swing.JMenuItem splitLoopMenuItem;
     // End of variables declaration//GEN-END:variables
-}
+}// LoopsTablePanel
