@@ -15,93 +15,88 @@ import ru.sakhalinenergy.alarmtripsettings.models.entity.TagSettingProperty;
 
 
 /**
- * Класс - набоор статических методов для управления деревом тагов выбранного 
- * устройства.
+ * Implements a set of static methods for tags tree manipulation.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.7
+ * @author Denis Udovenko
+ * @version 1.0.7
  */
 public class TagsTreeOperator
 {
     
     /**
-     * Метод строит дерево тагов полученного устройства от заданного корневого 
-     * узла.
+     * Builds tags tree for given loop starting from given root node.
      * 
-     * @param   root    Корневой узел
-     * @param   device  Экземпляр устройства, дерево тагов которого строим
-     * @return  void
+     * @param root Root node
+     * @param loop Loop entity instance whose tags tree will be built
      */
     public static void buildTree(DefaultMutableTreeNode root, Loop loop)
     {
         root.removeAllChildren();
                        
-        //Инициализируем список источников данных результатов экспорта из SPI:
-        _addIntoolsSourcesNodes(root, loop);
-    }//buildTree
+        // Build data sources branches with tags:
+        _buildDataSourcesBranches(root, loop);
+    }// buildTree
     
     
     /**
-     * Метод очищает заданный корневой узел от всех дочерних узлов.
+     * Removes all child nodes of given root node.
      *
-     * @param   root  Корневой узел, детей которого удаляем
-     * @return  void 
+     * @param root Root node
      */
     public static void clearTree(DefaultMutableTreeNode root)
     {
         root.removeAllChildren();
-    }//clearTree
+    }// clearTree
     
     
     /**
-     * Метод добавляет к корневому узлу отсортированные по приоритету узлы
-     * источников данных тагов SPI с уже достроенными списками тагов и их 
-     * свойств.
+     * Builds branches for parent data sources of tags from current loop. Adds 
+     * tags and tag settings nodes to parents source branches, then adds built
+     * branches to root node.
      * 
-     * @param root Корневой узел, к которому пристраиваем дерево тагов
-     * @param device Экземпляр устройства, дерево тагов которого строим
-     * @return  void
+     * @param root Root node
+     * @param loop Loop entity instance whose tags tree will be built
      */
-    private static void _addIntoolsSourcesNodes(DefaultMutableTreeNode root, Loop loop)
+    private static void _buildDataSourcesBranches(DefaultMutableTreeNode root, Loop loop)
     {
         Set<Tag> tags = loop.getTags();
         Source tempSource;
         int tempSourceId;
         
-        //Инициализируем список источников данных результатов экспорта из SPI:
+        // Initialize data source nodes hash:
         HashMap<Integer, DefaultMutableTreeNode> dataSourcesNodesMap = new HashMap();
         
-        //Группируем таги SPI по источникам данных:       
+        // Create and group tag nodes into data source brnches:
         for (Tag tempTag : tags)
         {
             tempSource = tempTag.getSource();
             tempSourceId = tempSource.getId();
             
-            //Если узел источника уже создан:
+            // If data source node is aleready created:
             if (dataSourcesNodesMap.containsKey(tempSourceId))
             {
                 DefaultMutableTreeNode intoolsTagNode = new DefaultMutableTreeNode(tempTag);
             
-                //Достраиваем к узлу тага ветвь с параметрами:
+                // Add settings branch to tag node:
                 _buildSettingsBranch(intoolsTagNode, tempTag);
                 dataSourcesNodesMap.get(tempSourceId).add(intoolsTagNode);
                 
-            } else { //Если узел источника еще не создан:
+            } else { // If data source node wasn't created yet:
             
                 DefaultMutableTreeNode dataSourceNode = new DefaultMutableTreeNode(tempSource);
                 DefaultMutableTreeNode tagNode = new DefaultMutableTreeNode(tempTag);
                 
-                //Достраиваем к узлу тага ветвь с параметрами:
+                // Add settings branch to tag node:
                 _buildSettingsBranch(tagNode, tempTag);
                 dataSourceNode.add(tagNode);
                 dataSourcesNodesMap.put(tempSourceId, dataSourceNode);
-            }//else
-        }//for
+            }// else
+        }// for
         
-        //Получаем коллекцию узлов для сортировки и добавления к корню:
+        // Get data source nodes collection for sorting and adding to the root:
         List<DefaultMutableTreeNode> intoolsDataSourcesNodesList = new ArrayList(dataSourcesNodesMap.values());
         
-        //Сортируем коллекуию по типу источника и по приоритету:
+        // Sort data source nodes by source type and priority:
         Collections.sort(intoolsDataSourcesNodesList, new Comparator<DefaultMutableTreeNode>()
         {
             @Override
@@ -112,53 +107,50 @@ public class TagsTreeOperator
                 
                 if (source1.getTypeId() == source2.getTypeId()) return source2.getPriority() - source1.getPriority();
                 else return source1.getTypeId() - source2.getTypeId();
-            }//compare
-        });//sort
+            }// compare
+        });// sort
         
-        //Добавляем в дерево все созданные узлы источников данных тагов SPI:
-        for (DefaultMutableTreeNode node : intoolsDataSourcesNodesList)
-        {
-            root.add(node);
-        }//for
-    }//_addIntoolsSourcesNodes 
+        // Add data source nodes to the root:
+        for (DefaultMutableTreeNode node : intoolsDataSourcesNodesList) root.add(node);
+    }// _buildDataSourcesBranches 
     
         
     /**
-     * Метод строит ветку настроек для заданнгого узла тага.
+     * Builds tag's node settings branch.
      * 
-     * @param tagNode Узел тага, для которого строим ветку параметров
-     * @param tag Экземпляр тага, параметры которого выстраиваем
-     * @return void
+     * @param tagNode Tag's node whose settings branch will be built
+     * @param tag Tag entity instance
      */
     private static void _buildSettingsBranch(DefaultMutableTreeNode tagNode, Tag tag)
     {
         Set<TagSetting> settings = tag.getSettings();
         List<TagSetting> settingsList = new ArrayList(settings);
         
-        //Сортируем коллекуию по типу настроек:
+        // Sort settings collection by setting type:
         Collections.sort(settingsList, new Comparator<TagSetting>()
         {
             @Override
             public int compare(TagSetting setting1, TagSetting setting2)
             {
                 return setting1.getTypeId() - setting2.getTypeId();
-            }//compare
-        });//sort
+            }// compare
+        });// sort
         
-        //Обходим все доступные настройки текущего тага:   
+        // Build setting properties branch for each setting and add setting branch to a tag:
         for (TagSetting tempSetting : settingsList)
         {
             DefaultMutableTreeNode settingNode = new DefaultMutableTreeNode(tempSetting);
             _buildSettingPropertiesBranch(settingNode, tempSetting);
             tagNode.add(settingNode);
-        }//for
-    }//_buildSettingsBranch
+        }// for
+    }// _buildSettingsBranch
     
     
     /**
-     * Метод строит ветку свойств настройки тага прибора. 
-     * 
-     * @return  void
+     * Builds tag's setting property branch.
+     *
+     * @param settingNode Tag's setting none whose settings branch will be built
+     * @param setting Setting entity instance
      */
     private static void _buildSettingPropertiesBranch(DefaultMutableTreeNode settingNode, TagSetting setting)
     {
@@ -166,6 +158,6 @@ public class TagsTreeOperator
         {
             DefaultMutableTreeNode settingPropertyNode = new DefaultMutableTreeNode(tempSettingProperty);
             settingNode.add(settingPropertyNode);
-        }//for
-    }//_buildSettingPropertiesBranch
-}//TagsTreeModel
+        }// for
+    }// _buildSettingPropertiesBranch
+}// TagsTreeOperator

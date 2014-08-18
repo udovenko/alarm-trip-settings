@@ -6,74 +6,75 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
-import ru.sakhalinenergy.alarmtripsettings.events.Events;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelector;
-import ru.sakhalinenergy.alarmtripsettings.implemented.SettingsTypes;
 import ru.sakhalinenergy.alarmtripsettings.Main;
+import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
+import ru.sakhalinenergy.alarmtripsettings.implemented.SettingsTypes;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelector;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Tag;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagSetting;
+import ru.sakhalinenergy.alarmtripsettings.views.panel.Panel;
 
 
 /**
- * Класс реализует вью дерева тегов устройства.
+ * Implements panel for rendering tags tree of the loop selected in loops table.
  * 
- * @author   Denis.Udovenko
- * @version  1.0.4
+ * @author Denis Udovenko
+ * @version 1.0.4
  */
-public class TagsTreePanel extends javax.swing.JPanel 
+public class TagsTreePanel extends Panel 
 {
-    public static final Byte COPY_NODE_NAME_TO_CLIPBOARD_EVENT = 1;
-    public Events events = new Events();
-    
+  
     private final SettingsSelector model;
     
     
     /**
-     * Конструктор вью. Инициализирует компоненты вью и назначает модель.
+     * Public constructor. Sets loop wrapper model and initializes components.
+     *
+     * @param model Loop entity wrapped into settings selection logic
      */
     public TagsTreePanel(SettingsSelector model) 
     {
         this.model = model;
                 
         initComponents();
-        this.copyNodeNameToClipboardMenuItem.setIcon(Main.copyIcon);
+        copyNodeNameToClipboardMenuItem.setIcon(Main.copyIcon);
         
         render();
-    }//TagsTreePanel
+    }// TagsTreePanel
        
     
     /**
-     * Метод формирует дерево тагов.
+     * Renders tags tree.
      */
     private void render()
     {
-        //Создаем рендерер дерева тагов устройства:
-        this.loopTagsTree.setCellRenderer(new TagsTreeCellRenderer(model));
-        this.loopTagsTree.addMouseListener(new TagsTreeMouseAdapter());
+        // Set tree cell renderer and mouse adapter:
+        loopTagsTree.setCellRenderer(new TagsTreeCellRenderer(model));
+        loopTagsTree.addMouseListener(new _TagsTreeMouseAdapter());
                 
-        //Получаем модель дерева и корневой узел:
-        DefaultTreeModel treeModel = (DefaultTreeModel)this.loopTagsTree.getModel();
+        // Get tree model and root node:
+        DefaultTreeModel treeModel = (DefaultTreeModel)loopTagsTree.getModel();
         DefaultMutableTreeNode root = (DefaultMutableTreeNode)treeModel.getRoot();
         
+        // Build tree:
         TagsTreeOperator.buildTree(root, model.getEntity());
                 
-        //Перегружаем дерево:
+        // Reload tree:
         treeModel.reload(root);
         
         TreePath tempPath;
         DefaultMutableTreeNode tempNode;
         Object tempNodeObject;
         
-        //Раскрываем все узлы дерева:
-        for (int i = 0; i < this.loopTagsTree.getRowCount(); i++)
+        // Iterate tree nodes:
+        for (int i = 0; i < loopTagsTree.getRowCount(); i++)
         {
-            tempPath = this.loopTagsTree.getPathForRow(i);
+            tempPath = loopTagsTree.getPathForRow(i);
             tempNode = (DefaultMutableTreeNode)tempPath.getLastPathComponent();
             tempNodeObject = tempNode.getUserObject();
             
-            //Раскрываем все узлы, не являющиеся тагами и таги, у которых есть хотя бы одна уставка:
-            if (tempNodeObject.getClass() != Tag.class) this.loopTagsTree.expandRow(i);
+            // Expand all sources nodes and only tag nodes which contain least one alarm setting:
+            if (!(tempNodeObject instanceof Tag)) loopTagsTree.expandRow(i);
             else {
             
                 Tag tempTag = (Tag)tempNodeObject;
@@ -83,69 +84,64 @@ public class TagsTreePanel extends javax.swing.JPanel
                         || tempSetting.getTypeId() == SettingsTypes.ALARM_L_SETTING.ID
                         || tempSetting.getTypeId() == SettingsTypes.ALARM_H_SETTING.ID
                         || tempSetting.getTypeId() == SettingsTypes.ALARM_HH_SETTING.ID) 
-                    this.loopTagsTree.expandRow(i);
-                }//for
-            }//else
-        }//for
-    }//render
+                    loopTagsTree.expandRow(i);
+                }// for
+            }// else
+        }// for
+    }// render
     
     
     /**
-     * Внутренний класс, описывающий адаптер мыши дерева тагов текущей выбранной
-     * петли.
+     * Inner class implements mouse adapter for tags tree.
      * 
-     * @author   Denis.Udovenko
-     * @version  1.0.0
+     * @author Denis Udovenko
+     * @version 1.0.1
      */
-    private class TagsTreeMouseAdapter extends MouseAdapter
+    private class _TagsTreeMouseAdapter extends MouseAdapter
     {
         
         /**
-         * Метод - обработчик событий мыши для дерева тагов.
+         * Handles right mouse click and shows tags tree popup menu.
          * 
-         * @param   e  Событие мыши
-         * @return  void
+         * @param event Mouse click event object
          */
-        private void showSourcesTreePopupMenu(MouseEvent e)
+        private void showSourcesTreePopupMenu(MouseEvent event)
         {
-            int x = e.getX();
-            int y = e.getY();
-            JTree tree = (JTree)e.getSource();
+            int x = event.getX();
+            int y = event.getY();
+            JTree tree = (JTree)event.getSource();
             TreePath path = tree.getPathForLocation(x, y);
+            
             if (path == null) return;	
             
             tree.setSelectionPath(path);
-            
-            TagsTreePanel.this.treePopupMenu.show(tree, x, y);
-        }//myPopupEvent
+            treePopupMenu.show(tree, x, y);
+        }// showSourcesTreePopupMenu
         
         
         /**
-         * Метод перегружает дефолтный обработчик адаптера нажатия клавиши мыши.
+         * Handles mouse pressed event.
          * 
-         * @param   e     Событие нажатия клавиши мыши
-         * @return  void
+         * @param event Mouse pressed event
          */
         @Override
-        public void mousePressed(MouseEvent e)
+        public void mousePressed(MouseEvent event)
         {
-            if (e.isPopupTrigger()) showSourcesTreePopupMenu(e);
-	}//mousePressed
+            if (event.isPopupTrigger()) showSourcesTreePopupMenu(event);
+	}// mousePressed
 	
         
         /**
-         * Метод перегружает дефолтный обработчик адаптера отпускания клавиши 
-         * мыши.
+         * Handles mouse released event.
          * 
-         * @param   e     Событие нажатия клавиши мыши
-         * @return  void
+         * @param event Mouse released event
          */
         @Override
-        public void mouseReleased(MouseEvent e) 
+        public void mouseReleased(MouseEvent event) 
         {
-            if (e.isPopupTrigger()) showSourcesTreePopupMenu(e);
-	}//mouseReleased
-    }//SourcesTreeMouseAdapter
+            if (event.isPopupTrigger()) showSourcesTreePopupMenu(event);
+	}// mouseReleased
+    }// _TagsTreeMouseAdapter
     
 
     /**
@@ -194,18 +190,17 @@ public class TagsTreePanel extends javax.swing.JPanel
 
     
     /**
-     * Метод рассылает всем подписчикам событие клика по пункту контекстного 
-     * меню копирования имени выбранного узла в буфер обмена.
+     * Handles "Copy selected node name to clipboard" menu item click event and
+     * triggers appropriate event with selected node user object data.
      * 
-     * @param   evt    События клика по пункту контекстного меню
-     * @return  void
+     * @param evt Popup menu item click object
      */
     private void copyNodeNameToClipboardMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyNodeNameToClipboardMenuItemActionPerformed
         
-        TreePath path = this.loopTagsTree.getSelectionPath();
+        TreePath path = loopTagsTree.getSelectionPath();
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
         CustomEvent copyNodeNameToClipboardEvent = new CustomEvent(node.getUserObject());
-        this.events.trigger(ViewEvent.COPY_NODE_NAME_TO_CLIPBOARD, copyNodeNameToClipboardEvent);    
+        trigger(ViewEvent.COPY_NODE_NAME_TO_CLIPBOARD, copyNodeNameToClipboardEvent);    
     }//GEN-LAST:event_copyNodeNameToClipboardMenuItemActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -214,4 +209,4 @@ public class TagsTreePanel extends javax.swing.JPanel
     private javax.swing.JScrollPane tagDetailsTreeScrollPane;
     private javax.swing.JPopupMenu treePopupMenu;
     // End of variables declaration//GEN-END:variables
-}
+}// TagsTreePanel

@@ -4,28 +4,30 @@ import java.awt.Color;
 import java.awt.Component;
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelector;
-import ru.sakhalinenergy.alarmtripsettings.implemented.SettingsTypes;
-import ru.sakhalinenergy.alarmtripsettings.implemented.SourcesTypes;
 import javax.swing.border.Border;
 import javax.swing.border.MatteBorder;
-import ru.sakhalinenergy.alarmtripsettings.models.entity.Source;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import ru.sakhalinenergy.alarmtripsettings.Main;
+import ru.sakhalinenergy.alarmtripsettings.implemented.SettingsTypes;
+import ru.sakhalinenergy.alarmtripsettings.implemented.SourcesTypes;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelector;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Tag;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.TagSetting;
-import ru.sakhalinenergy.alarmtripsettings.Main;
+import ru.sakhalinenergy.alarmtripsettings.models.entity.Source;
 
 
 /**
- * @author   Denis.Udovenko
- * @version  1.0.3
+ * Implements cell renderer for tags tree.
+ * 
+ * @author Denis Udovenko
+ * @version 1.0.3
  */
 public class TagsTreeCellRenderer extends DefaultTreeCellRenderer
 {
     private final SettingsSelector parentLoopWraper;
     
-    //Цвета ячеек для групп алармов:
+    // Cells background colors for alam groups cells:
     private final Color ALARM_LOW_LOW_GROUP_COLOR = new Color(245, 240, 255);
     private final Color ALARM_LOW_GROUP_COLOR = new Color(223, 253, 255);
     private final Color ALARM_HIGH_GROUP_COLOR = new Color(209, 255, 214);
@@ -33,35 +35,34 @@ public class TagsTreeCellRenderer extends DefaultTreeCellRenderer
     
     
     /**
-     * Public constructor. 
+     * Public constructor. Sets loop wrapper instance.
      * 
-     * @param parentLoopWraper Wrapped parent loop instance, from which tree was built
+     * @param parentLoopWraper Wrapped loop instance, from which tree was built
      */
     public TagsTreeCellRenderer(SettingsSelector parentLoopWraper)
     {
         this.parentLoopWraper = parentLoopWraper;
-    }//TagsTreeCellRenderer
+    }// TagsTreeCellRenderer
     
     
     /**
-     * Метод перегружает стандартный отрисовщик узла дерева тагов и 
-     * устанавливает соответствующие иконки в зависимости от класса или 
-     * содержания узла.
+     * Returns component that renderer uses to draw the value depending on node 
+     * object type.
      * 
-     * @param tree Текущий экземпляр дерева
-     * @param value Экземпляр текущего выбранного узла дерева
-     * @param sel Флаг "узел выбран"
-     * @param expanded Флаг "узел развернут"
-     * @param leaf Флаг "узел является листом", т.е не имеет детей
-     * @param row Индекс строки
-     * @param hasFocus Флаг "установлен фокус"
-     * @return Component Отредактированный экземпляр узла.
+     * @param tree JTree the receiver is being configured for
+     * @param value Value of the current tree cell to be set
+     * @param selected Specifies that cell will be drawn as selected
+     * @param expanded Specifies that node will be drawn in expended state
+     * @param leaf Specifies that node represents a leaf 
+     * @param row Row index in tree
+     * @param hasFocus Specifies that node currently has focus
+     * @return Component that renderer uses to draw the value depending on node object type
      */
     @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value,
-        boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus)
+        boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus)
     {
-        super.getTreeCellRendererComponent(tree, value, sel, expanded, 
+        super.getTreeCellRendererComponent(tree, value, selected, expanded, 
             leaf, row, hasFocus);
         
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
@@ -74,7 +75,7 @@ public class TagsTreeCellRenderer extends DefaultTreeCellRenderer
         
         Source tempSource;
                
-        //Если узел - источник списка тагов SPI:
+        // If current node is data source:
         if (nodeObject instanceof Source)
         {
             tempSource = (Source)nodeObject;
@@ -83,12 +84,12 @@ public class TagsTreeCellRenderer extends DefaultTreeCellRenderer
             if (tempSource.getTypeId() == SourcesTypes.DCS_VARIABLE_TABLE.ID) icon = Main.dcsIcon;
             if (tempSource.getTypeId() == SourcesTypes.ESD_VARIABLE_TABLE.ID) icon = Main.esdIcon;
             if (tempSource.getTypeId() == SourcesTypes.FGS_VARIABLE_TABLE.ID) icon = Main.fgsIcon;
-        }//if
+        }// if
         
-        //Если узел - заголовк тага:
+        // If current node is tag:
         if (nodeObject instanceof Tag) icon = Main.tagIcon;
         
-        //Если узел - значение параметра тага:
+        // If current node is tag setting:
         if (nodeObject instanceof TagSetting)
         {    
             icon = Main.settingIcon;
@@ -115,13 +116,14 @@ public class TagsTreeCellRenderer extends DefaultTreeCellRenderer
                 
                 if (setting.getTypeId() == SettingsTypes.ALARM_HH_SETTING.ID)
                     backgroundColor = ALARM_HIGH_HIGH_GROUP_COLOR;
-            }//if
-        }//if
+            }// if
+        }// if
                 
-        this.setBorder(border);
-        this.setOpaque(opaque);
-        this.setBackground(backgroundColor);    
-        this.setIcon(icon);
+        setBorder(border);
+        setOpaque(opaque);
+        setBackground(backgroundColor);    
+        setIcon(icon);
+        
         return this;
-    }//getTreeCellRendererComponent
-}//TagsTreeRenderer 
+    }// getTreeCellRendererComponent
+}// TagsTreeCellRenderer 
