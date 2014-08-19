@@ -13,7 +13,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.logic.summary.OveralCompliance
 import ru.sakhalinenergy.alarmtripsettings.models.logic.summary.IntoolsCompliance;
 import ru.sakhalinenergy.alarmtripsettings.models.config.ConfigEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.config.MainFormSettings;
-import ru.sakhalinenergy.alarmtripsettings.views.MainForm.MainForm;
+import ru.sakhalinenergy.alarmtripsettings.views.form.MainForm;
 import ru.sakhalinenergy.alarmtripsettings.controllers.MainFormController;
 
 

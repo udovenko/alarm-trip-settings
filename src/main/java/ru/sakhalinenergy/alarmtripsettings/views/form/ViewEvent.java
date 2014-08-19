@@ -1,4 +1,4 @@
-package ru.sakhalinenergy.alarmtripsettings.views.MainForm;
+package ru.sakhalinenergy.alarmtripsettings.views.form;
 
 
 /**

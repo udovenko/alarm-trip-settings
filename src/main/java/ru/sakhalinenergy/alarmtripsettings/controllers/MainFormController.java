@@ -7,8 +7,8 @@ import ru.sakhalinenergy.alarmtripsettings.factories.DialogsFactory;
 import ru.sakhalinenergy.alarmtripsettings.models.config.ConfigEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.config.MainFormSettings;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.AboutDialog;
-import ru.sakhalinenergy.alarmtripsettings.views.MainForm.ViewEvent;
-import ru.sakhalinenergy.alarmtripsettings.views.MainForm.MainForm;
+import ru.sakhalinenergy.alarmtripsettings.views.form.ViewEvent;
+import ru.sakhalinenergy.alarmtripsettings.views.form.MainForm;
 
 
 /**

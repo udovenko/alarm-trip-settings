@@ -1,11 +1,11 @@
-package ru.sakhalinenergy.alarmtripsettings.views.MainForm;
+package ru.sakhalinenergy.alarmtripsettings.views.form;
 
 import java.awt.Frame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import ru.sakhalinenergy.alarmtripsettings.Main;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.Events;
-import ru.sakhalinenergy.alarmtripsettings.Main;
-import javax.swing.SwingUtilities;
 import ru.sakhalinenergy.alarmtripsettings.models.config.MainFormSettingsObservable;
 
 
