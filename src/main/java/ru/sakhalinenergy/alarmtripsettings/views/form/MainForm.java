@@ -2,23 +2,24 @@ package ru.sakhalinenergy.alarmtripsettings.views.form;
 
 import java.awt.Frame;
 import javax.swing.JPanel;
+import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import ru.sakhalinenergy.alarmtripsettings.Main;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
+import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
 import ru.sakhalinenergy.alarmtripsettings.events.Events;
 import ru.sakhalinenergy.alarmtripsettings.models.config.MainFormSettingsObservable;
 
 
 /**
- * Вью главной формы приложения. Реализeует набор фреймов для вставки вью 
- * отдельных моделей.
+ * Implements application's main form.
  * 
- * @author   Denis.Udovenko
- * @version  1.1.7
+ * @author Denis Udovenko
+ * @version 1.1.8
  */
-public class MainForm extends javax.swing.JFrame
+public class MainForm extends JFrame
 {
-    public Events events = new Events();
+    private final Events events = new Events();
     
     private static final String LOGS_TAB_NAME                       = "log";
     private static final String OVERALL_COMPLIANCE_SUMMARY_TAB_NAME = "overall_compliance_summary";
@@ -31,347 +32,350 @@ public class MainForm extends javax.swing.JFrame
     private int windowHeigthBeforeMaximizing; 
    
     private int maximizedWindowWorkspaceHeight;
-    private int maximizedWindowAssetsTreeWidth;
-    private int maximizedWindowTagDetailsTreeWidth;
+    private int maximizedWindowPlantsTreeWidth;
+    private int maximizedWindowTagsTreeWidth;
     
     private int minimizedWindowWorkspaceHeight;
-    private int minimizedWindowAssetsTreeWidth;
-    private int minimizedWindowTagDetailsTreeWidth;
+    private int minimizedWindowPlantsTreeWidth;
+    private int minimizedWindowTagsTreeWidth;
     
     private final MainFormSettingsObservable config;
     
     
     /**
-     * Конструктор формы. Инициализирует все компоненты.
+     * Public constructor. Sets form configuration object, initializes 
+     * components and applies configuration.
+     * 
+     * @param config Main form configuration object
      */
     public MainForm(MainFormSettingsObservable config)
     {
         this.config = config;
         
-        //Инициализируем компоненты:
         initComponents();
         
-        //Применяем конфигурацию:
-        _applyConfig();
-        
-        //Устанавливаем иконки пунктов главного меню:
-        this.openStorageMenuItem.setIcon(Main.storageConnectionIcon);
-        this.versionMenuItem.setIcon(Main.aboutIcon);
-    }//MainFrom
+        // Set main menu items icons:
+        openStorageMenuItem.setIcon(Main.storageConnectionIcon);
+        versionMenuItem.setIcon(Main.aboutIcon);
+    }// MainFrom
 
     
     /**
-     * Метод устанавливает контент панели прокрутки для дерева ассетов.
-     * 
-     * @param plantsTreePanel Панель, отображающая дерево ассетов
+     * Sets relative location, restores configuration and shows form.
      */
-    public void setPlantsTreePanelContent(JPanel plantsTreePanel)
+    public void render()
     {
-        this.plantsTreeScrollPane.add(plantsTreePanel);
-        this.plantsTreeScrollPane.setViewportView(plantsTreePanel);
-    }//setPlantsTreePanelContent
-    
-    
-    /**
-     * Метод устанавливает контент панели прокрутки для таблицы устройств.
-     * 
-     * @param devicesTableandTaskBarPanel Панель, отображающая таблицу устройств
-     */
-    public void setDevicesTableAndTaskbarPanelContent(JPanel devicesTableandTaskBarPanel)
-    {
-        this.devicesTableAndTaskBarPanelScrollPane.add(devicesTableandTaskBarPanel);
-        this.devicesTableAndTaskBarPanelScrollPane.setViewportView(devicesTableandTaskBarPanel);
-    }//setDevicesTablePanelContent
-    
-    
-    /**
-     * Метод устанавливает контент панели прокрутки для графического отображения
-     * итогов анализа общего соответсвия уставок по выбранному объекту.
-     * 
-     * @param overallComplianceSummaryPanel Панель, отображающая соответсвующую информацию  
-     */
-    public void setOverallComplianceSummaryPanelContent(JPanel overallComplianceSummaryPanel)
-    {
-        this.overallComplianceSummaryScrollPane.add(overallComplianceSummaryPanel);
-        this.overallComplianceSummaryScrollPane.setViewportView(overallComplianceSummaryPanel);
-    }//setOverallComplianceSummaryPanelContent
-    
-    
-    /**
-     * Метод устанавливает контент панели прокрутки для графического отображения
-     * итогов анализа соответствия уставок SPI по выбранному объекту.
-     * 
-     * @param intoolsComplianceSummaryPanel Панель, отображающая соответсвующую информацию  
-     */
-    public void setIntoolsComplianceSummaryPanelContent(JPanel intoolsComplianceSummaryPanel)
-    {
-        this.intoolsComplianceSummaryScrollPane.add(intoolsComplianceSummaryPanel);
-        this.intoolsComplianceSummaryScrollPane.setViewportView(intoolsComplianceSummaryPanel);
-    }//setIntoolsComplianceSummaryPanelContent
-    
+        setLocationRelativeTo(null);
 
-    /**
-     * Метод устанавливает контент панели прокрутки для дерева источников данных
-     * тагов по выбранному объекту.
-     * 
-     * @param  dataSourcesPanel  Панель, отображающая соответсвующую информацию  
-     */
-    public void setDataSourcesPanelContent(JPanel dataSourcesPanel)
-    {
-        this.objectDataSourcesTreeScrollPane.add(dataSourcesPanel);
-        this.objectDataSourcesTreeScrollPane.setViewportView(dataSourcesPanel);
-    }//setDataSourcesPanelContent
-    
-    
-    /**
-     * Метод устанавливает контент панели прокрутки для дерева тагов выбранного
-     * устройства.
-     * 
-     * @param   tagsTreePanel  Панель, отображающая дерево тагов
-     */
-    public void setTagsTreePanelContent(JPanel tagsTreePanel)
-    {
-        this.tagDetailsTreeScrollPane.add(tagsTreePanel);
-        this.tagDetailsTreeScrollPane.setViewportView(tagsTreePanel);
-    }//setTagsTreePanelContent
-                
-    
-    /**
-     * Метод делает недоступным пункт меню "File -> Connect..."
-     */
-    public void disableConnectMenu()
-    {
-        this.fileMenu.getItem(0).setEnabled(false);
-    }//disableConnectMenu
-    
-    
-    /**
-     * Метод возвращает текущее состояние формы (развернута на весь экран или
-     * нет). Состояние формы определяется строковыми значениями "true" или 
-     * "false".
-     * 
-     * @return Текущее состояние формы (развернута на весь экран или нет)
-     */
-    public String isMaximized()
-    {
-        if (this.getExtendedState() == Frame.MAXIMIZED_BOTH) return Boolean.TRUE.toString();
-        else return Boolean.FALSE.toString();
-    }//getFormExtendedState
-    
-    
-    /**
-     * Метод возвращает горизонтальный отступ левого верхнего угла формы от 
-     * начала координат экрана.
-     *
-     * @return Горизонтальный отступ левого верхнего угла формы от начала координат экрана
-     */
-    public String getFormX()
-    {
-        return Integer.toString(this.windowLeftBeforeMaximizing);
-    }//getFormX
-
-    
-    /**
-     * Метод возвращает вертикальный отступ левого верхнего угла формы от 
-     * начала координат экрана.
-     *
-     * @return Вертикальный отступ левого верхнего угла формы от начала координат экрана
-     */
-    public String getFormY()
-    {
-        return Integer.toString(this.windowTopBeforeMaximizing);
-    }//getFormX
-    
-    
-    /**
-     * Метод возвращает ширину формы.
-     * 
-     * @return Ширина формы
-     */
-    public String getFormWidth()
-    {
-        return Integer.toString(this.windowWitdthBeforeMaximizing);
-    }//getFormWidth
-    
-    
-    /**
-     * Метод возвращает высоту формы.
-     * 
-     * @return Высота формы
-     */
-    public String getFormHeigt()
-    {
-        return Integer.toString(this.windowHeigthBeforeMaximizing);
-    }//getFormHeigt
-    
-    
-    /**
-     * Метод возвращает ширину дерева ассетов для формы, развернутой на весь 
-     * экран.
-     * 
-     * @return Ширина дерева ассетов для формы, развернутой на весь экран
-     */
-    public String getMaximizedWindowAssetsTreeWidth()
-    {
-        return Integer.toString(maximizedWindowAssetsTreeWidth);
-    }//getWorkspaceWidth
-    
-    
-    /**
-     * Метод возвращает высоту рабочего пространства для формы, развернутой на 
-     * весь экран.
-     * 
-     * @return Высоту рабочего пространства для формы, развернутой на весь экран
-     */
-    public String getMaximizedWindowWorkspaceHeight()
-    {
-        return Integer.toString(maximizedWindowWorkspaceHeight);
-    }//getWorkspaceHeight
-    
-    
-    /**
-     * Метод возвращает ширину дерева свойств тагов выбранного контура для 
-     * формы, развернутой на весь экран.
-     * 
-     * @return Ширина дерева свойств тагов выбранного контура для формы, развернутой на весь экран
-     */
-    public String getMaximizedWindowTagDetailsTreeWidth()
-    {
-        return Integer.toString(maximizedWindowTagDetailsTreeWidth);
-    }//tagDetailsTreeWidth
-    
-    
-    /**
-     * Метод возвращает ширину дерева ассетов для формы, не развернутой на весь 
-     * экран.
-     * 
-     * @return Ширина дерева ассетов для формы, развернутой на весь экран
-     */
-    public String getMinimizedWindowAssetsTreeWidth()
-    {
-        return Integer.toString(minimizedWindowAssetsTreeWidth);
-    }//getWorkspaceWidth
-    
-    
-    /**
-     * Метод возвращает высоту рабочего пространства для формы, не развернутой на 
-     * весь экран.
-     * 
-     * @return Высоту рабочего пространства для формы, развернутой на весь экран
-     */
-    public String getMinimizedWindowWorkspaceHeight()
-    {
-        return Integer.toString(minimizedWindowWorkspaceHeight);
-    }//getWorkspaceHeight
-    
-    
-    /**
-     * Метод возвращает ширину дерева свойств тагов выбранного контура для 
-     * формы, не развернутой на весь экран.
-     * 
-     * @return Ширина дерева свойств тагов выбранного контура для формы, развернутой на весь экран
-     */
-    public String getMinimizedWindowTagDetailsTreeWidth()
-    {
-        return Integer.toString(minimizedWindowTagDetailsTreeWidth);
-    }//tagDetailsTreeWidth
-    
-    
-    /**
-     * Метод возвращает назавание текущей активной вкладки нижней панели формы.
-     * 
-     * @return Hазавание текущей активной вкладки нижней панели формы
-     */
-    public String getActiveBottomTab()
-    {
-        if (this.bottomTabbedPane.getSelectedComponent() == this.applicationLogScrollPane) return LOGS_TAB_NAME;
-        if (this.bottomTabbedPane.getSelectedComponent() == this.overallComplianceSummaryScrollPane) return OVERALL_COMPLIANCE_SUMMARY_TAB_NAME;
-        if (this.bottomTabbedPane.getSelectedComponent() == this.intoolsComplianceSummaryScrollPane) return INTOOLS_COMPLIANCE_SUMMARY_TAB_NAME;
-        if (this.bottomTabbedPane.getSelectedComponent() == this.objectDataSourcesTreeScrollPane) return DATA_SOURCES_TAB_NAME;
-        
-        return null;
-    }//getActiveBottomTab
-       
-    
-    /**
-     * Метод применяет настройки интерфейса формы.
-     */
-    private void _applyConfig()
-    {
-        //Применяем размеры окна формы:
-        this.windowWitdthBeforeMaximizing = Integer.parseInt(config.getWindowWidth());
-        this.windowHeigthBeforeMaximizing = Integer.parseInt(config.getWindowHeight());
-        this.setSize(this.windowWitdthBeforeMaximizing, this.windowHeigthBeforeMaximizing);
-        
-        //Применяем положение окна:
-        this.windowLeftBeforeMaximizing = Integer.parseInt(config.getWindowLeft());
-        this.windowTopBeforeMaximizing = Integer.parseInt(config.getWindowTop());
         SwingUtilities.invokeLater(new Runnable()
         {
             @Override
             public void run()
             {
-                setLocation(windowLeftBeforeMaximizing, windowTopBeforeMaximizing);
+                // Restore configuration and show form:
+                _applyConfig();
+                setVisible(true);
+                
             }//run
         });//invokeLater
-               
-        //Воввтанавливаем внутренние переменные для хранения размеров областей:
-        maximizedWindowWorkspaceHeight = Integer.parseInt(config.getMaximizedWindowWorkspaceHeight());
-        maximizedWindowAssetsTreeWidth = Integer.parseInt(config.getMaximizedWindowAssetsTreeWidth());
-        maximizedWindowTagDetailsTreeWidth = Integer.parseInt(config.getMaximizedWindowTagDetailsTreeWidth());
-        minimizedWindowWorkspaceHeight = Integer.parseInt(config.getMinimizedWindowWorkspaceHeight());
-        minimizedWindowAssetsTreeWidth = Integer.parseInt(config.getMinimizedWindowAssetsTreeWidth());
-        minimizedWindowTagDetailsTreeWidth = Integer.parseInt(config.getMinimizedWindowTagDetailsTreeWidth());
+    }// render
+    
+    
+    /**
+     * Adds a new subscriber on given event type in subscribers list.
+     * 
+     * @param eventType Type of event we subscribing on
+     * @param listener New subscriber instance
+     */
+    public void on(Enum eventType, CustomEventListener listener)
+    {
+        events.on(eventType, listener);
+    }// on
+    
+    
+    /**
+     * Removes all subscribers for given event type.
+     * 
+     * @param eventType Type of event for which subscribers will be removed
+     */
+    public void off(Enum eventType)
+    {
+        events.off(eventType);
+    }// off
+    
+    
+    /**
+     * Triggers custom events with given type on descendant object.
+     * 
+     * @param eventType Type id for event which will be triggered
+     * @param event Custom event object
+     */
+    public void trigger(Enum eventType, CustomEvent event)
+    {
+        events.trigger(eventType, event);
+    }//trigger
+    
+    
+    /**
+     * Sets content panel for plants tree scroll pane.
+     * 
+     * @param plantsTreePanel Plants tree panel
+     */
+    public void setPlantsTreePanelContent(JPanel plantsTreePanel)
+    {
+        plantsTreeScrollPane.add(plantsTreePanel);
+        plantsTreeScrollPane.setViewportView(plantsTreePanel);
+    }// setPlantsTreePanelContent
+    
+    
+    /**
+     * Sets content panel for loops table and task bar pane.
+     * 
+     * @param loopsTableandTaskBarPanel Loops table panel
+     */
+    public void setLoopsTableAndTaskbarPanelContent(JPanel loopsTableandTaskBarPanel)
+    {
+        loopsTablePanelScrollPane.add(loopsTableandTaskBarPanel);
+        loopsTablePanelScrollPane.setViewportView(loopsTableandTaskBarPanel);
+    }// setLoopsTableAndTaskbarPanelContent
+    
+    
+    /**
+     * Sets content panel for overall compliance summary scroll pane.
+     * 
+     * @param overallComplianceSummaryPanel Overall compliance summary panel  
+     */
+    public void setOverallComplianceSummaryPanelContent(JPanel overallComplianceSummaryPanel)
+    {
+        overallComplianceSummaryScrollPane.add(overallComplianceSummaryPanel);
+        overallComplianceSummaryScrollPane.setViewportView(overallComplianceSummaryPanel);
+    }// setOverallComplianceSummaryPanelContent
+    
+    
+    /**
+     * Sets content panel for SPI compliance summary scroll pane.
+     * 
+     * @param intoolsComplianceSummaryPanel SPI compliance summary panel  
+     */
+    public void setIntoolsComplianceSummaryPanelContent(JPanel intoolsComplianceSummaryPanel)
+    {
+        intoolsComplianceSummaryScrollPane.add(intoolsComplianceSummaryPanel);
+        intoolsComplianceSummaryScrollPane.setViewportView(intoolsComplianceSummaryPanel);
+    }// setIntoolsComplianceSummaryPanelContent
+    
+
+    /**
+     * Sets content panel for data sources tree scroll pane.
+     * 
+     * @param  dataSourcesPanel Data sources tree panel
+     */
+    public void setDataSourcesPanelContent(JPanel dataSourcesPanel)
+    {
+        objectDataSourcesTreeScrollPane.add(dataSourcesPanel);
+        objectDataSourcesTreeScrollPane.setViewportView(dataSourcesPanel);
+    }// setDataSourcesPanelContent
+    
+    
+    /**
+     * Sets content panel for tags tree tree scroll pane.
+     * 
+     * @param tagsTreePanel Tags tree panel
+     */
+    public void setTagsTreePanelContent(JPanel tagsTreePanel)
+    {
+        tagsTreeScrollPane.add(tagsTreePanel);
+        tagsTreeScrollPane.setViewportView(tagsTreePanel);
+    }// setTagsTreePanelContent
+    
+    
+    /**
+     * Returns current form extended state flag as string.
+     * 
+     * @return "true" if form is maximized, else "false"
+     */
+    public String isMaximized()
+    {
+        if (getExtendedState() == Frame.MAXIMIZED_BOTH) return Boolean.TRUE.toString();
+        else return Boolean.FALSE.toString();
+    }// isMaximized
+    
+    
+    /**
+     * Returns horizontal offset of left corner of form from screen initial
+     * coordinates.
+     *
+     * @return Left offset of form
+     */
+    public String getFormLeft()
+    {
+        return Integer.toString(windowLeftBeforeMaximizing);
+    }// getFormLeft
+
+    
+    /**
+     * Returns vertical offset of top corner of form from screen initial
+     * coordinates.
+     *
+     * @return Top offset of form
+     */
+    public String getFormTop()
+    {
+        return Integer.toString(windowTopBeforeMaximizing);
+    }// getFormTop
+    
+    
+    /**
+     * Returns width of from.
+     * 
+     * @return Width of from
+     */
+    public String getFormWidth()
+    {
+        return Integer.toString(windowWitdthBeforeMaximizing);
+    }// getFormWidth
+    
+    
+    /**
+     * Returns height of from.
+     * 
+     * @return Height of from
+     */
+    public String getFormHeigt()
+    {
+        return Integer.toString(windowHeigthBeforeMaximizing);
+    }// getFormHeigt
+    
+    
+    /**
+     * Returns pants tree width for maximized form.
+     * 
+     * @return Pants tree width for maximized form
+     */
+    public String getMaximizedWindowPlantsTreeWidth()
+    {
+        return Integer.toString(maximizedWindowPlantsTreeWidth);
+    }// getMaximizedWindowPlantsTreeWidth
+    
+    
+    /**
+     * Returns workspace height for maximized form.
+     * 
+     * @return Workspace height for maximized form
+     */
+    public String getMaximizedWindowWorkspaceHeight()
+    {
+        return Integer.toString(maximizedWindowWorkspaceHeight);
+    }// getMaximizedWindowWorkspaceHeight
+    
+    
+    /**
+     * Returns tags tree width for maximized form.
+     * 
+     * @return Tags tree width for maximized form
+     */
+    public String getMaximizedWindowTagsTreeWidth()
+    {
+        return Integer.toString(maximizedWindowTagsTreeWidth);
+    }// getMaximizedWindowTagsTreeWidth
+    
+    
+    /**
+     * Returns pants tree width for not maximized form.
+     * 
+     * @return Pants tree width for not maximized form
+     */
+    public String getMinimizedWindowPlantsTreeWidth()
+    {
+        return Integer.toString(minimizedWindowPlantsTreeWidth);
+    }// getMinimizedWindowPlantsTreeWidth
+    
+    
+    /**
+     * Returns workspace height for not maximized form.
+     * 
+     * @return Workspace height for not maximized form
+     */
+    public String getMinimizedWindowWorkspaceHeight()
+    {
+        return Integer.toString(minimizedWindowWorkspaceHeight);
+    }// getMinimizedWindowWorkspaceHeight
+    
+    
+    /**
+     * Returns tags tree width for not maximized form.
+     * 
+     * @return Tags tree width for not maximized form
+     */
+    public String getMinimizedWindowTagsTreeWidth()
+    {
+        return Integer.toString(minimizedWindowTagsTreeWidth);
+    }// getMinimizedWindowTagsTreeWidth
+    
+    
+    /**
+     * Returns a name of current active bottom tab.
+     * 
+     * @return Name of current active bottom tab
+     */
+    public String getActiveBottomTab()
+    {
+        if (bottomTabbedPane.getSelectedComponent() == applicationLogScrollPane) return LOGS_TAB_NAME;
+        if (bottomTabbedPane.getSelectedComponent() == overallComplianceSummaryScrollPane) return OVERALL_COMPLIANCE_SUMMARY_TAB_NAME;
+        if (bottomTabbedPane.getSelectedComponent() == intoolsComplianceSummaryScrollPane) return INTOOLS_COMPLIANCE_SUMMARY_TAB_NAME;
+        if (bottomTabbedPane.getSelectedComponent() == objectDataSourcesTreeScrollPane) return DATA_SOURCES_TAB_NAME;
         
-        //Разворачиваем окно на весь экран, если такая настройка задана:
+        return null;
+    }// getActiveBottomTab
+       
+    
+    /**
+     * Restores form settings from configuration object.
+     */
+    private void _applyConfig()
+    {
+        // Apply sizes for not maximized from:
+        windowWitdthBeforeMaximizing = Integer.parseInt(config.getWindowWidth());
+        windowHeigthBeforeMaximizing = Integer.parseInt(config.getWindowHeight());
+        setSize(windowWitdthBeforeMaximizing, windowHeigthBeforeMaximizing);
+        
+        // Apply position for not maximized form:
+        windowLeftBeforeMaximizing = Integer.parseInt(config.getWindowLeft());
+        windowTopBeforeMaximizing  = Integer.parseInt(config.getWindowTop());
+        setLocation(windowLeftBeforeMaximizing, windowTopBeforeMaximizing);
+               
+        // Restore size fields values: 
+        maximizedWindowWorkspaceHeight = Integer.parseInt(config.getMaximizedWindowWorkspaceHeight());
+        maximizedWindowPlantsTreeWidth = Integer.parseInt(config.getMaximizedWindowAssetsTreeWidth());
+        maximizedWindowTagsTreeWidth   = Integer.parseInt(config.getMaximizedWindowTagDetailsTreeWidth());
+        minimizedWindowWorkspaceHeight = Integer.parseInt(config.getMinimizedWindowWorkspaceHeight());
+        minimizedWindowPlantsTreeWidth = Integer.parseInt(config.getMinimizedWindowAssetsTreeWidth());
+        minimizedWindowTagsTreeWidth   = Integer.parseInt(config.getMinimizedWindowTagDetailsTreeWidth());
+        
+        // If maximize form window, if approprite setting is true;
         if (config.getWindowMaximized().equals(Boolean.TRUE.toString()))
         {
-            this.setExtendedState(Frame.MAXIMIZED_BOTH);
+            setExtendedState(Frame.MAXIMIZED_BOTH);
                
-            //Устанвливаем ширину рабочих областей для развернутого на весь экран окна:
+            // Apply workspace panels sizes for maximized from:
             workspaceAndLogSplitPane.setDividerLocation(maximizedWindowWorkspaceHeight);
-            assetsTreeAndTagsInfoSplitPanel.setDividerLocation(maximizedWindowAssetsTreeWidth);
-            tagsTableAndTagDetailsSplitPanel.setDividerLocation(maximizedWindowTagDetailsTreeWidth);
+            assetsTreeAndTagsInfoSplitPanel.setDividerLocation(maximizedWindowPlantsTreeWidth);
+            loopsTableAndTagsTreeSplitPanel.setDividerLocation(maximizedWindowTagsTreeWidth);
         
         } else {
         
-            //Устанвливаем ширину рабочих областей для неразвернутого на весь экран окна:
+            // Apply workspace panels sizes for not maximized from:
             workspaceAndLogSplitPane.setDividerLocation(minimizedWindowWorkspaceHeight);
-            assetsTreeAndTagsInfoSplitPanel.setDividerLocation(minimizedWindowAssetsTreeWidth);
-            tagsTableAndTagDetailsSplitPanel.setDividerLocation(minimizedWindowTagDetailsTreeWidth);
-        }//else
+            assetsTreeAndTagsInfoSplitPanel.setDividerLocation(minimizedWindowPlantsTreeWidth);
+            loopsTableAndTagsTreeSplitPanel.setDividerLocation(minimizedWindowTagsTreeWidth);
+        }// else
         
-        //Устанавливаем активную вкладку нижней панели:
-        if (config.getActiveBottomTab().equals(LOGS_TAB_NAME)) this.bottomTabbedPane.setSelectedComponent(this.applicationLogScrollPane);
-        if (config.getActiveBottomTab().equals(OVERALL_COMPLIANCE_SUMMARY_TAB_NAME)) this.bottomTabbedPane.setSelectedComponent(this.overallComplianceSummaryScrollPane);
-        if (config.getActiveBottomTab().equals(INTOOLS_COMPLIANCE_SUMMARY_TAB_NAME)) this.bottomTabbedPane.setSelectedComponent(this.intoolsComplianceSummaryScrollPane);
-        if (config.getActiveBottomTab().equals(DATA_SOURCES_TAB_NAME)) this.bottomTabbedPane.setSelectedComponent(this.objectDataSourcesTreeScrollPane);
-    }//_applyConfig
-    
-    
-    /**
-     * Метод добавляет запись в тесктовое полен лога приложения.
-     * 
-     * @param record Запись, добавляемая в лог.
-     */
-    public void addLogRecord(String record)
-    {
-        this.applicationLogTextArea.append(record + "\n");
-        this.applicationLogTextArea.setCaretPosition(this.applicationLogTextArea.getCaretPosition() + record.length());
-    }//addLogRecord
-        
-    
-    /**
-     * Метод устанавливает содержимое метки с названием подключенной базы данных
-     * в статусной строке.
-     * 
-     * @param databaseName Строка с название базы данных
-     */
-    public void setStatusBarDatabaseName(String databaseName)
-    {
-        this.statusBarDatabaseNameLabel.setText(databaseName);
-    }//setStatusBarDatabaseName
-         
+        // Set active tab for bottom pane:
+        if (config.getActiveBottomTab().equals(LOGS_TAB_NAME)) bottomTabbedPane.setSelectedComponent(applicationLogScrollPane);
+        if (config.getActiveBottomTab().equals(OVERALL_COMPLIANCE_SUMMARY_TAB_NAME)) bottomTabbedPane.setSelectedComponent(overallComplianceSummaryScrollPane);
+        if (config.getActiveBottomTab().equals(INTOOLS_COMPLIANCE_SUMMARY_TAB_NAME)) bottomTabbedPane.setSelectedComponent(intoolsComplianceSummaryScrollPane);
+        if (config.getActiveBottomTab().equals(DATA_SOURCES_TAB_NAME)) bottomTabbedPane.setSelectedComponent(objectDataSourcesTreeScrollPane);
+    }// _applyConfig
+             
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -384,11 +388,11 @@ public class MainForm extends javax.swing.JFrame
 
         workspaceAndLogSplitPane = new javax.swing.JSplitPane();
         assetsTreeAndTagsInfoSplitPanel = new javax.swing.JSplitPane();
-        tagsTableAndTagDetailsSplitPanel = new javax.swing.JSplitPane();
-        tagDetailsTreeScrollPane = new javax.swing.JScrollPane();
-        deviceTagsTree = new javax.swing.JTree();
-        devicesTableAndTaskbarPanel = new javax.swing.JPanel();
-        devicesTableAndTaskBarPanelScrollPane = new javax.swing.JScrollPane();
+        loopsTableAndTagsTreeSplitPanel = new javax.swing.JSplitPane();
+        tagsTreeScrollPane = new javax.swing.JScrollPane();
+        tagsTree = new javax.swing.JTree();
+        loopsTablePanel = new javax.swing.JPanel();
+        loopsTablePanelScrollPane = new javax.swing.JScrollPane();
         plantsTreeScrollPane = new javax.swing.JScrollPane();
         bottomTabbedPane = new javax.swing.JTabbedPane();
         applicationLogScrollPane = new javax.swing.JScrollPane();
@@ -425,38 +429,38 @@ public class MainForm extends javax.swing.JFrame
 
         workspaceAndLogSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
-        tagDetailsTreeScrollPane.addComponentListener(new java.awt.event.ComponentAdapter() {
+        tagsTreeScrollPane.addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentResized(java.awt.event.ComponentEvent evt) {
-                tagDetailsTreeScrollPaneComponentResized(evt);
+                tagsTreeScrollPaneComponentResized(evt);
             }
         });
 
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
-        deviceTagsTree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
-        deviceTagsTree.setRootVisible(false);
-        deviceTagsTree.setShowsRootHandles(true);
-        tagDetailsTreeScrollPane.setViewportView(deviceTagsTree);
+        tagsTree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
+        tagsTree.setRootVisible(false);
+        tagsTree.setShowsRootHandles(true);
+        tagsTreeScrollPane.setViewportView(tagsTree);
 
-        tagsTableAndTagDetailsSplitPanel.setRightComponent(tagDetailsTreeScrollPane);
+        loopsTableAndTagsTreeSplitPanel.setRightComponent(tagsTreeScrollPane);
 
-        javax.swing.GroupLayout devicesTableAndTaskbarPanelLayout = new javax.swing.GroupLayout(devicesTableAndTaskbarPanel);
-        devicesTableAndTaskbarPanel.setLayout(devicesTableAndTaskbarPanelLayout);
-        devicesTableAndTaskbarPanelLayout.setHorizontalGroup(
-            devicesTableAndTaskbarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout loopsTablePanelLayout = new javax.swing.GroupLayout(loopsTablePanel);
+        loopsTablePanel.setLayout(loopsTablePanelLayout);
+        loopsTablePanelLayout.setHorizontalGroup(
+            loopsTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 23, Short.MAX_VALUE)
-            .addGroup(devicesTableAndTaskbarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(devicesTableAndTaskBarPanelScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE))
+            .addGroup(loopsTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(loopsTablePanelScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE))
         );
-        devicesTableAndTaskbarPanelLayout.setVerticalGroup(
-            devicesTableAndTaskbarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        loopsTablePanelLayout.setVerticalGroup(
+            loopsTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 322, Short.MAX_VALUE)
-            .addGroup(devicesTableAndTaskbarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(devicesTableAndTaskBarPanelScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 322, Short.MAX_VALUE))
+            .addGroup(loopsTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(loopsTablePanelScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 322, Short.MAX_VALUE))
         );
 
-        tagsTableAndTagDetailsSplitPanel.setLeftComponent(devicesTableAndTaskbarPanel);
+        loopsTableAndTagsTreeSplitPanel.setLeftComponent(loopsTablePanel);
 
-        assetsTreeAndTagsInfoSplitPanel.setRightComponent(tagsTableAndTagDetailsSplitPanel);
+        assetsTreeAndTagsInfoSplitPanel.setRightComponent(loopsTableAndTagsTreeSplitPanel);
 
         plantsTreeScrollPane.addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentResized(java.awt.event.ComponentEvent evt) {
@@ -543,94 +547,88 @@ public class MainForm extends javax.swing.JFrame
     
     
     /**
-     * Метод обрабатывает вызов пункта главного меню "File->Connect" и 
-     * рассылает соответсвующее событие всем подписчикам.  
+     * Handles "File -> Connect..." main menu item click event and triggers 
+     * appropriate event for all subscribers.
      * 
-     * @param evt Событие нажатия на пункт меню
-     * @return void
+     * @param evt Main menu item click event object
      */
     private void openStorageMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openStorageMenuItemActionPerformed
         
-        CustomEvent myEvent = new CustomEvent(this);
-        this.events.trigger(ViewEvent.CONNECT_MENU_ITEM_CLICK, myEvent);
+        CustomEvent myEvent = new CustomEvent(new Object());
+        trigger(ViewEvent.CONNECT_MENU_ITEM_CLICK, myEvent);
     }//GEN-LAST:event_openStorageMenuItemActionPerformed
            
     
     /**
-     * Метод обрабатывает событие изменения размеров дерева свойств выбранного 
-     * тага и сохраняет текущее значение в переменную в зависимости от 
-     * состояния главной формы (развернута на весь экран или нет).
+     * Handles tags tree pane resize event and sets new tags tree width value 
+     * in appropriate field depending on form expanded state.
      * 
-     * @param evt Событие изменения размеров панели
+     * @param evt Tags tree pane resize event object
      */
-    private void tagDetailsTreeScrollPaneComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_tagDetailsTreeScrollPaneComponentResized
+    private void tagsTreeScrollPaneComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_tagsTreeScrollPaneComponentResized
         
-        if (this.getExtendedState() == Frame.MAXIMIZED_BOTH) maximizedWindowTagDetailsTreeWidth = tagsTableAndTagDetailsSplitPanel.getDividerLocation();
-        else minimizedWindowTagDetailsTreeWidth = tagsTableAndTagDetailsSplitPanel.getDividerLocation();
-    }//GEN-LAST:event_tagDetailsTreeScrollPaneComponentResized
+        if (getExtendedState() == Frame.MAXIMIZED_BOTH) maximizedWindowTagsTreeWidth = loopsTableAndTagsTreeSplitPanel.getDividerLocation();
+        else minimizedWindowTagsTreeWidth = loopsTableAndTagsTreeSplitPanel.getDividerLocation();
+    }//GEN-LAST:event_tagsTreeScrollPaneComponentResized
    
     
     /**
-     * Метод обрабатывает вызов пункта главного меню "About->Version..." и 
-     * рассылает соответсвующее событие всем подписчикам.  
+     * Handles "About -> Version..." main menu item click event and triggers 
+     * appropriate event for all subscribers.
      * 
-     * @param evt Событие нажатия на пункт меню
+     * @param evt Main menu item click event object
      */
     private void versionMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_versionMenuItemActionPerformed
         
-        CustomEvent myEvent = new CustomEvent(this);
-        this.events.trigger(ViewEvent.VERSION_MENU_ITEM_CLICK, myEvent);
+        CustomEvent myEvent = new CustomEvent(new Object());
+        trigger(ViewEvent.VERSION_MENU_ITEM_CLICK, myEvent);
     }//GEN-LAST:event_versionMenuItemActionPerformed
    
            
     /**
-     * Метод обрабатывает событие закрытия окна формы и рассылает событие 
-     * сохранения настроек интерфейса с контентом настроек всем подписчикам.
+     * Handles form closing event and triggers appropriate event for all
+     * subscribers.
      * 
-     * @param evt Событие изменения размеров формы
+     * @param evt Form closing event object
      */
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         
         CustomEvent myEvent = new CustomEvent(new Object());
-        this.events.trigger(ViewEvent.FORM_CLOSING, myEvent);
+        trigger(ViewEvent.FORM_CLOSING, myEvent);
     }//GEN-LAST:event_formWindowClosing
 
-    
-    
+        
     /**
-     * Метод обрабатывает событие изменения высоты нижней панели со вкладками
-     * и сохраняет текущее значение в соответствующую переменную в зависимости 
-     * от состояния главной формы (развернута на весь экран или нет).
+     * Handles bottom tabbed pane resize event and sets new bottom tabbed pane's
+     * height value in appropriate field depending on form expanded state.
      * 
-     * @param evt Событие изменения размеров панели
+     * @param evt Bottom tabbed pane resize event object
      */
     private void bottomTabbedPaneComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_bottomTabbedPaneComponentResized
  
-        if (this.getExtendedState() == Frame.MAXIMIZED_BOTH) maximizedWindowWorkspaceHeight = workspaceAndLogSplitPane.getDividerLocation();
+        if (getExtendedState() == Frame.MAXIMIZED_BOTH) maximizedWindowWorkspaceHeight = workspaceAndLogSplitPane.getDividerLocation();
         else minimizedWindowWorkspaceHeight = workspaceAndLogSplitPane.getDividerLocation();     
     }//GEN-LAST:event_bottomTabbedPaneComponentResized
 
     
     /**
-     * Метод обрабатывает событие изменения ширины панели дерева ассетов и 
-     * сохраняет текущее значение в соответствующую переменную в зависимости 
-     * от состояния главной формы (развернута на весь экран или нет).
+     * Handles plants tree pane resize event and sets plants tree pane's
+     * width value in appropriate field depending on form expanded state.
      * 
-     * @param evt Событие изменения размеров панели
+     * @param evt Plants tree pane resize event object
      */
     private void plantsTreeScrollPaneComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_plantsTreeScrollPaneComponentResized
         
-        if (this.getExtendedState() == Frame.MAXIMIZED_BOTH) maximizedWindowAssetsTreeWidth = assetsTreeAndTagsInfoSplitPanel.getDividerLocation();
-        else minimizedWindowAssetsTreeWidth = assetsTreeAndTagsInfoSplitPanel.getDividerLocation();
+        if (getExtendedState() == Frame.MAXIMIZED_BOTH) maximizedWindowPlantsTreeWidth = assetsTreeAndTagsInfoSplitPanel.getDividerLocation();
+        else minimizedWindowPlantsTreeWidth = assetsTreeAndTagsInfoSplitPanel.getDividerLocation();
     }//GEN-LAST:event_plantsTreeScrollPaneComponentResized
 
     
     /**
-     * Метод обрабатывает события изменения развернутого состояния формы 
-     * (сворачивание/разворачивание) и восстанавливает пропорции панелей формы
-     * для нового состояния.
+     * Handles form expanded state change event and restores panes dividers 
+     * locations for appropriate form state in a task at the end of EDT queue.
      * 
-     * @param evt Событие изменения состояния панели
+     * @param evt Form expended state change event object
      */
     private void formWindowStateChanged(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowStateChanged
         
@@ -639,53 +637,53 @@ public class MainForm extends javax.swing.JFrame
             @Override
             public void run()
             {
-                //Если окно было развернуто на весь экран, восстанавливаем размеры параметров панелей для развернутого окна:
+                // If form was maximized:
                 if (getExtendedState() == Frame.MAXIMIZED_BOTH)
                 {
                     workspaceAndLogSplitPane.setDividerLocation(maximizedWindowWorkspaceHeight);
-                    assetsTreeAndTagsInfoSplitPanel.setDividerLocation(maximizedWindowAssetsTreeWidth);
-                    tagsTableAndTagDetailsSplitPanel.setDividerLocation(maximizedWindowTagDetailsTreeWidth);
+                    assetsTreeAndTagsInfoSplitPanel.setDividerLocation(maximizedWindowPlantsTreeWidth);
+                    loopsTableAndTagsTreeSplitPanel.setDividerLocation(maximizedWindowTagsTreeWidth);
 
-                } else { //Если окно было уменьшено:
+                } else { // If form was collapsed:
         
                     workspaceAndLogSplitPane.setDividerLocation(minimizedWindowWorkspaceHeight);
-                    assetsTreeAndTagsInfoSplitPanel.setDividerLocation(minimizedWindowAssetsTreeWidth);
-                    tagsTableAndTagDetailsSplitPanel.setDividerLocation(minimizedWindowTagDetailsTreeWidth);
-                }//else
-            }//run
-        });//invokeLater
+                    assetsTreeAndTagsInfoSplitPanel.setDividerLocation(minimizedWindowPlantsTreeWidth);
+                    loopsTableAndTagsTreeSplitPanel.setDividerLocation(minimizedWindowTagsTreeWidth);
+                }// else
+            }// run
+        });// invokeLater
     }//GEN-LAST:event_formWindowStateChanged
 
     
     /**
-     * Метод обрабатывает событие изменения размеров формы и сохраняет новые
-     * размеры в соответвующие поля.
+     * Handles form size changing event sets form size values in appropriate
+     * fields if form is not maximized.
      * 
-     * @param evt Событие изменения состояния панели
+     * @param evt Form size changing event object
      */
     private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized
         
         if (getExtendedState() != Frame.MAXIMIZED_BOTH)
         {
-            windowWitdthBeforeMaximizing = this.getSize().width;
-            windowHeigthBeforeMaximizing = this.getSize().height;
-        }//if
+            windowWitdthBeforeMaximizing = getSize().width;
+            windowHeigthBeforeMaximizing = getSize().height;
+        }// if
     }//GEN-LAST:event_formComponentResized
 
     
     /**
-     * Метод обрабатывает событие перемещения формы и сохраняет новые координаты 
-     * в соответствующие поля.
+     * Handles form position changing event sets form coordinate values in 
+     * appropriate fields if form is not maximized.
      * 
-     * @param evt Событие перемещения панели
+     * @param evt Form position changing event object
      */
     private void formComponentMoved(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentMoved
         
         if (getExtendedState() != Frame.MAXIMIZED_BOTH)
         {
-            windowLeftBeforeMaximizing = this.getLocation().x;
-            windowTopBeforeMaximizing = this.getLocation().y;
-        }//if
+            windowLeftBeforeMaximizing = getLocation().x;
+            windowTopBeforeMaximizing = getLocation().y;
+        }// if
     }//GEN-LAST:event_formComponentMoved
    
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -694,11 +692,11 @@ public class MainForm extends javax.swing.JFrame
     private javax.swing.JTextArea applicationLogTextArea;
     private javax.swing.JSplitPane assetsTreeAndTagsInfoSplitPanel;
     private javax.swing.JTabbedPane bottomTabbedPane;
-    private javax.swing.JTree deviceTagsTree;
-    private javax.swing.JScrollPane devicesTableAndTaskBarPanelScrollPane;
-    private javax.swing.JPanel devicesTableAndTaskbarPanel;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JScrollPane intoolsComplianceSummaryScrollPane;
+    private javax.swing.JSplitPane loopsTableAndTagsTreeSplitPanel;
+    private javax.swing.JPanel loopsTablePanel;
+    private javax.swing.JScrollPane loopsTablePanelScrollPane;
     private javax.swing.JMenuBar mainMenuBar;
     private javax.swing.JScrollPane objectDataSourcesTreeScrollPane;
     private javax.swing.JMenuItem openStorageMenuItem;
@@ -706,9 +704,9 @@ public class MainForm extends javax.swing.JFrame
     private javax.swing.JScrollPane plantsTreeScrollPane;
     private org.jdesktop.swingx.JXStatusBar statusBar;
     private javax.swing.JLabel statusBarDatabaseNameLabel;
-    private javax.swing.JScrollPane tagDetailsTreeScrollPane;
-    private javax.swing.JSplitPane tagsTableAndTagDetailsSplitPanel;
+    private javax.swing.JTree tagsTree;
+    private javax.swing.JScrollPane tagsTreeScrollPane;
     private javax.swing.JMenuItem versionMenuItem;
     private javax.swing.JSplitPane workspaceAndLogSplitPane;
     // End of variables declaration//GEN-END:variables
-}//MainForm
+}// MainForm

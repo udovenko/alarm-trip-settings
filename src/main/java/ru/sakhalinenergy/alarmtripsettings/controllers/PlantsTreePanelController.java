@@ -105,7 +105,7 @@ public class PlantsTreePanelController
                     // Create loops table panel view:
                     LoopsTablePanel loopsTablePanel = new LoopsTablePanel(loopsCollection, loopsTablePanelSettings);
                     new LoopsTablePanelController(loopsCollection, loopsTablePanel);
-                    Main.mainForm.setDevicesTableAndTaskbarPanelContent(loopsTablePanel);
+                    Main.mainForm.setLoopsTableAndTaskbarPanelContent(loopsTablePanel);
                     
                     // Create data sources tree panel:
                     DataSourcesPanel dataSourcesPanel = new DataSourcesPanel(loopsCollection);

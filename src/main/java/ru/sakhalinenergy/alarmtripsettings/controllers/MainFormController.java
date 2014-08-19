@@ -30,9 +30,9 @@ public class MainFormController
     public MainFormController(MainForm view)
     {
         this.view = view;
-        this.view.events.on(ViewEvent.FORM_CLOSING,            new _SaveUiSettingsRequestListener());
-        this.view.events.on(ViewEvent.CONNECT_MENU_ITEM_CLICK, new _OpenConnectToStorageFormRequestHandler());
-        this.view.events.on(ViewEvent.VERSION_MENU_ITEM_CLICK, new _OpenVersionDialogRequestHandler());
+        view.on(ViewEvent.FORM_CLOSING,            new _SaveUiSettingsRequestListener());
+        view.on(ViewEvent.CONNECT_MENU_ITEM_CLICK, new _OpenConnectToStorageFormRequestHandler());
+        view.on(ViewEvent.VERSION_MENU_ITEM_CLICK, new _OpenVersionDialogRequestHandler());
     }// MainFormController
     
     
@@ -52,16 +52,16 @@ public class MainFormController
             
             // Retrieve main form config into config singleton object:
             mainFormSettings.setWindowMaximized(view.isMaximized());
-            mainFormSettings.setWindowLeft(view.getFormX());
-            mainFormSettings.setWindowTop(view.getFormY());
+            mainFormSettings.setWindowLeft(view.getFormLeft());
+            mainFormSettings.setWindowTop(view.getFormTop());
             mainFormSettings.setWindowWidth(view.getFormWidth());
             mainFormSettings.setWindowHeight(view.getFormHeigt());
             mainFormSettings.setMaximizedWindowWorkspaceHeight(view.getMaximizedWindowWorkspaceHeight());
-            mainFormSettings.setMaximizedWindowAssetsTreeWidth(view.getMaximizedWindowAssetsTreeWidth());
-            mainFormSettings.setMaximizedWindowTagDetailsTreeWidth(view.getMaximizedWindowTagDetailsTreeWidth());
+            mainFormSettings.setMaximizedWindowAssetsTreeWidth(view.getMaximizedWindowPlantsTreeWidth());
+            mainFormSettings.setMaximizedWindowTagDetailsTreeWidth(view.getMaximizedWindowTagsTreeWidth());
             mainFormSettings.setMinimizedWindowWorkspaceHeight(view.getMinimizedWindowWorkspaceHeight());
-            mainFormSettings.setMinimizedWindowAssetsTreeWidth(view.getMinimizedWindowAssetsTreeWidth());
-            mainFormSettings.setMinimizedWindowTagDetailsTreeWidth(view.getMinimizedWindowTagDetailsTreeWidth());
+            mainFormSettings.setMinimizedWindowAssetsTreeWidth(view.getMinimizedWindowPlantsTreeWidth());
+            mainFormSettings.setMinimizedWindowTagDetailsTreeWidth(view.getMinimizedWindowTagsTreeWidth());
             mainFormSettings.setActiveBottomTab(view.getActiveBottomTab());
 
             // Subscribe on config save event:

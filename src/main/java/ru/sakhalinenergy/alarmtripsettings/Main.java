@@ -27,9 +27,9 @@ import ru.sakhalinenergy.alarmtripsettings.controllers.MainFormController;
 public class Main 
 {
     //Информация о версии приложения:
-    public static final String VERSION = "2.1.2.3";
+    public static final String VERSION = "2.1.2.4";
     public static final String LAST_CHANGES_DATE = "19.08.2014";
-    public static final String LAST_CHANGES_TIME = "11:12";
+    public static final String LAST_CHANGES_TIME = "13:21";
     public static final String AUTHOR = "Denis Udovenko";
     
     // Application .jar file directory:
@@ -133,18 +133,10 @@ public class Main
             {        
                 //Создаем главную форму приложения: 
                 mainForm = new MainForm(mainFormSettings);
-                mainForm.setLocationRelativeTo(null);
                 new MainFormController(mainForm);
 
                 //Отображаем главную форму:
-                SwingUtilities.invokeLater(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        mainForm.setVisible(true);
-                    }//run
-                });//invokeLater
+                mainForm.render();
 
                 //Пытаемся подключиться к хранилищу:
                 DialogsFactory.produceStorageConnectionDialog(true);
