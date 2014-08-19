@@ -1,25 +1,31 @@
 package ru.sakhalinenergy.alarmtripsettings.controllers;
 
+import java.util.List;
+import java.util.Arrays;
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
 import ru.sakhalinenergy.alarmtripsettings.Main;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
 import ru.sakhalinenergy.alarmtripsettings.factories.DialogsFactory;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelector;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Loop;
 import ru.sakhalinenergy.alarmtripsettings.models.config.LoopsTablePanelSettings;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelector;
+import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.CollectionEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.LoopsTable;
 import ru.sakhalinenergy.alarmtripsettings.views.panel.loops.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.panel.loops.LoopsTablePanel;
 import ru.sakhalinenergy.alarmtripsettings.views.panel.tags.TagsTreePanel;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.progress.OneProgressBarDialog;
 
 
 /**
  * Implements controller for loops table model of selected plants tree object.
  * 
  * @author Denis Udovenko
- * @version 1.0.3
+ * @version 1.0.4
  */
-public class LoopsTablePanelController 
+public class LoopsTablePanelController extends Controller
 {
     private final LoopsTablePanel view;
     private final LoopsTable model;
@@ -120,18 +126,17 @@ public class LoopsTablePanelController
      * event.
      * 
      * @author Denis Udovenko
-     * @version 1.0.3
+     * @version 1.0.4
      */
     private class _MergeLoopMenuItemClickHandler implements CustomEventListener
     {
         @Override
         public void customEventOccurred(CustomEvent evt)
         {
-            //Получаем экземпляр петли, копии которой будем объединять:
-            /*int loopIndex = (Integer)evt.getSource();
-            final DbLoop loopToBeMerged = Main.loops.get(loopIndex);
-            
-            //Выводим диалог для подтверждения объединения петель:
+            // Get loop instance which will be merged with its copies:
+            Loop loopToBeMerged = (Loop)evt.getSource();
+                        
+            // Show loop merging confirmation dialog:
             int answer = JOptionPane.showConfirmDialog(Main.mainForm,
                 "Are you sure you want to merge all copies of " + loopToBeMerged.toString() + " into one loop?",
                 "Action confirmation",
@@ -139,22 +144,34 @@ public class LoopsTablePanelController
             
             if (answer == JOptionPane.OK_OPTION)
             {
-                List<DbLoop> loops = new ArrayList(Arrays.asList(loopToBeMerged));
+                List<Loop> loops = new ArrayList(Arrays.asList(loopToBeMerged));
                 
-                //Добавляем обработчик события заврешения сохранения источника данных и всей связанной с ним информации:
-                Main.loopSplittingAndMergingController.events.off(LoopSplittingAndMergingController.LOOPS_MERGED_EVENT);
-                Main.loopSplittingAndMergingController.events.on(LoopSplittingAndMergingController.LOOPS_MERGED_EVENT, new CustomEventListener()
+                // Subscribe on model's thread error event:
+                model.off(CollectionEvent.THREAD_ERROR);
+                model.on(CollectionEvent.THREAD_ERROR, new ThreadErrorEventHandler());
+           
+                // Create and render dialog with single progress bar:
+                model.off(CollectionEvent.THREAD_PROGRESS);
+                final OneProgressBarDialog oneProgressBarDialog = new OneProgressBarDialog(model, CollectionEvent.THREAD_PROGRESS);
+                oneProgressBarDialog.render("Merging loop " + loopToBeMerged.toString() + " copies...", Main.mainForm);
+                
+                // Subscribe on model's loops merged event:
+                model.off(CollectionEvent.LOOPS_MERGED);
+                model.on(CollectionEvent.LOOPS_MERGED, new CustomEventListener()
                 {
                     @Override
                     public void customEventOccurred(CustomEvent evt)
                     {   
-                        Main.storageConnectionController.connectToStorage();
-                    }//customEventOccurred
-                });//addSourceRemovedEventListener
-            
-                //Вызываем метод контроллера:
-                Main.loopSplittingAndMergingController.mergeLoops(loops);
-            }//if*/
+                        oneProgressBarDialog.close();
+                        
+                        // Ask factory to produce storage connection dialog and start reconnection:
+                        DialogsFactory.produceStorageConnectionDialog(true);
+                    }// customEventOccurred
+                });// addSourceRemovedEventListener
+                                
+                // Excecute loops merging:
+                model.mergeLoops(loops);
+            }// if
         }// customEventOccurred
     }// _MergeLoopMenuItemClickHandler
     

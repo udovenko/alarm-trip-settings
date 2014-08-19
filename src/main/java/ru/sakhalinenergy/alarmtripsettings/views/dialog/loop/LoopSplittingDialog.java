@@ -198,6 +198,8 @@ public class LoopSplittingDialog extends Dialog
      */
     private void runSplittingButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runSplittingButtonActionPerformed
         
+        _close();
+        
         CustomEvent runSplittingButtonClickEvent = new CustomEvent(_getSelectedTags());
         trigger(ViewEvent.RUN_SPLITTING_BUTTON_CLICK, runSplittingButtonClickEvent);    
     }//GEN-LAST:event_runSplittingButtonActionPerformed

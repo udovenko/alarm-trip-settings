@@ -1,13 +1,16 @@
 package ru.sakhalinenergy.alarmtripsettings.controllers;
 
 import java.util.List;
+import ru.sakhalinenergy.alarmtripsettings.Main;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
+import ru.sakhalinenergy.alarmtripsettings.factories.DialogsFactory;
 import ru.sakhalinenergy.alarmtripsettings.models.entity.Tag;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.CollectionEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.collection.LoopsTable;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.loop.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.loop.LoopSplittingDialog;
+import ru.sakhalinenergy.alarmtripsettings.views.dialog.progress.OneProgressBarDialog;
 
 
 /**
@@ -35,7 +38,7 @@ public class LoopSplittingDialogController extends Controller
         this.model = model;
         this.view = view;
         
-        view.on(ViewEvent.RUN_SPLITTING_BUTTON_CLICK, new _SplitLoopButtonHandler());
+        this.view.on(ViewEvent.RUN_SPLITTING_BUTTON_CLICK, new _SplitLoopButtonHandler());
     }// LoopSplittingDialogController
     
     
@@ -43,7 +46,7 @@ public class LoopSplittingDialogController extends Controller
      * Inner class - handler for split loop context menu item click event.
      * 
      * @author Denis Udovenko
-     * @version 1.0.1
+     * @version 1.0.2
      */
     private class _SplitLoopButtonHandler implements CustomEventListener
     {
@@ -52,35 +55,14 @@ public class LoopSplittingDialogController extends Controller
         {
             List<Tag> tagsToSeperate = (List<Tag>)event.getSource();
             
-            //Подписываемся на события прогоресса нити:
-            /*model.on(THREAD_PROGRESS_EVENT, new CustomEventListener()
-            {
-                @Override
-                public void customEventOccurred(CustomEvent evt)
-                {
-                    HashMap<Byte, Object> progress = (HashMap)evt.getSource();
-                    oneProgressBarWithLogDialog.setProgressCaption((String)progress.get(PROGRESS_CYCLE_CAPTION_KEY));
-                    oneProgressBarWithLogDialog.setProgress((Integer)progress.get(PROGRESS_CYCLE_PERCENTAGE_KEY));
-                }//customEventOccurred
-            });//addProgressEventListener*/
-            
+            // Create and render dialog with single progress bar:
+            model.off(CollectionEvent.THREAD_PROGRESS);
+            final OneProgressBarDialog oneProgressBarDialog = new OneProgressBarDialog(model, CollectionEvent.THREAD_PROGRESS);
+            oneProgressBarDialog.render("Splitting loop " + tagsToSeperate.get(0).getLoop().toString() + "...", Main.mainForm);
+                       
             // Subscribe on model's thread error event:
             model.off(CollectionEvent.THREAD_ERROR);
             model.on(CollectionEvent.THREAD_ERROR, new ThreadErrorEventHandler());
-            
-            //
-            model.off(CollectionEvent.THREAD_WARNING);
-            model.on(CollectionEvent.THREAD_WARNING, new CustomEventListener()
-            { 
-                @Override
-                public void customEventOccurred(CustomEvent event)
-                {
-                    Object[] exceptionWrapper = (Object[])event.getSource();
-                    String comment = (String)exceptionWrapper[0];
-                    Exception exception = (Exception)exceptionWrapper[1];
-                    //oneProgressBarWithLogDialog.addLogRecord(comment + ": " + exception);
-                }// customEventOccurred
-            });// on
             
             // Subscribe on model's loop split event:
             model.off(CollectionEvent.LOOP_SPLIT);
@@ -89,10 +71,10 @@ public class LoopSplittingDialogController extends Controller
                 @Override
                 public void customEventOccurred(CustomEvent event)
                 {
-                    //oneProgressBarDialog.setVisible(false);
-            
-                    //
-                    //DialogsFactory.produceStorageConnectionDialog(true);
+                    oneProgressBarDialog.close();
+                        
+                    // Ask factory to produce storage connection dialog and start reconnection:
+                    DialogsFactory.produceStorageConnectionDialog(true);
                 }// customEventOccurred
             });// on
             

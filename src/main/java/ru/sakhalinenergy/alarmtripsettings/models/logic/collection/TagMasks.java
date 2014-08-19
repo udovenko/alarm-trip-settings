@@ -35,7 +35,7 @@ public class TagMasks extends Model implements TagMasksObservable
     
         
     /**
-     * Creates a thread for fetching tag masks collection. Subscribes models 
+     * Creates a thread for fetching tag masks collection. Subscribes model's 
      * events listeners on thread events and executes it.
      */
     public void fetch()

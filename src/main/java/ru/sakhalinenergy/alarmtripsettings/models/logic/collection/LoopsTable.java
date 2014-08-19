@@ -25,7 +25,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.storage.HibernateUtil;
  * object.
  * 
  * @author Denis Udovenko
- * @version 1.0.5
+ * @version 1.0.6
  */
 public class LoopsTable extends Model implements LoopsTableObservable
 {
@@ -209,8 +209,8 @@ public class LoopsTable extends Model implements LoopsTableObservable
     
     
     /**
-     * Creates a thread for loop split. Copies given tags parent loop, attaches 
-     * tags to copy and saves new loop.
+     * Creates a thread for loop split. Subscribes model's events listeners on 
+     * thread events and executes it.
      * 
      * @param tagsToSeparate Tags to separate into new loop
      */
@@ -227,7 +227,7 @@ public class LoopsTable extends Model implements LoopsTableObservable
                 {
                     if (pervLoopId != -1 && tempTag.getLoop().getId() != pervLoopId)
                     {
-                        Exception exception = new Exception("Tagsdo not belong to same loop");
+                        Exception exception = new Exception("Tags do not belong to same loop");
                         _invokeExceptionInEdt("Invalid tag set error", exception, WorkerThread.Event.ERROR);
                         return new HashMap();
                     }// if
@@ -258,27 +258,17 @@ public class LoopsTable extends Model implements LoopsTableObservable
                                       
                     session = HibernateUtil.getSessionFactory().openSession();
                     session.beginTransaction();
-                    
-                    
+                                        
                     // Attach given tags to new loop:
                     for (Tag tempTag : tagsToSeparate) 
                     {    
-                        System.out.println(tempTag);
-                        //session.merge(tempTag);
                         initialLoop.getTags().remove(tempTag);
                         tempTag.setLoop(newLoop);
                         newLoop.getTags().add(tempTag);
-                    }
-                    //newLoop.setTags(new HashSet(tagsToSeparate));
+                    }// for
                     
-                    //session.update(initialLoop);
                     session.save(newLoop);
-                    
-                    for (Tag tempTag : newLoop.getTags()) 
-                    { 
-                        //session.save(tempTag);
-                    }
-                    
+
                     session.flush();
                     
                     session.getTransaction().commit();
@@ -303,4 +293,113 @@ public class LoopsTable extends Model implements LoopsTableObservable
         // Execute thread:
         loopSplitter.execute();
     }// splitLoop
+    
+    
+    /**
+     * Creates a thread for merging given loops list. Subscribes model's events 
+     * listeners on thread events and executes it.
+     * 
+     * @param loops Loop instances which will be merged with their copies
+     */
+    public void mergeLoops(final List<Loop> loops)
+    {
+        // Create a thread for loop split:
+        WorkerThread loopsMerger = new WorkerThread()
+        {
+            @Override
+            protected HashMap doInBackground()
+            {
+                // Check that given loops is really split:
+                for (Loop tempLoop : loops)
+                {
+                    if (!isLoopSplit(tempLoop))
+                    {
+                        Exception exception = new Exception("One or more of given loops is not spit and can't be merged");
+                        _invokeExceptionInEdt("Loop can't be merged error", exception, WorkerThread.Event.ERROR);
+                        return new HashMap();
+                    }// if
+                }// for
+                
+                Session session = null;
+                List<Loop> loopCopies;
+                HashMap<ProgressInfoKey, Object> progress = new HashMap();
+                progress.put(ProgressInfoKey.CYCLE_CAPTION, " ");    
+                progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, 0);
+                
+                try
+                {
+                    // Publish current progress:
+                    progress.put(ProgressInfoKey.CYCLE_CAPTION, "Reassigning tags");
+                    progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, 10);
+                    publish(progress);
+                    
+                    // Open Hibernate session and begin transaction:
+                    session = HibernateUtil.getSessionFactory().openSession();
+                    session.beginTransaction();
+                    
+                    // Iterate given loops list:
+                    for (Loop tempLoop: loops)
+                    {    
+                        // Get current loop's copies list:
+                        loopCopies = session.createCriteria(Loop.class)
+                            .add(Restrictions.eq("plant", tempLoop.getPlant()))
+                            .add(Restrictions.eq("area", tempLoop.getArea()))
+                            .add(Restrictions.eq("unit", tempLoop.getUnit()))
+                            .add(Restrictions.eq("measuredVariable", tempLoop.getMeasuredVariable()))
+                            .add(Restrictions.eq("uniqueIndex", tempLoop.getUniqueIndex()))
+                            .add(Restrictions.eq("suffix", tempLoop.getSuffix()))
+                            .list();
+                        
+                        // Collect all tags from loop copies:
+                        for (Loop tempCopyLoop : loopCopies)
+                        {
+                            // Update parent loop for each collected tag:
+                            if (tempCopyLoop.getId() != tempLoop.getId())
+                            {
+                                for (Tag tempTag : tempCopyLoop.getTags())
+                                {
+                                    tempTag.setLoop(tempLoop);
+                                    tempLoop.getTags().add(tempTag);
+                                }// for
+                            }// if    
+                        }// for    
+                        
+                        // Publish current progress:
+                        progress.put(ProgressInfoKey.CYCLE_CAPTION, "Removing obsolete loops");
+                        progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, 55);
+                        publish(progress);
+                    
+                        // Remove empty loops:
+                        String hql = "DELETE FROM Loop loop_table WHERE (SELECT COUNT(id) FROM Tag WHERE loop_id = loop_table.id) = 0";
+                        session.createQuery(hql).executeUpdate();
+                        
+                        // Publish current progress:
+                        progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, 100);
+                        publish(progress);
+                    }// for
+                    
+                    session.flush();
+                    
+                    session.getTransaction().commit();
+                    session.close();
+                    
+                } catch (Exception exception) {
+                    
+                    _invokeExceptionInEdt("Loops merging error", exception, WorkerThread.Event.ERROR);
+                } finally {
+            
+                    if (session != null && session.isOpen()) session.close();
+                }// finally 
+                
+                return new HashMap();
+            }// doInBackground
+        };// loopsMerger 
+        
+        // Resubscribe model's events listeners on thread events:
+        _subscribeOnThreadEvents(loopsMerger, CollectionEvent.THREAD_PROGRESS, 
+            CollectionEvent.THREAD_WARNING, CollectionEvent.THREAD_ERROR, CollectionEvent.LOOPS_MERGED);
+
+        // Execute thread:
+        loopsMerger.execute();
+    }// mergeLoop
 }// LoopsTable

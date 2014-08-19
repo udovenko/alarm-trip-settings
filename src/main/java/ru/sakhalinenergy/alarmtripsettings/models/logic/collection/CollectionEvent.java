@@ -5,7 +5,7 @@ package ru.sakhalinenergy.alarmtripsettings.models.logic.collection;
  * Collection classes events enumeration.
  *
  * @author Denis Udovenko
- * @version 1.0.1
+ * @version 1.0.2
  */
 public enum CollectionEvent 
 {
@@ -13,6 +13,7 @@ public enum CollectionEvent
     THREAD_WARNING,
     THREAD_ERROR,
     LOOPS_READ,
+    LOOPS_MERGED,
     LOOP_SPLIT,
     PLANTS_READ,
     TREE_READ,
