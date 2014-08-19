@@ -57,11 +57,11 @@ public class MainFormController
             mainFormSettings.setWindowWidth(view.getFormWidth());
             mainFormSettings.setWindowHeight(view.getFormHeigt());
             mainFormSettings.setMaximizedWindowWorkspaceHeight(view.getMaximizedWindowWorkspaceHeight());
-            mainFormSettings.setMaximizedWindowAssetsTreeWidth(view.getMaximizedWindowPlantsTreeWidth());
-            mainFormSettings.setMaximizedWindowTagDetailsTreeWidth(view.getMaximizedWindowTagsTreeWidth());
+            mainFormSettings.setMaximizedWindowPlantsTreeWidth(view.getMaximizedWindowPlantsTreeWidth());
+            mainFormSettings.setMaximizedWindowTagsTreeWidth(view.getMaximizedWindowTagsTreeWidth());
             mainFormSettings.setMinimizedWindowWorkspaceHeight(view.getMinimizedWindowWorkspaceHeight());
-            mainFormSettings.setMinimizedWindowAssetsTreeWidth(view.getMinimizedWindowPlantsTreeWidth());
-            mainFormSettings.setMinimizedWindowTagDetailsTreeWidth(view.getMinimizedWindowTagsTreeWidth());
+            mainFormSettings.setMinimizedWindowPlantsTreeWidth(view.getMinimizedWindowPlantsTreeWidth());
+            mainFormSettings.setMinimizedWindowTagsTreeWidth(view.getMinimizedWindowTagsTreeWidth());
             mainFormSettings.setActiveBottomTab(view.getActiveBottomTab());
 
             // Subscribe on config save event:

@@ -6,7 +6,7 @@ package ru.sakhalinenergy.alarmtripsettings.models.config;
  * getters.
  * 
  * @author Denis Udovenko
- * @version 1.0.1
+ * @version 1.0.2
  */
 public interface MainFormSettingsObservable 
 {
@@ -66,7 +66,7 @@ public interface MainFormSettingsObservable
      * 
      * @return Assets tree width for expanded form
      */
-    public String getMaximizedWindowAssetsTreeWidth();
+    public String getMaximizedWindowPlantsTreeWidth();
    
     
     /**
@@ -74,7 +74,7 @@ public interface MainFormSettingsObservable
      * 
      * @return Tags tree width
      */
-    public String getMaximizedWindowTagDetailsTreeWidth();
+    public String getMaximizedWindowTagsTreeWidth();
 
     
     /**
@@ -98,7 +98,7 @@ public interface MainFormSettingsObservable
      * 
      * @return Assets tree width for collapsed form
      */
-    public String getMinimizedWindowAssetsTreeWidth();
+    public String getMinimizedWindowPlantsTreeWidth();
     
 
     /**
@@ -106,6 +106,6 @@ public interface MainFormSettingsObservable
      * 
      * @return Selected loop tags tree width for collapsed form
      */
-    public String getMinimizedWindowTagDetailsTreeWidth();
+    public String getMinimizedWindowTagsTreeWidth();
 
 }// MainFormSettingsObservable

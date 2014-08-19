@@ -345,11 +345,11 @@ public class MainForm extends JFrame
                
         // Restore size fields values: 
         maximizedWindowWorkspaceHeight = Integer.parseInt(config.getMaximizedWindowWorkspaceHeight());
-        maximizedWindowPlantsTreeWidth = Integer.parseInt(config.getMaximizedWindowAssetsTreeWidth());
-        maximizedWindowTagsTreeWidth   = Integer.parseInt(config.getMaximizedWindowTagDetailsTreeWidth());
+        maximizedWindowPlantsTreeWidth = Integer.parseInt(config.getMaximizedWindowPlantsTreeWidth());
+        maximizedWindowTagsTreeWidth   = Integer.parseInt(config.getMaximizedWindowTagsTreeWidth());
         minimizedWindowWorkspaceHeight = Integer.parseInt(config.getMinimizedWindowWorkspaceHeight());
-        minimizedWindowPlantsTreeWidth = Integer.parseInt(config.getMinimizedWindowAssetsTreeWidth());
-        minimizedWindowTagsTreeWidth   = Integer.parseInt(config.getMinimizedWindowTagDetailsTreeWidth());
+        minimizedWindowPlantsTreeWidth = Integer.parseInt(config.getMinimizedWindowPlantsTreeWidth());
+        minimizedWindowTagsTreeWidth   = Integer.parseInt(config.getMinimizedWindowTagsTreeWidth());
         
         // If maximize form window, if approprite setting is true;
         if (config.getWindowMaximized().equals(Boolean.TRUE.toString()))

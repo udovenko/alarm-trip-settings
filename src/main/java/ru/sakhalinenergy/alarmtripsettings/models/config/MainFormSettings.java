@@ -5,7 +5,7 @@ package ru.sakhalinenergy.alarmtripsettings.models.config;
  * Implements main form settings model.
  * 
  * @author Denis Udovenko
- * @version 1.0.3
+ * @version 1.0.4
  */
 public class MainFormSettings extends Config implements MainFormSettingsObservable
 {
@@ -19,11 +19,11 @@ public class MainFormSettings extends Config implements MainFormSettingsObservab
     @Entry private String windowWidth;
     @Entry private String windowHeight;
     @Entry private String maximizedWindowWorkspaceHeight;
-    @Entry private String maximizedWindowAssetsTreeWidth;
-    @Entry private String maximizedWindowTagDetailsTreeWidth;
+    @Entry private String maximizedWindowPlantsTreeWidth;
+    @Entry private String maximizedWindowTagsTreeWidth;
     @Entry private String minimizedWindowWorkspaceHeight;
-    @Entry private String minimizedWindowAssetsTreeWidth;
-    @Entry private String minimizedWindowTagDetailsTreeWidth;
+    @Entry private String minimizedWindowPlantsTreeWidth;
+    @Entry private String minimizedWindowTagsTreeWidth;
     @Entry private String activeBottomTab;
     
     
@@ -204,10 +204,10 @@ public class MainFormSettings extends Config implements MainFormSettingsObservab
      * @return Assets tree width for expanded form
      */
     @Override
-    public String getMaximizedWindowAssetsTreeWidth() 
+    public String getMaximizedWindowPlantsTreeWidth() 
     {
-        return maximizedWindowAssetsTreeWidth;
-    }// getMaximizedWindowAssetsTreeWidth
+        return maximizedWindowPlantsTreeWidth;
+    }// getMaximizedWindowPlantsTreeWidth
     
 
     /**
@@ -215,11 +215,11 @@ public class MainFormSettings extends Config implements MainFormSettingsObservab
      * 
      * @param assetsTreeWidth Assets tree width for expanded form
      */
-    public void setMaximizedWindowAssetsTreeWidth(String assetsTreeWidth) 
+    public void setMaximizedWindowPlantsTreeWidth(String assetsTreeWidth) 
     {
-        this.maximizedWindowAssetsTreeWidth = assetsTreeWidth;
+        this.maximizedWindowPlantsTreeWidth = assetsTreeWidth;
         hasChanged = true;
-    }// setMaximizedWindowAssetsTreeWidth
+    }// setMaximizedWindowPlantsTreeWidth
 
     
     /**
@@ -228,10 +228,10 @@ public class MainFormSettings extends Config implements MainFormSettingsObservab
      * @return Tags tree width
      */
     @Override
-    public String getMaximizedWindowTagDetailsTreeWidth()
+    public String getMaximizedWindowTagsTreeWidth()
     {
-        return maximizedWindowTagDetailsTreeWidth;
-    }// getMaximizedWindowTagDetailsTreeWidth
+        return maximizedWindowTagsTreeWidth;
+    }// getMaximizedWindowTagsTreeWidth
     
 
     /**
@@ -239,11 +239,11 @@ public class MainFormSettings extends Config implements MainFormSettingsObservab
      * 
      * @param tagDetailsTreeWidth Tags tree width
      */
-    public void setMaximizedWindowTagDetailsTreeWidth(String tagDetailsTreeWidth) 
+    public void setMaximizedWindowTagsTreeWidth(String tagDetailsTreeWidth) 
     {
-        this.maximizedWindowTagDetailsTreeWidth = tagDetailsTreeWidth;
+        this.maximizedWindowTagsTreeWidth = tagDetailsTreeWidth;
         hasChanged = true;
-    }// setMaximizedWindowTagDetailsTreeWidth
+    }// setMaximizedWindowTagsTreeWidth
 
     
     /**
@@ -300,10 +300,10 @@ public class MainFormSettings extends Config implements MainFormSettingsObservab
      * @return Assets tree width for collapsed form
      */
     @Override
-    public String getMinimizedWindowAssetsTreeWidth() 
+    public String getMinimizedWindowPlantsTreeWidth() 
     {
-        return minimizedWindowAssetsTreeWidth;
-    }// getMinimizedWindowAssetsTreeWidth
+        return minimizedWindowPlantsTreeWidth;
+    }// getMinimizedWindowPlantsTreeWidth
 
     
     /**
@@ -311,11 +311,11 @@ public class MainFormSettings extends Config implements MainFormSettingsObservab
      * 
      * @param minimizedWindowAssetsTreeWidth Assets tree width for collapsed form
      */
-    public void setMinimizedWindowAssetsTreeWidth(String minimizedWindowAssetsTreeWidth) 
+    public void setMinimizedWindowPlantsTreeWidth(String minimizedWindowAssetsTreeWidth) 
     {
-        this.minimizedWindowAssetsTreeWidth = minimizedWindowAssetsTreeWidth;
+        this.minimizedWindowPlantsTreeWidth = minimizedWindowAssetsTreeWidth;
         hasChanged = true;
-    }// setMinimizedWindowAssetsTreeWidth
+    }// setMinimizedWindowPlantsTreeWidth
     
 
     /**
@@ -324,10 +324,10 @@ public class MainFormSettings extends Config implements MainFormSettingsObservab
      * @return Selected loop tags tree width for collapsed form
      */
     @Override
-    public String getMinimizedWindowTagDetailsTreeWidth() 
+    public String getMinimizedWindowTagsTreeWidth() 
     {
-        return minimizedWindowTagDetailsTreeWidth;
-    }// getMinimizedWindowTagDetailsTreeWidth
+        return minimizedWindowTagsTreeWidth;
+    }// getMinimizedWindowTagsTreeWidth
 
     
     /**
@@ -335,9 +335,9 @@ public class MainFormSettings extends Config implements MainFormSettingsObservab
      * 
      * @param minimizedWindowTagDetailsTreeWidth Selected loop tags tree width for collapsed form
      */
-    public void setMinimizedWindowTagDetailsTreeWidth(String minimizedWindowTagDetailsTreeWidth) 
+    public void setMinimizedWindowTagsTreeWidth(String minimizedWindowTagDetailsTreeWidth) 
     {
-        this.minimizedWindowTagDetailsTreeWidth = minimizedWindowTagDetailsTreeWidth;
+        this.minimizedWindowTagsTreeWidth = minimizedWindowTagDetailsTreeWidth;
         hasChanged = true;
-    }// setMinimizedWindowTagDetailsTreeWidth
+    }// setMinimizedWindowTagsTreeWidth
 }// UiSettings
