@@ -4,13 +4,9 @@ import java.io.File;
 import java.awt.Image;
 import java.awt.Toolkit;
 import javax.swing.ImageIcon;
-import javax.swing.SwingUtilities;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
-import ru.sakhalinenergy.alarmtripsettings.events.EventsPull;
 import ru.sakhalinenergy.alarmtripsettings.factories.DialogsFactory;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.summary.OveralCompliance;
-import ru.sakhalinenergy.alarmtripsettings.models.logic.summary.IntoolsCompliance;
 import ru.sakhalinenergy.alarmtripsettings.models.config.ConfigEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.config.MainFormSettings;
 import ru.sakhalinenergy.alarmtripsettings.views.form.MainForm;
@@ -18,30 +14,31 @@ import ru.sakhalinenergy.alarmtripsettings.controllers.MainFormController;
 
 
 /**
- * Главный класс приложения. Содержит все глобальные переменные и объекты, а 
- * также метод - точку входа приложения.
+ * Application's main class. Stores basic settings, constants and entry point 
+ * method.
  * 
  * @author Denis Udovenko
  * @version 1.1.3
  */
 public class Main 
 {
-    //Информация о версии приложения:
+    
+    // Application's version information:
     public static final String VERSION = "2.1.2.5";
     public static final String LAST_CHANGES_DATE = "19.08.2014";
     public static final String LAST_CHANGES_TIME = "13:59";
     public static final String AUTHOR = "Denis Udovenko";
     
-    // Application .jar file directory:
+    // Application's .jar file directory:
     public static final String JAR_DIR = _getJarDirectory();
     
-    // Application temp directory:
+    // Application's temp directory:
     public static final String TEMP_DIR = Main.JAR_DIR + File.separator + "temp";
     
     // Images source directory:
     private static final String IMAGES_SOURCE_DIR = "/images";
     
-    // Create application icons:
+    // Application's icons:
     public static final ImageIcon 
         intoolsIcon           = new ImageIcon(Main.class.getResource(IMAGES_SOURCE_DIR + "/intools.png")),
         documentsIcon         = new ImageIcon(Main.class.getResource(IMAGES_SOURCE_DIR + "/documents.png")),
@@ -76,30 +73,23 @@ public class Main
         areaIcon              = new ImageIcon(Main.class.getResource(IMAGES_SOURCE_DIR + "/area.jpg")),
         unitIcon              = new ImageIcon(Main.class.getResource(IMAGES_SOURCE_DIR + "/unit.jpg"));
     
-    // Create application images:
+    // Application's images:
     public static final Image 
         sakhalinEnergyLogoImage = Toolkit.getDefaultToolkit().createImage(Main.class.getResource(IMAGES_SOURCE_DIR + "/logo.png"));
-    
-    
-    //Объявляем глобальные переменные вью:
-    public static MainForm mainForm;
-     
-    //Создаем пулл событий приложения для коммуникаций между вью:
-    public static EventsPull eventsPull = new EventsPull();
         
-    //Объявляем глобальные переменные и коллекции:
-    public static IntoolsCompliance intoolsComplianceSummary;
-    public static OveralCompliance overalComplianceSummary;
-    
+    // Application's main form:
+    public static MainForm mainForm;
+
     
     /**
-     * Точка входа приложения.
+     * Application's entry point method. Loads configuration for main from and
+     * shows it. Launches connection to storage.
      * 
-     * @param   args[]  Входные параметры коммандной строки.
+     * @param args[] Command line parameters
      */
     public static void main(String args[])
     {
-        //Настраиваем тему интерфейса:
+        // Set up interface look and feel:
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /*
          * If Nimbus (introduced in Java SE 6) is not available, stay with the
@@ -123,7 +113,8 @@ public class Main
             java.util.logging.Logger.getLogger(MainForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-         
+        
+        // Set callback for main form settngs load event:
         final MainFormSettings mainFormSettings = MainFormSettings.getInstance();
         mainFormSettings.off(ConfigEvent.LOADED);
         mainFormSettings.on(ConfigEvent.LOADED, new CustomEventListener()
@@ -131,21 +122,20 @@ public class Main
             @Override
             public void customEventOccurred(CustomEvent evt)
             {        
-                //Создаем главную форму приложения: 
+                // Create application's main form:
                 mainForm = new MainForm(mainFormSettings);
                 new MainFormController(mainForm);
 
-                //Отображаем главную форму:
                 mainForm.render();
 
-                //Пытаемся подключиться к хранилищу:
+                // Initiate storage connection:
                 DialogsFactory.produceStorageConnectionDialog(true);
-              
-            }//customEventOccurred
-        });//on
+            }// customEventOccurred
+        });// on
         
+        // Load main form settings:
         mainFormSettings.fetch();
-    }//main
+    }// main
     
     
     /**
