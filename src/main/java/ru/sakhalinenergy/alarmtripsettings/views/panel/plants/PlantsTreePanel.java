@@ -156,8 +156,10 @@ public class PlantsTreePanel extends Panel
         // Convert expanded nodes identifiers arrays to string tokens:
         plantsIdString = plantsId.toString();
         areasIdString = areasId.toString();
-        plantsIdString = plantsIdString.replaceAll("[\\[\\]\\s]", "");
-        areasIdString = areasIdString.replace("[", "").replace("]", "").replace(" ", "");
+        
+        String replaceExp = "[\\[\\]\\s]";
+        plantsIdString = plantsIdString.replaceAll(replaceExp, "");
+        areasIdString  = areasIdString.replaceAll(replaceExp, "");
         
         // Return tokens as array of two elements:
         result[0] = plantsIdString;

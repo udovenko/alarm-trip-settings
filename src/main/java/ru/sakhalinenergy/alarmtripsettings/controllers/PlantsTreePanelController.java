@@ -19,8 +19,8 @@ import ru.sakhalinenergy.alarmtripsettings.views.panel.plants.ViewEvent;
 import ru.sakhalinenergy.alarmtripsettings.views.panel.plants.PlantsTreePanel;
 import ru.sakhalinenergy.alarmtripsettings.views.panel.loops.LoopsTablePanel;
 import ru.sakhalinenergy.alarmtripsettings.views.panel.sources.DataSourcesPanel;
-import ru.sakhalinenergy.alarmtripsettings.views.OverallComplianceSummaryPanel;
-import ru.sakhalinenergy.alarmtripsettings.views.IntoolsComplianceSummaryPanel;
+import ru.sakhalinenergy.alarmtripsettings.views.panel.summary.OverallComplianceSummaryPanel;
+import ru.sakhalinenergy.alarmtripsettings.views.panel.summary.IntoolsComplianceSummaryPanel;
 
 
 /**
