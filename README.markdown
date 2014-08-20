@@ -15,4 +15,12 @@ Calculates overall compliance statistics:
 
 ![](src/main/doc/presentation/images/full_window_with_overall_compliance_tab.png?raw=true)
 
+Calculates compliance statistics for specialized engineering database:
 
+![](src/main/doc/presentation/images/full_window_with_spi_compliance_tab.png?raw=true)
+
+Allows automatic settings data import from *MS Excel book*, *Yokogawa Distributed Control System (DCS) backup*, *Honeywell DCS export*, *Honeywell SCADA database*:   
+
+![](src/main/doc/presentation/images/create_source_from_excel_dialog.png?raw=true)
+
+![](src/main/doc/presentation/images/create_source_from_yokogawa_dcs_backup_dialog.png?raw=true)
