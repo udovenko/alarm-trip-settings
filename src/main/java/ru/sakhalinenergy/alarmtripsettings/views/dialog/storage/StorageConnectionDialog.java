@@ -1,12 +1,9 @@
 package ru.sakhalinenergy.alarmtripsettings.views.dialog.storage;
 
 import java.awt.Component;
-import java.io.File;
 import javax.swing.ImageIcon;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.Main;
+import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.models.config.StorageConnectionDialogSettingsObservable;
 import ru.sakhalinenergy.alarmtripsettings.views.dialog.Dialog;
 
@@ -40,7 +37,7 @@ public class StorageConnectionDialog extends Dialog
                
         // Set dialog icon:
         ImageIcon img = Main.storageConnectionIcon;
-        this.setIconImage(img.getImage());
+        setIconImage(img.getImage());
     }// SetStorageConnectionForm
 
     
@@ -76,8 +73,8 @@ public class StorageConnectionDialog extends Dialog
      */
     public String getStorageType()
     {
-        if (this.useMySqlStorageRadioButton.isSelected())  return MYSQL_STORAGE_NAME;
-        if (this.useSqliteStorageRadioButton.isSelected()) return SQLITE_STORAGE_NAME;
+        if (useMySqlStorageRadioButton.isSelected())  return MYSQL_STORAGE_NAME;
+        if (useSqliteStorageRadioButton.isSelected()) return SQLITE_STORAGE_NAME;
         
         return null;
     }// getStorageType
@@ -150,6 +147,17 @@ public class StorageConnectionDialog extends Dialog
         
     
     /**
+     * Sets value for text field with path to SQLite database.
+     * 
+     * @param path Path to SQLite database
+     */
+    public void setSqliteDatabasePath(String path)
+    {
+        sqliteDatabaseFilePathTextField.setText(path);
+    }// setSqliteDatabasePath
+    
+    
+    /**
      * Restores storage connection configuration settings into dialog's control
      * elements.
      */
@@ -158,24 +166,24 @@ public class StorageConnectionDialog extends Dialog
         // Restore data source type:
         if (config.getStorageType().equals(MYSQL_STORAGE_NAME))
         {
-            this.useMySqlStorageRadioButton.setSelected(true);
-            this.storagesSettingsPanesLayeredPane.moveToFront(this.mySqlStorageSettingsPanel); 
+            useMySqlStorageRadioButton.setSelected(true);
+            storagesSettingsPanesLayeredPane.moveToFront(mySqlStorageSettingsPanel); 
         
         } else if (config.getStorageType().equals(SQLITE_STORAGE_NAME)) {
             
-            this.useSqliteStorageRadioButton.setSelected(true);
-            this.storagesSettingsPanesLayeredPane.moveToFront(this.SqliteStorageSettingsPanel);
+            useSqliteStorageRadioButton.setSelected(true);
+            storagesSettingsPanesLayeredPane.moveToFront(SqliteStorageSettingsPanel);
         }// else if
         
         // Restore MySQL connection settings:
-        this.mySqlStorageHostTextField.setText(config.getMySqlHost());
-        this.mySqlStoragePortTextField.setText(config.getMySqlPort());
-        this.mySqlStorageDatabasenameTextField.setText(config.getMySqlDatabase());
-        this.mySqlStorageUserNameTextField.setText(config.getMySqlUser());
-        this.mySqlStoragePasswordTextField.setText(config.getMySqlPassword());
+        mySqlStorageHostTextField.setText(config.getMySqlHost());
+        mySqlStoragePortTextField.setText(config.getMySqlPort());
+        mySqlStorageDatabasenameTextField.setText(config.getMySqlDatabase());
+        mySqlStorageUserNameTextField.setText(config.getMySqlUser());
+        mySqlStoragePasswordTextField.setText(config.getMySqlPassword());
         
         // Restore SQLite storage settings:
-        this.sqliteDatabaseFilePathTextField.setText(config.getSqliteDatabasePath());
+        sqliteDatabaseFilePathTextField.setText(config.getSqliteDatabasePath());
     }// _applyConfig
     
     
@@ -422,7 +430,7 @@ public class StorageConnectionDialog extends Dialog
      */
     private void useSqliteStorageRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_useSqliteStorageRadioButtonActionPerformed
         
-        this.storagesSettingsPanesLayeredPane.moveToFront(SqliteStorageSettingsPanel);
+        storagesSettingsPanesLayeredPane.moveToFront(SqliteStorageSettingsPanel);
     }//GEN-LAST:event_useSqliteStorageRadioButtonActionPerformed
 
     
@@ -434,7 +442,7 @@ public class StorageConnectionDialog extends Dialog
      */
     private void useMySqlStorageRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_useMySqlStorageRadioButtonActionPerformed
        
-        this.storagesSettingsPanesLayeredPane.moveToFront(mySqlStorageSettingsPanel);    
+        storagesSettingsPanesLayeredPane.moveToFront(mySqlStorageSettingsPanel);    
     }//GEN-LAST:event_useMySqlStorageRadioButtonActionPerformed
 
     
@@ -457,8 +465,8 @@ public class StorageConnectionDialog extends Dialog
      */
     private void connectToStorageButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectToStorageButtonActionPerformed
         
-        CustomEvent myEvent = new CustomEvent(new Object());
-        this.events.trigger(ViewEvent.CONNECT_TO_STORAGE, myEvent);
+        CustomEvent connectToStorageButtonClickEvent = new CustomEvent(new Object());
+        trigger(ViewEvent.CONNECT_TO_STORAGE_BUTTON_CLICK, connectToStorageButtonClickEvent);
     }//GEN-LAST:event_connectToStorageButtonActionPerformed
 
     
@@ -470,24 +478,8 @@ public class StorageConnectionDialog extends Dialog
      */
     private void setSqlliteDatabasePathButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setSqlliteDatabasePathButtonActionPerformed
         
-        // Create file choser dialog:
-        String working_directory = System.getProperty("user.dir");
-        JFileChooser fileChooser = new JFileChooser(working_directory);
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("SQLite Database", "sqlite");
-        fileChooser.setFileFilter(filter);
-        
-        // Show dialog with given title:
-        int dialog_result = fileChooser.showDialog(this, "Select SQLite database file");
-
-        // Handle file path selection result:
-        if (dialog_result == JFileChooser.APPROVE_OPTION)
-        {
-            File directory = fileChooser.getSelectedFile();
-            String filename = directory.getAbsolutePath();
-            
-            // Update file path text field:
-            sqliteDatabaseFilePathTextField.setText(filename);
-        }//if
+        CustomEvent setPathToSqliteDatabaseButtonClickEvent = new CustomEvent(new Object());
+        trigger(ViewEvent.SELECT_PATH_TO_SQLITE_DATABSE_BUTTON_CLICK, setPathToSqliteDatabaseButtonClickEvent);
     }//GEN-LAST:event_setSqlliteDatabasePathButtonActionPerformed
 
     

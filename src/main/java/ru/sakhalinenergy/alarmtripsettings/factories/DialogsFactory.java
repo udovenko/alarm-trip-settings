@@ -84,10 +84,10 @@ public class DialogsFactory
                     {
                         // Create storage connection dialog and its controller:
                         StorageConnectionDialog storageConnectionDialog = new StorageConnectionDialog(storageConnectionDialogSettings);
-                        StorageConnectionDialogController contrlloer = new StorageConnectionDialogController(storageConnectionDialog);
+                        StorageConnectionDialogController controller = new StorageConnectionDialogController(storageConnectionDialog);
                         
                         // Show dialog or run reconnection to storage:
-                        if (autoconnect) contrlloer.connectAndCreatePlantsTree(storageConnectionDialogSettings);
+                        if (autoconnect) controller.connectAndCreatePlantsTree(storageConnectionDialogSettings);
                         else storageConnectionDialog.render(Main.mainForm);
                     }// run
                 });// invokeLater

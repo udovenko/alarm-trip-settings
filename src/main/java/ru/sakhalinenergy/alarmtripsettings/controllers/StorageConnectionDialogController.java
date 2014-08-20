@@ -1,6 +1,7 @@
 package ru.sakhalinenergy.alarmtripsettings.controllers;
 
-import javax.swing.SwingUtilities;
+import java.awt.Component;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import ru.sakhalinenergy.alarmtripsettings.Main;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEventListener;
@@ -22,7 +23,7 @@ import ru.sakhalinenergy.alarmtripsettings.views.dialog.storage.StorageConnectio
  * @author Denis Udovenko
  * @version 1.0.4
  */
-public class StorageConnectionDialogController 
+public class StorageConnectionDialogController extends Controller
 {
     private final StorageConnectionDialog view;
     
@@ -35,8 +36,30 @@ public class StorageConnectionDialogController
     public StorageConnectionDialogController(StorageConnectionDialog view)
     {
         this.view = view;
-        this.view.on(ViewEvent.CONNECT_TO_STORAGE, new _ConnectToStorageRequestHandler());
+        
+        this.view.on(ViewEvent.SELECT_PATH_TO_SQLITE_DATABSE_BUTTON_CLICK, new _selectPathToSqliteDatabaseButtonClickHandler());
+        this.view.on(ViewEvent.CONNECT_TO_STORAGE_BUTTON_CLICK, new _ConnectToStorageButtonClickHandler());
     }// StorageConnectionDialogController
+    
+    
+    /**
+     * Inner class - handler for "Select SQLite database path" button click 
+     * event of view.
+     * 
+     * @author Denis Udovenko
+     * @version 1.0.1
+     */
+    private class _selectPathToSqliteDatabaseButtonClickHandler implements CustomEventListener
+    {
+        @Override
+        public void customEventOccurred(CustomEvent evt)
+        {
+            // Show file selection dialog and handling its result:
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("SQLite Database", "sqlite");
+            String filepath = _showSelectPathToFileDialog("Select SQLite database file", filter, (Component)view);
+            if (filepath != null) view.setSqliteDatabasePath(filepath);
+        }// customEventOccurred
+    }// _selectPathToSqliteDatabaseButtonClickHandler
     
     
     /**
@@ -45,7 +68,7 @@ public class StorageConnectionDialogController
      * @author Denis Udovenko
      * @version 1.0.2
      */
-    private class _ConnectToStorageRequestHandler implements CustomEventListener
+    private class _ConnectToStorageButtonClickHandler implements CustomEventListener
     {
         @Override
         public void customEventOccurred(CustomEvent evt)
@@ -66,7 +89,7 @@ public class StorageConnectionDialogController
             // Hide dialog:
             view.close();
         }// customEventOccurred
-    }// _ConnectToStorageRequestHandler
+    }// _ConnectToStorageButtonClickHandler
     
     
     /**

@@ -53,7 +53,7 @@ public class CreateDcsVariableTableFromHoneywellScadaExportDialogController exte
         @Override
         public void customEventOccurred(CustomEvent event)
         {
-            // Showing file selection dialog and handling its result:
+            // Show file selection dialog and handle its result:
             FileNameExtensionFilter filter = new FileNameExtensionFilter("Honeywell SCADA Database", "qdb");
             String filepath = _showSelectPathToFileDialog("Select Honeywell SCADA database file", filter, (Component)view);
             if (filepath != null) ((HoneywellScadaDatabase)model).setFilePath(filepath);
@@ -78,7 +78,7 @@ public class CreateDcsVariableTableFromHoneywellScadaExportDialogController exte
             config.setTagFormat(view.getTagMask().getExample());
             config.save();
             
-            // Crate and render single progress bar dialog with with log text field:
+            // Create and render single progress bar dialog with with log text field:
             model.off(SourceEvent.THREAD_PROGRESS);
             model.off(SourceEvent.THREAD_WARNING);
             final OneProgressBarWithLogDialog oneProgressBarsWithLogDialog = 
