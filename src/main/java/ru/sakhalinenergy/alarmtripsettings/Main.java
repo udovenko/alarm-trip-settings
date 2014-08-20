@@ -18,7 +18,7 @@ import ru.sakhalinenergy.alarmtripsettings.controllers.MainFormController;
  * method.
  * 
  * @author Denis Udovenko
- * @version 1.1.3
+ * @version 1.1.4
  */
 public class Main 
 {
@@ -40,6 +40,7 @@ public class Main
     
     // Application's icons:
     public static final ImageIcon 
+        alarmTripIcon         = new ImageIcon(Main.class.getResource(IMAGES_SOURCE_DIR + "/alarm_trip.png")),
         intoolsIcon           = new ImageIcon(Main.class.getResource(IMAGES_SOURCE_DIR + "/intools.png")),
         documentsIcon         = new ImageIcon(Main.class.getResource(IMAGES_SOURCE_DIR + "/documents.png")),
         dcsIcon               = new ImageIcon(Main.class.getResource(IMAGES_SOURCE_DIR + "/dcs.png")),

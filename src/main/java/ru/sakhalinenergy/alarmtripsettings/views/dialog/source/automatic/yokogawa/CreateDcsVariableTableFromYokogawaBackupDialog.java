@@ -42,9 +42,9 @@ public class CreateDcsVariableTableFromYokogawaBackupDialog extends DataSourceDi
     {
         super(model, plants, tagMasks, config);
         
-        this.setModal(true);
+        setModal(true);
         initComponents();
-        this.setIconImage(Main.yokogawaIcon.getImage());
+        setIconImage(Main.yokogawaIcon.getImage());
         
         // Subscribe on model's events:
         model.on(SourceEvent.STATIONS_READ, new _StationsReadEventHandler());

@@ -54,6 +54,8 @@ public class MainForm extends JFrame
         
         initComponents();
         
+        setIconImage(Main.alarmTripIcon.getImage());
+        
         // Set main menu items icons:
         openStorageMenuItem.setIcon(Main.storageConnectionIcon);
         versionMenuItem.setIcon(Main.aboutIcon);
