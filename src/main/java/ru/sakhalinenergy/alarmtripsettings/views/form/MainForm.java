@@ -55,6 +55,7 @@ public class MainForm extends JFrame
         initComponents();
         
         setIconImage(Main.alarmTripIcon.getImage());
+        setTitle("Alarm and Trip settings tool");
         
         // Set main menu items icons:
         openStorageMenuItem.setIcon(Main.storageConnectionIcon);
