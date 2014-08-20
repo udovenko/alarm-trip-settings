@@ -24,3 +24,7 @@ Allows automatic settings data import from *MS Excel book*, *Yokogawa Distribute
 ![](src/main/doc/presentation/images/create_source_from_excel_dialog.png?raw=true)
 
 ![](src/main/doc/presentation/images/create_source_from_yokogawa_dcs_backup_dialog.png?raw=true)
+
+![](src/main/doc/presentation/images/create_source_from_honeywell_dcs_export_dialog.png?raw=true)
+
+![](src/main/doc/presentation/images/create_source_from_honeywell_scada_database_dialog.png?raw=true)
