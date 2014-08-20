@@ -49,7 +49,7 @@ abstract public class AutomaticSourceCreationDialogController extends Controller
     {
         @Override
         public void customEventOccurred(CustomEvent event)
-        {   System.out.println("set plant!");
+        {
             Plant plant = (Plant)event.getSource();
             model.setPlant(plant);
         }// customEventOccurred

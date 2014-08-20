@@ -3,9 +3,11 @@ Alarm and Trip Settings Tool
 
 * Requires Java 1.7
 
-Data comparison tool for Windows. Created for internal tasks of Control and Automation department.
+Data comparison tool for Windows. Created for internal tasks of Control and Automation department. 
 
 > This code and information placed on GitHub only as an example. The only purpose of this repo is to allow other people estimate author's skills and look for some code samples. Application itself is totally useless outside of organization internal scope and without particular input data.
+
+Uses _Hibernate_ framework for interactions with local _SQLite_ storage and _Maven_ for packages managing and building project.
 
 Collects, stores and compares settings from different data sources:
 
@@ -28,3 +30,11 @@ Allows automatic settings data import from *MS Excel book*, *Yokogawa Distribute
 ![](src/main/doc/presentation/images/create_source_from_honeywell_dcs_export_dialog.png?raw=true)
 
 ![](src/main/doc/presentation/images/create_source_from_honeywell_scada_database_dialog.png?raw=true)
+
+Allows to create and edit existing data sources manually:
+
+![](src/main/doc/presentation/images/create_edit_source_manually_dialog.png?raw=true)
+
+Supports several data source types with different comparison and display features:
+
+![](src/main/doc/presentation/images/data_sources_popup_menu.png?raw=true)
