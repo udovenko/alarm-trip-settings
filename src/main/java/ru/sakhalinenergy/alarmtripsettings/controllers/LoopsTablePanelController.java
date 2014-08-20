@@ -1,8 +1,8 @@
 package ru.sakhalinenergy.alarmtripsettings.controllers;
 
-import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Arrays;
-import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import ru.sakhalinenergy.alarmtripsettings.Main;
 import ru.sakhalinenergy.alarmtripsettings.events.CustomEvent;
@@ -144,33 +144,8 @@ public class LoopsTablePanelController extends Controller
             
             if (answer == JOptionPane.OK_OPTION)
             {
-                List<Loop> loops = new ArrayList(Arrays.asList(loopToBeMerged));
-                
-                // Subscribe on model's thread error event:
-                model.off(CollectionEvent.THREAD_ERROR);
-                model.on(CollectionEvent.THREAD_ERROR, new ThreadErrorEventHandler());
-           
-                // Create and render dialog with single progress bar:
-                model.off(CollectionEvent.THREAD_PROGRESS);
-                final OneProgressBarDialog oneProgressBarDialog = new OneProgressBarDialog(model, CollectionEvent.THREAD_PROGRESS);
-                oneProgressBarDialog.render("Merging loop " + loopToBeMerged.toString() + " copies...", Main.mainForm);
-                
-                // Subscribe on model's loops merged event:
-                model.off(CollectionEvent.LOOPS_MERGED);
-                model.on(CollectionEvent.LOOPS_MERGED, new CustomEventListener()
-                {
-                    @Override
-                    public void customEventOccurred(CustomEvent evt)
-                    {   
-                        oneProgressBarDialog.close();
-                        
-                        // Ask factory to produce storage connection dialog and start reconnection:
-                        DialogsFactory.produceStorageConnectionDialog(true);
-                    }// customEventOccurred
-                });// addSourceRemovedEventListener
-                                
-                // Excecute loops merging:
-                model.mergeLoops(loops);
+                Set<Loop> loops = new HashSet(Arrays.asList(loopToBeMerged));
+                _mergeLoops(loops, "Merging loop " + loopToBeMerged.toString() + " copies...");
             }// if
         }// customEventOccurred
     }// _MergeLoopMenuItemClickHandler
@@ -189,27 +164,52 @@ public class LoopsTablePanelController extends Controller
         @Override
         public void customEventOccurred(CustomEvent evt)
         {
-            /*int answer = JOptionPane.showConfirmDialog(Main.mainForm,
+            int answer = JOptionPane.showConfirmDialog(Main.mainForm,
                 "Are you sure you want to merge all split loops within selected object?",
                 "Action confirmation",
             JOptionPane.OK_CANCEL_OPTION);
             
             if (answer == JOptionPane.OK_OPTION)
             {
-                //Добавляем обработчик события заврешения сохранения источника данных и всей связанной с ним информации:
-                Main.loopSplittingAndMergingController.events.off(LoopSplittingAndMergingController.LOOPS_MERGED_EVENT);
-                Main.loopSplittingAndMergingController.events.on(LoopSplittingAndMergingController.LOOPS_MERGED_EVENT, new CustomEventListener()
-                {
-                    @Override
-                    public void customEventOccurred(CustomEvent evt)
-                    {   
-                        Main.storageConnectionController.connectToStorage();
-                    }//customEventOccurred
-                });//addSourceRemovedEventListener
-            
-                //Вызываем метод контроллера:
-                Main.loopSplittingAndMergingController.mergeLoops(Main.loops);
-            }//if*/
+                _mergeLoops(model.getSplitLoops(), "Merging all split loops for selected PAU object...");
+            }//if
         }// customEventOccurred
     }// _MergeAllSplitLoopsMenuItemClickHandler
+    
+    
+    /**
+     * Creates progress bar, subscribes on model's events and executes model's
+     * method for merging copies of loops, given in input set.
+     * 
+     * @param loops Each loop of this set will be merged with its copies
+     * @param progressBarTitle Progress bar dialog title which will be shown during process
+     */
+    private void _mergeLoops(Set<Loop> loops, String progressBarTitle)
+    {
+        // Subscribe on model's thread error event:
+        model.off(CollectionEvent.THREAD_ERROR);
+        model.on(CollectionEvent.THREAD_ERROR, new ThreadErrorEventHandler());
+
+        // Create and render dialog with single progress bar:
+        model.off(CollectionEvent.THREAD_PROGRESS);
+        final OneProgressBarDialog oneProgressBarDialog = new OneProgressBarDialog(model, CollectionEvent.THREAD_PROGRESS);
+        oneProgressBarDialog.render(progressBarTitle, Main.mainForm);
+
+        // Subscribe on model's loops merged event:
+        model.off(CollectionEvent.LOOPS_MERGED);
+        model.on(CollectionEvent.LOOPS_MERGED, new CustomEventListener()
+        {
+            @Override
+            public void customEventOccurred(CustomEvent evt)
+            {   
+                oneProgressBarDialog.close();
+
+                // Ask factory to produce storage connection dialog and start reconnection:
+                DialogsFactory.produceStorageConnectionDialog(true);
+            }// customEventOccurred
+        });// addSourceRemovedEventListener
+
+        // Excecute loops merging:
+        model.mergeLoops(loops);
+    }// _splitLoops
 }// LoopsTablePanelController

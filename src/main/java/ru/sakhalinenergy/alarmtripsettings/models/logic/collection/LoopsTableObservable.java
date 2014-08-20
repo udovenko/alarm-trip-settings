@@ -1,5 +1,6 @@
 package ru.sakhalinenergy.alarmtripsettings.models.logic.collection;
 
+import java.util.Set;
 import java.util.List;
 import ru.sakhalinenergy.alarmtripsettings.events.EventsObservable;
 import ru.sakhalinenergy.alarmtripsettings.models.logic.settings.SettingsSelector;
@@ -11,7 +12,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.entity.Source;
  * Interface of loops table model for using by views. Allows only getters.
  *
  * @author Denis Udovenko
- * @version 1.0.4
+ * @version 1.0.5
  */
 public interface LoopsTableObservable extends EventsObservable
 {
@@ -41,6 +42,14 @@ public interface LoopsTableObservable extends EventsObservable
      * @return True if loop is split, else false
      */
     public boolean isLoopSplit(Loop loop);
+    
+    
+    /**
+     * Returns list of split loops.
+     * 
+     * @return List of split loops
+     */
+    public Set<Loop> getSplitLoops();
     
     
     /**

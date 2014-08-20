@@ -253,6 +253,10 @@ public class LoopsTablePanel extends Panel
             // Enable/disable loop merge menu item depending on loop split state: 
             if (model.isLoopSplit(selectedLoop)) mergeLoopMenuItem.setEnabled(true);
             else mergeLoopMenuItem.setEnabled(false);
+            
+            // Enable/disable merge all loops menu item depending on presence of split loops in model:
+            if (model.getSplitLoops().isEmpty()) mergeAllLoopsMenuItem.setEnabled(false);
+            else mergeAllLoopsMenuItem.setEnabled(true);
              
             // Show popup menu:
             loopsTablePopupMenu.show(loopsTable, x, y);

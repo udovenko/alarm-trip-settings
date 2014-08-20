@@ -1,6 +1,7 @@
 package ru.sakhalinenergy.alarmtripsettings.models.logic.collection;
 
 import java.util.Set;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ import ru.sakhalinenergy.alarmtripsettings.models.storage.HibernateUtil;
  * object.
  * 
  * @author Denis Udovenko
- * @version 1.0.6
+ * @version 1.0.7
  */
 public class LoopsTable extends Model implements LoopsTableObservable
 {
@@ -52,6 +53,7 @@ public class LoopsTable extends Model implements LoopsTableObservable
      * 
      * @return list of loops wrapped into settings selection logic
      */
+    @Override
     public List<SettingsSelector> getWrappedLoops()
     {
         if (wrappedLoops == null)
@@ -124,6 +126,7 @@ public class LoopsTable extends Model implements LoopsTableObservable
      * @param loop Loop to be checked for split
      * @return True if loop is split, else false
      */
+    @Override
     public boolean isLoopSplit(Loop loop)
     {
         boolean result = false;
@@ -134,6 +137,29 @@ public class LoopsTable extends Model implements LoopsTableObservable
         
         return result;
     }// isSplit
+    
+    
+    /**
+     * Returns set of split loops. Only first found copy will be taken for each
+     * found split loop.
+     * 
+     * @return Set of split loops
+     */
+    @Override
+    public Set<Loop> getSplitLoops()
+    {
+        HashMap<String, Loop> uniqueLoops = new HashMap();
+                
+        for (Loop tempLoop : loops)
+        {
+            String tempLoopAsString = tempLoop.toString();
+            
+            if (isLoopSplit(tempLoop) && !uniqueLoops.containsKey(tempLoopAsString))
+                uniqueLoops.put(tempLoopAsString, tempLoop);
+        }// for
+        
+        return new HashSet(uniqueLoops.values());
+    }// getSplitLoops
     
     
     /**
@@ -301,7 +327,7 @@ public class LoopsTable extends Model implements LoopsTableObservable
      * 
      * @param loops Loop instances which will be merged with their copies
      */
-    public void mergeLoops(final List<Loop> loops)
+    public void mergeLoops(final Set<Loop> loops)
     {
         // Create a thread for loop split:
         WorkerThread loopsMerger = new WorkerThread()
@@ -321,7 +347,6 @@ public class LoopsTable extends Model implements LoopsTableObservable
                 }// for
                 
                 Session session = null;
-                List<Loop> loopCopies;
                 HashMap<ProgressInfoKey, Object> progress = new HashMap();
                 progress.put(ProgressInfoKey.CYCLE_CAPTION, " ");    
                 progress.put(ProgressInfoKey.CYCLE_PERCENTAGE, 0);
@@ -341,7 +366,7 @@ public class LoopsTable extends Model implements LoopsTableObservable
                     for (Loop tempLoop: loops)
                     {    
                         // Get current loop's copies list:
-                        loopCopies = session.createCriteria(Loop.class)
+                        List<Loop> loopCopies = session.createCriteria(Loop.class)
                             .add(Restrictions.eq("plant", tempLoop.getPlant()))
                             .add(Restrictions.eq("area", tempLoop.getArea()))
                             .add(Restrictions.eq("unit", tempLoop.getUnit()))

@@ -67,6 +67,7 @@ public class Loop
      * components.
      * 
      * @param object Object to compare
+     * @return True if given object equals to current one
      */
     @Override
     public boolean equals(Object object) 
